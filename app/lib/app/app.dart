@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hisaabchat/app/router.dart';
 import 'package:hisaabchat/app/settings/appearance_controller.dart';
 import 'package:hisaabchat/app/theme/app_theme.dart';
+import 'package:hisaabchat/core/widgets/toast.dart';
 
 class HisaabChatApp extends ConsumerWidget {
   const HisaabChatApp({super.key});
@@ -29,7 +30,7 @@ class HisaabChatApp extends ConsumerWidget {
           data: media.copyWith(
             disableAnimations: media.disableAnimations || appearance.reduceMotion,
           ),
-          child: child!,
+          child: ToastHost(child: child!),
         );
       },
     );

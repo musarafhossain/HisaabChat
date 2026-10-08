@@ -174,6 +174,9 @@ void main() {
     expect(app.txns.txns, isEmpty);
     expect(app.accounts.byId('cash').balance, 230000);
     expect(find.text('Undo'), findsOneWidget);
+    // The toast sits above the composer, never on top of it.
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(tester.getBottomLeft(find.text('Undo')).dy, lessThan(tester.getTopLeft(find.byType(QuickComposer)).dy));
 
     await tester.tap(find.text('Undo'));
     await tester.pumpAndSettle();

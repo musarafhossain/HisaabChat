@@ -8,6 +8,7 @@ import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/motion/animated_icons.dart';
 import 'package:hisaabchat/core/motion/motion.dart';
 import 'package:hisaabchat/core/motion/shake.dart';
+import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart';
 import 'package:hisaabchat/features/categories/categories_controller.dart';
 import 'package:hisaabchat/features/categories/data/category.dart';
@@ -157,136 +158,140 @@ class _QuickComposerState extends ConsumerState<QuickComposer> {
     final selected = _selectedCategory(entry);
     final signColor = _income ? colors.income : colors.expense;
 
-    return Material(
-      color: colors.threadBackground,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedSize(
-                duration: context.motion(Motion.medium),
-                curve: Motion.enter,
-                alignment: Alignment.bottomCenter,
-                child: typing
-                    ? SizedBox(
-                        height: 44,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                          children: [
-                            for (final category in _suggestions(entry))
-                              Padding(
-                                padding: const EdgeInsets.only(right: 8),
-                                child: ChoiceChip(
-                                  avatar: Icon(
-                                    AppIcons.byKey(category.icon),
-                                    size: 18,
-                                    color: category.color,
-                                    fill: 1,
+    return ToastAvoid(
+      child: Material(
+        color: colors.threadBackground,
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedSize(
+                  duration: context.motion(Motion.medium),
+                  curve: Motion.enter,
+                  alignment: Alignment.bottomCenter,
+                  child: typing
+                      ? SizedBox(
+                          height: 44,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                            children: [
+                              for (final category in _suggestions(entry))
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: ChoiceChip(
+                                    avatar: Icon(
+                                      AppIcons.byKey(category.icon),
+                                      size: 18,
+                                      color: category.color,
+                                      fill: 1,
+                                    ),
+                                    label: Text(category.name),
+                                    selected: selected?.id == category.id,
+                                    showCheckmark: false,
+                                    backgroundColor: colors.panel,
+                                    labelStyle: selected?.id == category.id
+                                        ? theme.chipTheme.secondaryLabelStyle
+                                        : null,
+                                    onSelected: (_) => setState(() {
+                                      _pickedCategoryId = category.id;
+                                      _hint = null;
+                                    }),
                                   ),
-                                  label: Text(category.name),
-                                  selected: selected?.id == category.id,
-                                  showCheckmark: false,
-                                  backgroundColor: colors.panel,
-                                  labelStyle: selected?.id == category.id ? theme.chipTheme.secondaryLabelStyle : null,
-                                  onSelected: (_) => setState(() {
-                                    _pickedCategoryId = category.id;
-                                    _hint = null;
-                                  }),
                                 ),
-                              ),
-                          ],
-                        ),
-                      )
-                    : const SizedBox(width: double.infinity),
-              ),
-              AnimatedSize(
-                duration: context.motion(Motion.short),
-                child: _hint == null
-                    ? const SizedBox(width: double.infinity)
-                    : Padding(
-                        padding: const EdgeInsets.fromLTRB(56, 0, 8, 6),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(_hint!, style: TextStyle(fontSize: 12.5, color: colors.danger)),
-                        ),
-                      ),
-              ),
-              Shake(
-                trigger: _shake,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Tooltip(
-                      message: _income ? 'Income (tap for expense)' : 'Expense (tap for income)',
-                      child: InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: _toggleSign,
-                        child: AnimatedContainer(
-                          duration: context.motion(Motion.medium),
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(color: signColor.withValues(alpha: 0.15), shape: BoxShape.circle),
-                          child: MorphIcon(
-                            first: AppIcons.toggleExpense,
-                            second: AppIcons.toggleIncome,
-                            showSecond: _income,
-                            color: signColor,
-                            turns: 0.5,
+                            ],
+                          ),
+                        )
+                      : const SizedBox(width: double.infinity),
+                ),
+                AnimatedSize(
+                  duration: context.motion(Motion.short),
+                  child: _hint == null
+                      ? const SizedBox(width: double.infinity)
+                      : Padding(
+                          padding: const EdgeInsets.fromLTRB(56, 0, 8, 6),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(_hint!, style: TextStyle(fontSize: 12.5, color: colors.danger)),
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: TextField(
-                        controller: _text,
-                        focusNode: _focus,
-                        minLines: 1,
-                        maxLines: 4,
-                        textInputAction: TextInputAction.send,
-                        onSubmitted: (_) => _send(),
-                        decoration: InputDecoration(
-                          fillColor: colors.panel,
-                          hintText: _income ? 'Income, e.g. 35000 salary' : 'Amount and note, e.g. 120 tea',
-                          suffixIcon: typing
-                              ? IconButton(
-                                  tooltip: 'More details',
-                                  icon: const Icon(AppIcons.attach),
-                                  onPressed: _openFullForm,
-                                )
-                              : null,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Tooltip(
-                      message: typing ? 'Send' : 'Full form',
-                      child: Material(
-                        color: colors.primary,
-                        shape: const CircleBorder(),
+                ),
+                Shake(
+                  trigger: _shake,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Tooltip(
+                        message: _income ? 'Income (tap for expense)' : 'Expense (tap for income)',
                         child: InkWell(
                           customBorder: const CircleBorder(),
-                          onTap: typing ? _send : _openFullForm,
-                          child: SizedBox.square(
-                            dimension: 48,
+                          onTap: _toggleSign,
+                          child: AnimatedContainer(
+                            duration: context.motion(Motion.medium),
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(color: signColor.withValues(alpha: 0.15), shape: BoxShape.circle),
                             child: MorphIcon(
-                              first: AppIcons.attach,
-                              second: AppIcons.send,
-                              showSecond: typing,
-                              color: theme.colorScheme.onPrimary,
+                              first: AppIcons.toggleExpense,
+                              second: AppIcons.toggleIncome,
+                              showSecond: _income,
+                              color: signColor,
+                              turns: 0.5,
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: TextField(
+                          controller: _text,
+                          focusNode: _focus,
+                          minLines: 1,
+                          maxLines: 4,
+                          textInputAction: TextInputAction.send,
+                          onSubmitted: (_) => _send(),
+                          decoration: InputDecoration(
+                            fillColor: colors.panel,
+                            hintText: _income ? 'Income, e.g. 35000 salary' : 'Amount and note, e.g. 120 tea',
+                            suffixIcon: typing
+                                ? IconButton(
+                                    tooltip: 'More details',
+                                    icon: const Icon(AppIcons.attach),
+                                    onPressed: _openFullForm,
+                                  )
+                                : null,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Tooltip(
+                        message: typing ? 'Send' : 'Full form',
+                        child: Material(
+                          color: colors.primary,
+                          shape: const CircleBorder(),
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: typing ? _send : _openFullForm,
+                            child: SizedBox.square(
+                              dimension: 48,
+                              child: MorphIcon(
+                                first: AppIcons.attach,
+                                second: AppIcons.send,
+                                showSecond: typing,
+                                color: theme.colorScheme.onPrimary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

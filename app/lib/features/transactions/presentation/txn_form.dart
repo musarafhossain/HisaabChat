@@ -11,6 +11,7 @@ import 'package:hisaabchat/core/motion/shake.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/amount_field.dart';
 import 'package:hisaabchat/core/widgets/settings_tile.dart';
+import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/core/widgets/window_class.dart';
 import 'package:hisaabchat/features/accounts/accounts_controller.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart';
@@ -84,29 +85,24 @@ Future<bool?> showTxnForm(BuildContext context, {Txn? existing, TxnDraft? draft}
   );
 }
 
-/// Shows a SnackBar with Undo after deleting [txns].
-void showDeletedSnackBar(BuildContext context, WidgetRef ref, List<Txn> txns) {
-  final messenger = ScaffoldMessenger.of(context);
+/// Shows a toast with Undo after deleting [txns].
+void showDeletedToast(BuildContext context, WidgetRef ref, List<Txn> txns) {
+  final toast = AppToast.of(context);
   // Read now: the calling widget (e.g. the edit form) may be gone when Undo is tapped.
   final mutations = ref.read(txnMutationsProvider);
   final label = txns.length == 1
       ? 'Deleted ${Money.format(txns.single.amount)} ${txns.single.labelFor(null)}'
       : 'Deleted ${txns.length} transactions';
-  messenger
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(
-        content: Text(label),
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () async {
-            for (final txn in txns) {
-              await mutations.restore(txn);
-            }
-          },
-        ),
-      ),
-    );
+  toast.show(
+    label,
+    kind: ToastKind.success,
+    actionLabel: 'Undo',
+    onAction: () async {
+      for (final txn in txns) {
+        await mutations.restore(txn);
+      }
+    },
+  );
 }
 
 class TxnForm extends ConsumerStatefulWidget {
@@ -230,7 +226,7 @@ class _TxnFormState extends ConsumerState<TxnForm> {
     try {
       await ref.read(txnMutationsProvider).delete(txn.id);
       if (!mounted) return;
-      showDeletedSnackBar(context, ref, [txn]);
+      showDeletedToast(context, ref, [txn]);
       widget.onDone(true);
     } on ApiException catch (error) {
       if (mounted) {

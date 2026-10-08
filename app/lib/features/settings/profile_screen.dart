@@ -7,6 +7,7 @@ import 'package:hisaabchat/core/config/device.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/settings_tile.dart';
+import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/features/auth/auth_controller.dart';
 import 'package:hisaabchat/features/auth/data/app_user.dart';
 import 'package:hisaabchat/features/auth/presentation/auth_scaffold.dart';
@@ -81,7 +82,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         'monthStartDay': _monthStartDay,
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile saved')));
+      AppToast.success(context, 'Profile saved');
       unawaited(Navigator.of(context).maybePop());
     } on ApiException catch (error) {
       if (mounted) setState(() => _error = error.fieldErrors.values.firstOrNull ?? error.message);

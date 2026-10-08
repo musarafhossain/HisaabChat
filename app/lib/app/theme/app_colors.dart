@@ -27,6 +27,12 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.transfer,
     required this.warning,
     required this.danger,
+    required this.toastBackground,
+    required this.onToast,
+    required this.toastAction,
+    required this.toastSuccess,
+    required this.toastError,
+    required this.toastInfo,
   });
 
   static const light = AppColors(
@@ -52,6 +58,12 @@ class AppColors extends ThemeExtension<AppColors> {
     transfer: Color(0xFF027EB5),
     warning: Color(0xFFE69500),
     danger: Color(0xFFE53935),
+    toastBackground: Color(0xFF233138),
+    onToast: Color(0xFFF0F2F5),
+    toastAction: Color(0xFF25D366),
+    toastSuccess: Color(0xFF25D366),
+    toastError: Color(0xFFF15C6D),
+    toastInfo: Color(0xFF53BDEB),
   );
 
   static const dark = AppColors(
@@ -77,6 +89,12 @@ class AppColors extends ThemeExtension<AppColors> {
     transfer: Color(0xFF53BDEB),
     warning: Color(0xFFFFBC2D),
     danger: Color(0xFFF15C6D),
+    toastBackground: Color(0xFFE9EDEF),
+    onToast: Color(0xFF111B21),
+    toastAction: Color(0xFF008069),
+    toastSuccess: Color(0xFF1DAA61),
+    toastError: Color(0xFFDC2626),
+    toastInfo: Color(0xFF0284C7),
   );
 
   final Color primary;
@@ -101,6 +119,14 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color transfer;
   final Color warning;
   final Color danger;
+
+  // Toasts (inverse surface: dark in light mode, light in dark mode)
+  final Color toastBackground;
+  final Color onToast;
+  final Color toastAction;
+  final Color toastSuccess;
+  final Color toastError;
+  final Color toastInfo;
 
   @override
   AppColors copyWith() => this;
@@ -132,6 +158,12 @@ class AppColors extends ThemeExtension<AppColors> {
       transfer: mix(transfer, other.transfer),
       warning: mix(warning, other.warning),
       danger: mix(danger, other.danger),
+      toastBackground: mix(toastBackground, other.toastBackground),
+      onToast: mix(onToast, other.onToast),
+      toastAction: mix(toastAction, other.toastAction),
+      toastSuccess: mix(toastSuccess, other.toastSuccess),
+      toastError: mix(toastError, other.toastError),
+      toastInfo: mix(toastInfo, other.toastInfo),
     );
   }
 }

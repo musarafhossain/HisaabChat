@@ -9,6 +9,7 @@ import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/chat_tile.dart';
 import 'package:hisaabchat/core/widgets/empty_state.dart';
 import 'package:hisaabchat/core/widgets/settings_tile.dart';
+import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/features/accounts/accounts_controller.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_form.dart';
@@ -42,7 +43,7 @@ class AccountInfoView extends ConsumerWidget {
       await action();
     } on ApiException catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+        AppToast.error(context, error.message);
       }
     }
   }

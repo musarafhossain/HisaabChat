@@ -12,6 +12,7 @@ import 'package:hisaabchat/core/motion/motion.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/chat_tile.dart';
 import 'package:hisaabchat/core/widgets/empty_state.dart';
+import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/features/accounts/accounts_controller.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_form.dart';
@@ -129,9 +130,9 @@ class _AccountThreadState extends ConsumerState<AccountThread> {
       }
       if (!mounted) return;
       setState(_selected.clear);
-      showDeletedSnackBar(context, ref, txns);
+      showDeletedToast(context, ref, txns);
     } on ApiException catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+      if (mounted) AppToast.error(context, error.message);
     }
   }
 
@@ -146,11 +147,9 @@ class _AccountThreadState extends ConsumerState<AccountThread> {
       }
       if (!mounted) return;
       setState(_selected.clear);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(txns.length == 1 ? 'Duplicated' : 'Duplicated ${txns.length} transactions')),
-      );
+      AppToast.success(context, txns.length == 1 ? 'Duplicated' : 'Duplicated ${txns.length} transactions');
     } on ApiException catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+      if (mounted) AppToast.error(context, error.message);
     }
   }
 

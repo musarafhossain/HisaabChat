@@ -11,10 +11,9 @@ void openNewTransaction(BuildContext context) {
   final container = ProviderScope.containerOf(context, listen: false);
   final accounts = container.read(accountsProvider).value?.active ?? const [];
   if (accounts.isEmpty) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(const SnackBar(content: Text('Add an account first, like Cash or your bank.')));
-    unawaited(showAccountForm(context));
+    unawaited(
+      showAccountForm(context, intro: 'Transactions belong to an account. Add one first, like Cash or your bank.'),
+    );
     return;
   }
   unawaited(showTxnForm(context, draft: TxnDraft(accountId: accounts.first.id)));

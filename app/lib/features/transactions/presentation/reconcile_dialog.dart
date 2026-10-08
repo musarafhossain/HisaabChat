@@ -4,20 +4,19 @@ import 'package:hisaabchat/app/theme/app_colors.dart';
 import 'package:hisaabchat/core/money/money.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/amount_field.dart';
+import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart';
 import 'package:hisaabchat/features/transactions/transactions_controller.dart';
 
 /// "What's the actual balance?" → records the difference as an adjustment.
 Future<void> showReconcileDialog(BuildContext context, Account account) async {
-  final messenger = ScaffoldMessenger.of(context);
+  final toast = AppToast.of(context);
   final message = await showDialog<String>(
     context: context,
     builder: (context) => _ReconcileDialog(account: account),
   );
   if (message != null) {
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+    toast.show(message, kind: ToastKind.success);
   }
 }
 

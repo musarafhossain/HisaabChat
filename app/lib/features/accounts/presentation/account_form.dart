@@ -15,8 +15,8 @@ import 'package:hisaabchat/features/auth/presentation/auth_scaffold.dart';
 
 /// Opens the add/edit account form: a bottom sheet on phones, a dialog on
 /// wider windows. Returns the saved account, or null if dismissed.
-Future<Account?> showAccountForm(BuildContext context, {Account? existing}) {
-  final form = AccountForm(existing: existing);
+Future<Account?> showAccountForm(BuildContext context, {Account? existing, String? intro}) {
+  final form = AccountForm(existing: existing, intro: intro);
   if (context.windowClass == WindowClass.compact) {
     return showModalBottomSheet<Account>(
       context: context,
@@ -38,9 +38,12 @@ Future<Account?> showAccountForm(BuildContext context, {Account? existing}) {
 }
 
 class AccountForm extends ConsumerStatefulWidget {
-  const AccountForm({super.key, this.existing});
+  const AccountForm({super.key, this.existing, this.intro});
 
   final Account? existing;
+
+  /// Optional line under the title explaining why the form opened.
+  final String? intro;
 
   @override
   ConsumerState<AccountForm> createState() => _AccountFormState();
@@ -144,6 +147,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 _isEdit ? 'Edit account' : 'New account',
                 style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
               ),
+              if (widget.intro != null) ...[
+                const SizedBox(height: 6),
+                Text(widget.intro!, style: TextStyle(color: colors.textSecondary)),
+              ],
               const SectionLabel('Type'),
               Wrap(
                 spacing: 8,

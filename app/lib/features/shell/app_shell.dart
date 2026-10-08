@@ -6,6 +6,7 @@ import 'package:hisaabchat/app/theme/app_colors.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/motion/animated_icons.dart';
 import 'package:hisaabchat/core/motion/motion.dart';
+import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/core/widgets/window_class.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_form.dart';
 import 'package:hisaabchat/features/auth/auth_controller.dart';
@@ -86,18 +87,20 @@ class _CompactShell extends ConsumerWidget {
         ],
       ),
       body: body,
-      floatingActionButton: _Fab(current: current),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: Destination.bottomBar.indexOf(current),
-        onDestinationSelected: (i) => onSelect(Destination.bottomBar[i]),
-        destinations: [
-          for (final d in Destination.bottomBar)
-            NavigationDestination(
-              icon: AnimatedFillIcon(d.icon, filled: false),
-              selectedIcon: AnimatedFillIcon(d.icon, filled: true),
-              label: d.label,
-            ),
-        ],
+      floatingActionButton: ToastAvoid(child: _Fab(current: current)),
+      bottomNavigationBar: ToastAvoid(
+        child: NavigationBar(
+          selectedIndex: Destination.bottomBar.indexOf(current),
+          onDestinationSelected: (i) => onSelect(Destination.bottomBar[i]),
+          destinations: [
+            for (final d in Destination.bottomBar)
+              NavigationDestination(
+                icon: AnimatedFillIcon(d.icon, filled: false),
+                selectedIcon: AnimatedFillIcon(d.icon, filled: true),
+                label: d.label,
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -251,11 +254,7 @@ class _Fab extends StatelessWidget {
   }
 }
 
-void _comingSoon(BuildContext context, String message) {
-  ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(message)));
-}
+void _comingSoon(BuildContext context, String message) => AppToast.show(context, message);
 
 /// Keeps every section alive (like IndexedStack) and fades the newly
 /// selected one in: the "fade-through" tab transition from the motion spec.

@@ -6,6 +6,7 @@ import 'package:hisaabchat/app/theme/app_colors.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/settings_tile.dart';
+import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/features/auth/auth_controller.dart';
 
 /// WhatsApp-style settings: profile header, then icon rows.
@@ -33,7 +34,7 @@ class SettingsScreen extends ConsumerWidget {
       await ref.read(authControllerProvider.notifier).logoutAll();
     } on ApiException catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+        AppToast.error(context, error.message);
       }
     }
   }
