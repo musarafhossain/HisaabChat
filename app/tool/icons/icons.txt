@@ -150,3 +150,9 @@ pie_chart
 show_chart
 rocket_launch
 task_alt
+
+# Lend & borrow, recurring (phase 6)
+call
+person_add
+handshake
+event_upcoming

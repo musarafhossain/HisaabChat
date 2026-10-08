@@ -6,7 +6,8 @@ import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 import { DateTime } from 'luxon'
 import Account from '#models/account'
 import Category from '#models/category'
-import Transaction, { type TransactionType } from '#models/transaction'
+import Person from '#models/person'
+import Transaction, { isPeopleType, type TransactionType } from '#models/transaction'
 import type User from '#models/user'
 import { applyEffects, effectsOf, negate } from '#services/balance_service'
 
@@ -19,9 +20,15 @@ export type TransactionInput = {
   accountId: string
   toAccountId?: string | null
   categoryId?: string | null
+  personId?: string | null
+  /** LEND / BORROW: when the money should come back (a local date). */
+  dueDate?: DateTime | null
   date: DateTime
   note?: string | null
 }
+
+/** Marks a transaction as one occurrence of a recurring rule. */
+export type RecurringLink = { recurringRuleId: string; occurrenceDate: DateTime }
 
 export type TransactionChanges = Partial<Omit<TransactionInput, 'id'>>
 
@@ -31,6 +38,7 @@ export type TransactionFilters = {
   type?: TransactionType
   accountId?: string
   categoryId?: string
+  personId?: string
   q?: string
   cursor?: string
   limit?: number
@@ -41,7 +49,7 @@ const fieldError = (field: string, message: string, rule = 'invalid') =>
 
 const notFound = () => new Exception('Transaction not found', { status: 404, code: 'E_NOT_FOUND' })
 
-const RELATIONS = ['account', 'toAccount', 'category'] as const
+const RELATIONS = ['account', 'toAccount', 'category', 'person'] as const
 
 export default class TransactionService {
   /**
@@ -55,13 +63,7 @@ export default class TransactionService {
     }
 
     try {
-      const transaction = await db.transaction(async (trx) => {
-        const shape = this.normalize(input)
-        await this.assertReferences(user, shape, trx, { checkArchived: true })
-        const created = await Transaction.create({ ...shape, userId: user.id }, { client: trx })
-        await applyEffects(trx, effectsOf(created))
-        return created
-      })
+      const transaction = await db.transaction((trx) => this.createWithin(trx, user, input))
       return { transaction: await this.load(transaction.id), created: true }
     } catch (error) {
       // Two identical retries raced: the second insert hits the primary key.
@@ -71,6 +73,34 @@ export default class TransactionService {
       }
       throw error
     }
+  }
+
+  /**
+   * Validates, inserts and moves balances inside the caller's DB transaction
+   * (used directly by recurring rules).
+   */
+  static async createWithin(
+    trx: TransactionClientContract,
+    user: User,
+    input: TransactionInput,
+    link?: RecurringLink
+  ) {
+    const shape = this.normalize(input)
+    await this.assertReferences(user, shape, trx, { checkArchived: true })
+    const created = await Transaction.create(
+      { ...shape, ...link, userId: user.id },
+      { client: trx }
+    )
+    await applyEffects(trx, effectsOf(created))
+    return created
+  }
+
+  /**
+   * Checks accounts, category or person for a would-be transaction (used to
+   * validate recurring rules before any transaction exists).
+   */
+  static async assertValid(trx: TransactionClientContract, user: User, input: TransactionInput) {
+    await this.assertReferences(user, this.normalize(input), trx, { checkArchived: true })
   }
 
   /**
@@ -94,14 +124,18 @@ export default class TransactionService {
         toAccountId:
           changes.toAccountId !== undefined ? changes.toAccountId : transaction.toAccountId,
         categoryId: changes.categoryId !== undefined ? changes.categoryId : transaction.categoryId,
+        personId: changes.personId !== undefined ? changes.personId : transaction.personId,
+        dueDate: changes.dueDate !== undefined ? changes.dueDate : transaction.dueDate,
         date: changes.date ?? transaction.date,
         note: changes.note !== undefined ? changes.note : transaction.note,
       })
-      // Old entries on archived accounts stay editable; moving money onto an
-      // archived account is not allowed.
+      // Old entries on archived accounts (or people) stay editable; moving
+      // money onto an archived one is not allowed.
       await this.assertReferences(user, next, trx, {
         checkArchived:
-          next.accountId !== transaction.accountId || next.toAccountId !== transaction.toAccountId,
+          next.accountId !== transaction.accountId ||
+          next.toAccountId !== transaction.toAccountId ||
+          next.personId !== transaction.personId,
       })
 
       await applyEffects(trx, negate(effectsOf(transaction)))
@@ -161,6 +195,7 @@ export default class TransactionService {
       .preload('account')
       .preload('toAccount')
       .preload('category')
+      .preload('person')
       .first()
     if (!transaction) throw notFound()
     return transaction
@@ -179,6 +214,7 @@ export default class TransactionService {
       .preload('account')
       .preload('toAccount')
       .preload('category')
+      .preload('person')
       .orderBy('date', 'desc')
       .orderBy('id', 'desc')
       .limit(limit + 1)
@@ -242,6 +278,7 @@ export default class TransactionService {
       .preload('account')
       .preload('toAccount')
       .preload('category')
+      .preload('person')
     const byId = new Map(transactions.map((t) => [t.id, t]))
     return new Map(pairs.map((pair) => [pair.accountId, byId.get(pair.txnId)!]))
   }
@@ -257,6 +294,7 @@ export default class TransactionService {
     if (filters.to) query.where('date', '<', filters.to.toJSDate())
     if (filters.type) query.where('type', filters.type)
     if (filters.categoryId) query.where('categoryId', filters.categoryId)
+    if (filters.personId) query.where('personId', filters.personId)
     if (filters.accountId) {
       const accountId = filters.accountId
       query.where((q) => q.where('accountId', accountId).orWhere('toAccountId', accountId))
@@ -278,12 +316,16 @@ export default class TransactionService {
   /** Clears fields that don't belong to the type (see chk_txn_shape). */
   private static normalize<T extends Omit<TransactionInput, 'id'>>(input: T) {
     const isTransfer = input.type === 'TRANSFER'
+    const isPeople = isPeopleType(input.type)
+    const hasDueDate = input.type === 'LEND' || input.type === 'BORROW'
     return {
       type: input.type,
       amount: input.amount,
       accountId: input.accountId,
       toAccountId: isTransfer ? (input.toAccountId ?? null) : null,
-      categoryId: isTransfer ? null : (input.categoryId ?? null),
+      categoryId: isTransfer || isPeople ? null : (input.categoryId ?? null),
+      personId: isPeople ? (input.personId ?? null) : null,
+      dueDate: hasDueDate ? (input.dueDate ?? null) : null,
       date: input.date,
       note: input.note?.trim() ? input.note.trim() : null,
       ...('id' in input && input.id ? { id: input.id as string } : {}),
@@ -328,6 +370,19 @@ export default class TransactionService {
       return
     }
 
+    if (isPeopleType(shape.type)) {
+      if (!shape.personId) throw fieldError('personId', 'Choose a person', 'required')
+      const person = await Person.query({ client: trx })
+        .where('userId', user.id)
+        .where('id', shape.personId)
+        .first()
+      if (!person) throw fieldError('personId', 'Choose one of your people', 'exists')
+      if (options.checkArchived && person.archived) {
+        throw fieldError('personId', `${person.name} is archived. Unarchive them to add entries.`)
+      }
+      return
+    }
+
     if (!shape.categoryId) throw fieldError('categoryId', 'Choose a category', 'required')
     const category = await Category.query({ client: trx })
       .where('userId', user.id)
@@ -359,12 +414,13 @@ export default class TransactionService {
     return this.load(transaction.id)
   }
 
-  private static load(id: string) {
+  static load(id: string) {
     return Transaction.query()
       .where('id', id)
       .preload(RELATIONS[0])
       .preload(RELATIONS[1])
       .preload(RELATIONS[2])
+      .preload(RELATIONS[3])
       .firstOrFail()
   }
 

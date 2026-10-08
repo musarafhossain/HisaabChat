@@ -97,6 +97,12 @@ abstract final class AppIcons {
   static const IconData start = Symbols.rocketLaunch;
   static const IconData done = Symbols.taskAlt;
 
+  // Lend & borrow, recurring
+  static const IconData phone = Symbols.call;
+  static const IconData addPerson = Symbols.personAdd;
+  static const IconData settle = Symbols.handshake;
+  static const IconData upcoming = Symbols.eventUpcoming;
+
   /// Curated icons offered when creating a category (keys stored in the DB).
   static const List<String> categoryChoices = [
     'home',

@@ -44,5 +44,8 @@ abstract final class Dates {
     return '$day, ${time(value)}';
   }
 
+  /// "8 Oct" (due dates, schedules).
+  static String dayMonth(DateTime value) => _dayMonth.format(value);
+
   static bool sameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
 }

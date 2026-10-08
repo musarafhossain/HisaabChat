@@ -7,6 +7,8 @@
 import type { InferData, InferVariants } from '@adonisjs/core/types/transformers'
 import type AccountTransformer from '#transformers/account_transformer'
 import type CategoryTransformer from '#transformers/category_transformer'
+import type PersonTransformer from '#transformers/person_transformer'
+import type RecurringTransformer from '#transformers/recurring_transformer'
 import type TransactionTransformer from '#transformers/transaction_transformer'
 import type UserTransformer from '#transformers/user_transformer'
 
@@ -18,6 +20,14 @@ export namespace Data {
   export type Category = InferData<CategoryTransformer>
   export namespace Category {
     export type Variants = InferVariants<CategoryTransformer>
+  }
+  export type Person = InferData<PersonTransformer>
+  export namespace Person {
+    export type Variants = InferVariants<PersonTransformer>
+  }
+  export type Recurring = InferData<RecurringTransformer>
+  export namespace Recurring {
+    export type Variants = InferVariants<RecurringTransformer>
   }
   export type Transaction = InferData<TransactionTransformer>
   export namespace Transaction {

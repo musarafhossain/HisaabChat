@@ -20,6 +20,20 @@ export type ScannedRoutes = {
     'accounts.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.reconcile': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'recurring.index': { paramsTuple?: []; params?: {} }
+    'recurring.store': { paramsTuple?: []; params?: {} }
+    'recurring.upcoming': { paramsTuple?: []; params?: {} }
+    'recurring.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'recurring.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'recurring.confirm': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'recurring.skip': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'people.index': { paramsTuple?: []; params?: {} }
+    'people.store': { paramsTuple?: []; params?: {} }
+    'people.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'people.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'people.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'people.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'people.settle': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.index': { paramsTuple?: []; params?: {} }
     'categories.store': { paramsTuple?: []; params?: {} }
     'categories.reorder': { paramsTuple?: []; params?: {} }
@@ -47,6 +61,10 @@ export type ScannedRoutes = {
     'me.show': { paramsTuple?: []; params?: {} }
     'accounts.index': { paramsTuple?: []; params?: {} }
     'accounts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'recurring.index': { paramsTuple?: []; params?: {} }
+    'recurring.upcoming': { paramsTuple?: []; params?: {} }
+    'people.index': { paramsTuple?: []; params?: {} }
+    'people.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.index': { paramsTuple?: []; params?: {} }
     'dashboard': { paramsTuple?: []; params?: {} }
     'reports.byCategory': { paramsTuple?: []; params?: {} }
@@ -61,6 +79,10 @@ export type ScannedRoutes = {
     'me.show': { paramsTuple?: []; params?: {} }
     'accounts.index': { paramsTuple?: []; params?: {} }
     'accounts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'recurring.index': { paramsTuple?: []; params?: {} }
+    'recurring.upcoming': { paramsTuple?: []; params?: {} }
+    'people.index': { paramsTuple?: []; params?: {} }
+    'people.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.index': { paramsTuple?: []; params?: {} }
     'dashboard': { paramsTuple?: []; params?: {} }
     'reports.byCategory': { paramsTuple?: []; params?: {} }
@@ -80,6 +102,13 @@ export type ScannedRoutes = {
     'accounts.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'accounts.reconcile': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'recurring.store': { paramsTuple?: []; params?: {} }
+    'recurring.confirm': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'recurring.skip': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'people.store': { paramsTuple?: []; params?: {} }
+    'people.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'people.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'people.settle': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.store': { paramsTuple?: []; params?: {} }
     'categories.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -90,12 +119,15 @@ export type ScannedRoutes = {
   PATCH: {
     'me.update': { paramsTuple?: []; params?: {} }
     'accounts.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'recurring.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'people.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'budgets.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'transactions.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   DELETE: {
     'accounts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'recurring.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'budgets.deleteOverride': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'month': ParamValue} }
     'transactions.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }

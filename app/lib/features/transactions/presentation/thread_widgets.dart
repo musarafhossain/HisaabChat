@@ -23,7 +23,7 @@ class ThreadChip extends StatelessWidget {
     final light = Theme.of(context).brightness == Brightness.light;
     return Center(
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: colors.dateChip,
@@ -34,9 +34,12 @@ class ThreadChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[Icon(icon, size: 14, color: colors.textSecondary), const SizedBox(width: 6)],
-            Text(
-              text,
-              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500, color: colors.textSecondary),
+            Flexible(
+              child: Text(
+                text,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500, color: colors.textSecondary),
+              ),
             ),
           ],
         ),
@@ -57,9 +60,13 @@ class TxnBubble extends StatelessWidget {
     this.shakeTrigger = 0,
     this.onTap,
     this.onLongPress,
+    this.label,
   });
 
   final Txn txn;
+
+  /// Replaces the account-centric label (a person's thread says "You lent · Cash").
+  final String? label;
 
   /// The thread's account: decides the side and the sign.
   final String accountId;
@@ -76,11 +83,13 @@ class TxnBubble extends StatelessWidget {
     final colors = context.colors;
     final outgoing = txn.directionFor(accountId) == TxnDirection.outgoing;
     final signed = txn.signedFor(accountId);
+    final title = label ?? txn.labelFor(accountId);
     final maxWidth = MediaQuery.sizeOf(context).width * (context.windowClass == WindowClass.compact ? 0.75 : 0.5);
 
     final (IconData labelIcon, Color labelColor) = switch (txn.type) {
       TxnType.transfer => (AppIcons.transfer, colors.transfer),
       TxnType.adjustment => (AppIcons.adjustment, colors.textSecondary),
+      _ when txn.type.isPeople => (AppIcons.people, txn.person?.color ?? colors.primary),
       _ => (AppIcons.byKey(txn.category?.icon ?? 'category'), txn.category?.color ?? colors.textSecondary),
     };
 
@@ -116,7 +125,7 @@ class TxnBubble extends StatelessWidget {
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
-                    txn.labelFor(accountId),
+                    title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: labelColor),
@@ -131,12 +140,20 @@ class TxnBubble extends StatelessWidget {
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
                 fontFeatures: const [FontFeature.tabularFigures()],
-                color: txn.type == TxnType.transfer
+                color: txn.type == TxnType.transfer || txn.type.isPeople
                     ? colors.textPrimary
                     : (signed >= 0 ? colors.income : colors.expense),
               ),
             ),
-            if (txn.note != null && txn.note!.isNotEmpty && txn.note != txn.labelFor(accountId))
+            if (txn.dueDate != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(
+                  'Due ${Dates.dayMonth(txn.dueDate!)}',
+                  style: TextStyle(fontSize: 12.5, color: colors.textSecondary),
+                ),
+              ),
+            if (txn.note != null && txn.note!.isNotEmpty && txn.note != title)
               Padding(
                 padding: const EdgeInsets.only(top: 2),
                 child: Text(txn.note!, style: TextStyle(fontSize: 14.5, color: colors.textPrimary)),
@@ -181,7 +198,7 @@ class TxnBubble extends StatelessWidget {
               button: true,
               label:
                   '${outgoing ? 'Money out' : 'Money in'}, ${Money.format(txn.amount)} rupees, '
-                  '${txn.labelFor(accountId)}, ${Dates.time(txn.localDate)}'
+                  '$title, ${Dates.time(txn.localDate)}'
                   '${status == null
                       ? ', saved'
                       : status == PendingStatus.sending

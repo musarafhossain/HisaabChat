@@ -15,6 +15,9 @@ import 'package:hisaabchat/features/categories/presentation/categories_screen.da
 import 'package:hisaabchat/features/health/connection_check_screen.dart';
 import 'package:hisaabchat/features/home/home_screen.dart';
 import 'package:hisaabchat/features/onboarding/onboarding_screen.dart';
+import 'package:hisaabchat/features/people/presentation/people_section.dart';
+import 'package:hisaabchat/features/people/presentation/person_thread.dart';
+import 'package:hisaabchat/features/recurring/presentation/recurring_screen.dart';
 import 'package:hisaabchat/features/reports/presentation/category_transactions.dart';
 import 'package:hisaabchat/features/reports/presentation/reports_section.dart';
 import 'package:hisaabchat/features/settings/appearance_screen.dart';
@@ -142,6 +145,24 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               section(
+                Destination.people,
+                const PeopleSection(),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    parentNavigatorKey: rootNavigatorKey,
+                    pageBuilder: (context, state) => sharedAxisPage(
+                      key: state.pageKey,
+                      child: PersonThreadScreen(personId: state.pathParameters['id']!),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              section(
                 Destination.reports,
                 const ReportsSection(),
                 routes: [
@@ -175,6 +196,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                   fullScreen('profile', const ProfileScreen()),
                   fullScreen('appearance', const AppearanceScreen()),
                   fullScreen('categories', const CategoriesScreen()),
+                  fullScreen('recurring', const RecurringScreen()),
                   fullScreen('connection', const ConnectionCheckScreen()),
                 ],
               ),

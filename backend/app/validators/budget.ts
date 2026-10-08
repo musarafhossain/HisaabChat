@@ -17,6 +17,7 @@ export const createBudgetValidator = vine.create({
     .string()
     .regex(/^[a-z0-9_]{1,40}$/)
     .optional(),
+  rollover: vine.boolean().optional(),
   categoryIds: vine.array(vine.string().uuid()).minLength(1).maxLength(50),
 })
 
@@ -33,6 +34,7 @@ export const updateBudgetValidator = vine.create({
     .string()
     .regex(/^[a-z0-9_]{1,40}$/)
     .optional(),
+  rollover: vine.boolean().optional(),
   categoryIds: vine.array(vine.string().uuid()).minLength(1).maxLength(50).optional(),
   sortOrder: vine.number().withoutDecimals().range([0, 10_000]).optional(),
 })

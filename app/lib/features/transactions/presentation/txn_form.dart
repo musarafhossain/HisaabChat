@@ -18,6 +18,8 @@ import 'package:hisaabchat/features/accounts/data/account.dart';
 import 'package:hisaabchat/features/auth/presentation/auth_scaffold.dart';
 import 'package:hisaabchat/features/categories/categories_controller.dart';
 import 'package:hisaabchat/features/categories/data/category.dart';
+import 'package:hisaabchat/features/recurring/data/recurring.dart';
+import 'package:hisaabchat/features/recurring/recurring_controller.dart';
 import 'package:hisaabchat/features/transactions/data/txn.dart';
 import 'package:hisaabchat/features/transactions/transactions_controller.dart';
 
@@ -125,6 +127,12 @@ class _TxnFormState extends ConsumerState<TxnForm> {
   late String? _toAccountId = widget.existing?.toAccount?.id;
   late String? _categoryId = widget.existing?.category?.id ?? widget.draft?.categoryId;
   late DateTime _date = widget.existing?.localDate ?? DateTime.now();
+
+  /// New transactions only: repeat on this schedule (null = once).
+  Frequency? _repeat;
+
+  /// Repeat: add it automatically, or remind me to confirm each time.
+  bool _autoAdd = true;
   bool _showAllCategories = false;
   bool _saving = false;
   String? _error;
@@ -132,7 +140,9 @@ class _TxnFormState extends ConsumerState<TxnForm> {
   int _shake = 0;
 
   bool get _isEdit => widget.existing != null;
-  bool get _isAdjustment => widget.existing?.type == TxnType.adjustment;
+
+  /// Adjustments and lend/borrow entries can only be viewed and deleted here.
+  bool get _isReadOnly => widget.existing?.type == TxnType.adjustment || (widget.existing?.type.isPeople ?? false);
 
   String _initialAmount() {
     final paise = widget.existing?.amount ?? widget.draft?.amount;
@@ -205,7 +215,8 @@ class _TxnFormState extends ConsumerState<TxnForm> {
       if (_isEdit) {
         await mutations.update(widget.existing!.id, body);
       } else {
-        await mutations.create(body);
+        final txn = await mutations.create(body);
+        if (_repeat != null && !await _makeRecurring(txn)) return;
       }
       unawaited(HapticFeedback.lightImpact());
       widget.onDone(true);
@@ -217,6 +228,35 @@ class _TxnFormState extends ConsumerState<TxnForm> {
         _fieldErrors = error.fieldErrors;
         _error = error.fieldErrors.isEmpty ? error.message : null;
       });
+    }
+  }
+
+  /// Turns the saved transaction into the first of a recurring rule.
+  /// false (with the error shown) if the rule couldn't be created.
+  Future<bool> _makeRecurring(Txn txn) async {
+    try {
+      await ref.read(recurringMutationsProvider).create({
+        'type': txn.type.api,
+        'amount': txn.amount,
+        'accountId': txn.account.id,
+        'toAccountId': txn.toAccount?.id,
+        'categoryId': txn.category?.id,
+        'note': txn.note,
+        'frequency': _repeat!.api,
+        'dayOfMonth': _repeat == Frequency.monthly ? _date.day : null,
+        'startDate': isoDateOf(_date),
+        'autoCreate': _autoAdd,
+        'linkTransactionId': txn.id,
+      });
+      return true;
+    } on ApiException catch (error) {
+      if (mounted) {
+        setState(() {
+          _saving = false;
+          _error = 'Saved once, but it couldn’t be set to repeat: ${error.message}';
+        });
+      }
+      return false;
     }
   }
 
@@ -245,7 +285,7 @@ class _TxnFormState extends ConsumerState<TxnForm> {
     final accounts = ref.watch(accountsProvider).value?.active ?? const <Account>[];
     final categories = ref.watch(categoriesProvider).value ?? const <TxnCategory>[];
 
-    if (_isAdjustment) return _adjustmentInfo(context);
+    if (_isReadOnly) return _readOnlyInfo(context);
 
     final typeColor = switch (_type) {
       TxnType.income => colors.income,
@@ -340,6 +380,49 @@ class _TxnFormState extends ConsumerState<TxnForm> {
                 trailing: const Icon(AppIcons.expand),
                 onTap: _pickDate,
               ),
+              if (!_isEdit) ...[
+                const SectionLabel('Repeat'),
+                DropdownButtonFormField<Frequency?>(
+                  initialValue: _repeat,
+                  isExpanded: true,
+                  decoration: const InputDecoration(prefixIcon: Icon(AppIcons.recurring)),
+                  items: [
+                    const DropdownMenuItem(child: Text('Doesn’t repeat')),
+                    for (final f in Frequency.values)
+                      DropdownMenuItem(
+                        value: f,
+                        child: Text(f == Frequency.monthly ? 'Monthly on the ${ordinal(_date.day)}' : f.label),
+                      ),
+                  ],
+                  onChanged: (value) => setState(() => _repeat = value),
+                ),
+                if (_repeat != null)
+                  SwitchListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                    value: _autoAdd,
+                    onChanged: (value) => setState(() => _autoAdd = value),
+                    title: const Text('Add automatically'),
+                    subtitle: Text(
+                      _autoAdd ? 'Added on each due date' : 'Remind me on Home to confirm or skip',
+                      style: TextStyle(color: colors.textSecondary),
+                    ),
+                  ),
+              ] else if (widget.existing!.isRecurring)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Row(
+                    children: [
+                      Icon(AppIcons.recurring, size: 18, color: colors.textSecondary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Repeats. Change the schedule in Settings → Recurring.',
+                          style: TextStyle(color: colors.textSecondary),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               const SectionLabel('Note (optional)'),
               TextFormField(
                 controller: _note,
@@ -401,9 +484,40 @@ class _TxnFormState extends ConsumerState<TxnForm> {
   );
 
   /// Adjustments come from "Reconcile balance": they can be deleted, not edited.
-  Widget _adjustmentInfo(BuildContext context) {
+  Widget _readOnlyInfo(BuildContext context) {
     final txn = widget.existing!;
     final colors = context.colors;
+    if (txn.type.isPeople) {
+      return Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ListTile(
+              leading: const Icon(AppIcons.people),
+              title: Text('${txn.labelFor(null)} · ${Money.format(txn.amount)}'),
+              subtitle: Text('${txn.account.name} · ${Dates.formLabel(txn.localDate)}'),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                'Lend & borrow entries live in ${txn.person?.name ?? 'the person'}’s chat under People. '
+                'To change one, delete it and add it again.',
+                style: TextStyle(color: colors.textSecondary),
+              ),
+            ),
+            if (_error != null) FormErrorBanner(_error!),
+            TextButton.icon(
+              onPressed: _saving ? null : _delete,
+              style: TextButton.styleFrom(foregroundColor: colors.danger),
+              icon: const Icon(AppIcons.delete),
+              label: const Text('Delete entry'),
+            ),
+          ],
+        ),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(

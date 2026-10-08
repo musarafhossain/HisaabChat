@@ -130,12 +130,20 @@ class BudgetInfoView extends ConsumerWidget {
               budget.spent,
               style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600, color: stateColor),
             ),
-            Text(' of ${Money.format(budget.budgeted)}', style: TextStyle(fontSize: 16, color: colors.textSecondary)),
+            Text(' of ${Money.format(budget.available)}', style: TextStyle(fontSize: 16, color: colors.textSecondary)),
           ],
         ),
         if (budget.hasOverride)
           Text(
             'This month only · usually ${Money.format(budget.amount)}',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12.5, color: colors.textSecondary),
+          ),
+        if (budget.rolloverIn != 0)
+          Text(
+            budget.rolloverIn > 0
+                ? 'Includes ${Money.format(budget.rolloverIn)} carried over from earlier months'
+                : '${Money.format(-budget.rolloverIn)} overspent earlier is taken from this month',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 12.5, color: colors.textSecondary),
           ),

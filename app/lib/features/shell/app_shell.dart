@@ -11,6 +11,7 @@ import 'package:hisaabchat/core/widgets/window_class.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_form.dart';
 import 'package:hisaabchat/features/auth/auth_controller.dart';
 import 'package:hisaabchat/features/budgets/presentation/budget_form.dart';
+import 'package:hisaabchat/features/people/presentation/person_form.dart';
 import 'package:hisaabchat/features/shell/destinations.dart';
 import 'package:hisaabchat/features/transactions/presentation/new_transaction.dart';
 
@@ -204,7 +205,7 @@ class _OverflowMenu extends StatelessWidget {
       icon: const Icon(AppIcons.more),
       onSelected: onSelect,
       itemBuilder: (context) => [
-        for (final d in [Destination.reports, Destination.settings])
+        for (final d in [Destination.people, Destination.reports, Destination.settings])
           PopupMenuItem(
             value: d,
             child: Row(children: [Icon(d.icon), const SizedBox(width: 12), Text(d.label)]),
@@ -226,6 +227,7 @@ class _Fab extends StatelessWidget {
     final (IconData icon, String tooltip, String message) = switch (current) {
       Destination.accounts => (AppIcons.addAccount, 'New account', ''),
       Destination.budgets => (AppIcons.addBudget, 'New budget', ''),
+      Destination.people => (AppIcons.addPerson, 'New person', ''),
       Destination.reports || Destination.settings => (AppIcons.add, '', ''),
       _ => (AppIcons.add, 'New transaction', ''),
     };
@@ -244,6 +246,8 @@ class _Fab extends StatelessWidget {
             ? () => showAccountForm(context)
             : current == Destination.budgets
             ? () => showBudgetForm(context)
+            : current == Destination.people
+            ? () => showPersonForm(context)
             : () => openNewTransaction(context),
         child: AnimatedSwitcher(
           duration: context.motion(Motion.short),

@@ -15,7 +15,7 @@ Color budgetStateColor(AppColors colors, BudgetState state) => switch (state) {
 
 /// "₹3,400 of ₹4,000 · ₹50/day left", "Over by ₹350", "₹600 left".
 String budgetSummary(BudgetStatus budget) {
-  final base = '${Money.format(budget.spent)} of ${Money.format(budget.budgeted)}';
+  final base = '${Money.format(budget.spent)} of ${Money.format(budget.available)}';
   if (budget.remaining < 0) return '$base · Over by ${Money.format(-budget.remaining)}';
   final perDay = budget.safeToSpendPerDay;
   if (perDay != null && budget.daysLeft > 0) return '$base · ${Money.format(wholeRupees(perDay))}/day left';

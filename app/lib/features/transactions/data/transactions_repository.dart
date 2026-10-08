@@ -6,7 +6,15 @@ import 'package:hisaabchat/features/transactions/data/txn.dart';
 typedef TxnSaved = ({Txn txn, List<BudgetAlert> alerts});
 
 /// Filters for `GET /transactions`.
-typedef TxnQuery = ({String? accountId, String? categoryId, TxnType? type, String? q, DateTime? from, DateTime? to});
+typedef TxnQuery = ({
+  String? accountId,
+  String? categoryId,
+  String? personId,
+  TxnType? type,
+  String? q,
+  DateTime? from,
+  DateTime? to,
+});
 
 /// `/transactions` endpoints plus account reconcile.
 class TransactionsRepository {
@@ -20,6 +28,7 @@ class TransactionsRepository {
       query: {
         'accountId': ?query.accountId,
         'categoryId': ?query.categoryId,
+        'personId': ?query.personId,
         'type': ?query.type?.api,
         'from': ?query.from?.toUtc().toIso8601String(),
         'to': ?query.to?.toUtc().toIso8601String(),

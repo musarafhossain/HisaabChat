@@ -24,6 +24,24 @@ export interface ApiDefinition {
     unarchive: typeof routes['accounts.unarchive']
     reconcile: typeof routes['accounts.reconcile']
   }
+  recurring: {
+    index: typeof routes['recurring.index']
+    store: typeof routes['recurring.store']
+    upcoming: typeof routes['recurring.upcoming']
+    update: typeof routes['recurring.update']
+    destroy: typeof routes['recurring.destroy']
+    confirm: typeof routes['recurring.confirm']
+    skip: typeof routes['recurring.skip']
+  }
+  people: {
+    index: typeof routes['people.index']
+    store: typeof routes['people.store']
+    show: typeof routes['people.show']
+    update: typeof routes['people.update']
+    archive: typeof routes['people.archive']
+    unarchive: typeof routes['people.unarchive']
+    settle: typeof routes['people.settle']
+  }
   categories: {
     index: typeof routes['categories.index']
     store: typeof routes['categories.store']

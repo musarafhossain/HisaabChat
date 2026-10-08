@@ -47,6 +47,7 @@ final FutureProviderFamily<List<Txn>, CategoryTxnsKey> categoryTxnsProvider =
       final page = await ref.watch(transactionsRepositoryProvider).list((
         accountId: null,
         categoryId: key.categoryId,
+        personId: null,
         type: null,
         q: null,
         from: key.from,

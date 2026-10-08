@@ -31,6 +31,7 @@ class TransactionTile extends StatelessWidget {
     final (IconData icon, Color color) = switch (txn.type) {
       TxnType.transfer => (AppIcons.transfer, colors.transfer),
       TxnType.adjustment => (AppIcons.adjustment, colors.textSecondary),
+      _ when txn.type.isPeople => (AppIcons.people, txn.person?.color ?? colors.primary),
       _ => (AppIcons.byKey(txn.category?.icon ?? 'category'), txn.category?.color ?? colors.textSecondary),
     };
     final (String amount, Color amountColor) = switch (txn.type) {
@@ -41,6 +42,9 @@ class TransactionTile extends StatelessWidget {
         Money.format(txn.adjustmentIncrease ?? false ? txn.amount : -txn.amount, signed: true),
         colors.textSecondary,
       ),
+      // Not income or expense: shown in the neutral text color.
+      TxnType.lend || TxnType.repay => (Money.format(-txn.amount), colors.textPrimary),
+      TxnType.borrow || TxnType.collect => (Money.format(txn.amount, signed: true), colors.textPrimary),
     };
     final subtitle = [
       if (txn.type == TxnType.transfer) 'From ${txn.account.name}' else txn.account.name,

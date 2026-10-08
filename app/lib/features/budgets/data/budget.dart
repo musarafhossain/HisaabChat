@@ -49,6 +49,8 @@ class BudgetStatus {
     required this.state,
     required this.daysLeft,
     this.safeToSpendPerDay,
+    this.rollover = false,
+    this.rolloverIn = 0,
   });
 
   factory BudgetStatus.fromJson(Map<String, dynamic> json) => BudgetStatus(
@@ -70,6 +72,8 @@ class BudgetStatus {
     state: BudgetState.fromApi(json['status'] as String),
     daysLeft: (json['daysLeft'] as num?)?.toInt() ?? 0,
     safeToSpendPerDay: (json['safeToSpendPerDay'] as num?)?.toInt(),
+    rollover: json['rollover'] as bool? ?? false,
+    rolloverIn: (json['rolloverIn'] as num?)?.toInt() ?? 0,
   );
 
   final String id;
@@ -93,8 +97,17 @@ class BudgetStatus {
   final int daysLeft;
   final int? safeToSpendPerDay;
 
-  /// Spent / budgeted, for rings and bars (may exceed 1).
-  double get progress => budgeted > 0 ? spent / budgeted : (spent > 0 ? 1.0 : 0.0);
+  /// Carry unspent money (or overspending) into the next month.
+  final bool rollover;
+
+  /// Carried in from earlier months: + unspent, − overspent.
+  final int rolloverIn;
+
+  /// What can be spent this period: the amount plus anything carried over.
+  int get available => budgeted + rolloverIn;
+
+  /// Spent / available, for rings and bars (may exceed 1).
+  double get progress => available > 0 ? spent / available : (spent > 0 ? 1.0 : 0.0);
 }
 
 @immutable

@@ -34,6 +34,14 @@ export function effectsOf(t: TxnLike): Effect[] {
           delta: t.adjustmentDirection === 'INCREASE' ? t.amount : -t.amount,
         },
       ]
+    // Money leaves the account when you lend or pay back…
+    case 'LEND':
+    case 'REPAY':
+      return [{ accountId: t.accountId, delta: -t.amount }]
+    // …and comes in when you borrow or get paid back.
+    case 'BORROW':
+    case 'COLLECT':
+      return [{ accountId: t.accountId, delta: t.amount }]
   }
 }
 
@@ -70,6 +78,10 @@ export async function findBalanceDrift(userId?: string): Promise<BalanceDrift[]>
                WHEN 'EXPENSE' THEN -amount
                WHEN 'TRANSFER' THEN -amount
                WHEN 'ADJUSTMENT' THEN IF(adjustment_direction = 'INCREASE', amount, -amount)
+               WHEN 'LEND' THEN -amount
+               WHEN 'REPAY' THEN -amount
+               WHEN 'BORROW' THEN amount
+               WHEN 'COLLECT' THEN amount
              END AS delta
       FROM transactions
       UNION ALL

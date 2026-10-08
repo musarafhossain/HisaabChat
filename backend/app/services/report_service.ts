@@ -31,6 +31,7 @@ export default class ReportService {
       .preload('account')
       .preload('toAccount')
       .preload('category')
+      .preload('person')
       .orderBy('date', 'desc')
       .orderBy('id', 'desc')
       .limit(8)

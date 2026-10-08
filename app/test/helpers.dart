@@ -13,6 +13,10 @@ import 'package:hisaabchat/features/budgets/data/budget.dart';
 import 'package:hisaabchat/features/budgets/data/budgets_repository.dart';
 import 'package:hisaabchat/features/categories/data/categories_repository.dart';
 import 'package:hisaabchat/features/categories/data/category.dart';
+import 'package:hisaabchat/features/people/data/people_repository.dart';
+import 'package:hisaabchat/features/people/data/person.dart';
+import 'package:hisaabchat/features/recurring/data/recurring.dart';
+import 'package:hisaabchat/features/recurring/data/recurring_repository.dart';
 import 'package:hisaabchat/features/reports/data/report.dart';
 import 'package:hisaabchat/features/reports/data/reports_repository.dart';
 import 'package:hisaabchat/features/transactions/data/transactions_repository.dart';
@@ -356,6 +360,28 @@ class FakeTransactionsRepository implements TransactionsRepository {
   /// Set by pumpApp so creates can report budget alerts.
   FakeBudgetsRepository? budgets;
 
+  /// Set by pumpApp so people entries can name their person.
+  FakePeopleRepository? people;
+
+  /// Marks [id] as created by rule [ruleId] (the form's "Repeat").
+  void markRecurring(String id, String ruleId) {
+    final i = txns.indexWhere((t) => t.id == id);
+    final t = txns[i];
+    txns[i] = Txn(
+      id: t.id,
+      type: t.type,
+      amount: t.amount,
+      date: t.date,
+      note: t.note,
+      account: t.account,
+      toAccount: t.toAccount,
+      category: t.category,
+      person: t.person,
+      isRecurring: true,
+      recurringRuleId: ruleId,
+    );
+  }
+
   AccountRef _accountRef(String id) {
     final a = accounts.byId(id);
     return AccountRef(id: a.id, name: a.name, icon: a.icon, color: a.color);
@@ -377,6 +403,8 @@ class FakeTransactionsRepository implements TransactionsRepository {
           ? null
           : CategoryRef(id: category.id, name: category.name, icon: category.icon, color: category.color),
       adjustmentIncrease: body['adjustmentIncrease'] as bool?,
+      person: body['personId'] == null ? null : people!.ref(body['personId']! as String),
+      dueDate: body['dueDate'] == null ? null : DateTime.parse(body['dueDate']! as String),
     );
   }
 
@@ -392,6 +420,10 @@ class FakeTransactionsRepository implements TransactionsRepository {
           ..applyDelta(t.toAccount!.id, sign * t.amount);
       case TxnType.adjustment:
         accounts.applyDelta(t.account.id, sign * (t.adjustmentIncrease! ? t.amount : -t.amount));
+      case TxnType.lend || TxnType.repay:
+        accounts.applyDelta(t.account.id, -sign * t.amount);
+      case TxnType.borrow || TxnType.collect:
+        accounts.applyDelta(t.account.id, sign * t.amount);
     }
   }
 
@@ -405,6 +437,7 @@ class FakeTransactionsRepository implements TransactionsRepository {
                   (query.accountId == null || t.account.id == query.accountId || t.toAccount?.id == query.accountId) &&
                   (query.type == null || t.type == query.type) &&
                   (query.categoryId == null || t.category?.id == query.categoryId) &&
+                  (query.personId == null || t.person?.id == query.personId) &&
                   (query.from == null || !t.date.isBefore(query.from!)) &&
                   (query.to == null || t.date.isBefore(query.to!)) &&
                   (q.isEmpty ||
@@ -812,6 +845,192 @@ class FakeReportsRepository implements ReportsRepository {
   }
 }
 
+/// In-memory `/people`; balances come from the fake transactions.
+class FakePeopleRepository implements PeopleRepository {
+  FakePeopleRepository(this.txns);
+
+  final FakeTransactionsRepository txns;
+  final List<({String id, String name, Color color, bool archived})> rows = [];
+  int _next = 0;
+
+  int balanceOf(String id) =>
+      txns.txns.where((t) => t.person?.id == id).fold<int>(0, (sum, t) => sum + t.type.personSign * t.amount);
+
+  Person _person(({String id, String name, Color color, bool archived}) row) =>
+      Person(id: row.id, name: row.name, color: row.color, archived: row.archived, balance: balanceOf(row.id));
+
+  PersonRef ref(String id) {
+    final row = rows.firstWhere((r) => r.id == id);
+    return PersonRef(id: row.id, name: row.name, color: row.color);
+  }
+
+  /// Adds someone directly (test setup).
+  String add(String name) {
+    final id = 'person-${_next++}';
+    rows.add((id: id, name: name, color: const Color(0xFF1DAA61), archived: false));
+    return id;
+  }
+
+  @override
+  Future<PeopleState> list() async {
+    final people = rows.map(_person).toList();
+    return PeopleState(
+      people: people,
+      youGet: people.fold(0, (sum, p) => sum + (p.balance > 0 ? p.balance : 0)),
+      youOwe: people.fold(0, (sum, p) => sum + (p.balance < 0 ? -p.balance : 0)),
+    );
+  }
+
+  @override
+  Future<Person> create(Map<String, Object?> body) async {
+    final name = body['name']! as String;
+    if (rows.any((r) => r.name == name)) {
+      throw const ApiException(
+        message: 'You already have someone with this name',
+        statusCode: 422,
+        fieldErrors: {'name': 'You already have someone with this name'},
+      );
+    }
+    final id = add(name);
+    return _person(rows.firstWhere((r) => r.id == id));
+  }
+
+  @override
+  Future<Person> update(String id, Map<String, Object?> changes) async {
+    final i = rows.indexWhere((r) => r.id == id);
+    final old = rows[i];
+    rows[i] = (id: id, name: (changes['name'] as String?) ?? old.name, color: old.color, archived: old.archived);
+    return _person(rows[i]);
+  }
+
+  @override
+  Future<Person> setArchived(String id, {required bool archived}) async {
+    if (archived && balanceOf(id) != 0) {
+      throw const ApiException(message: 'Settle up before archiving', statusCode: 422);
+    }
+    final i = rows.indexWhere((r) => r.id == id);
+    final old = rows[i];
+    rows[i] = (id: id, name: old.name, color: old.color, archived: archived);
+    return _person(rows[i]);
+  }
+
+  @override
+  Future<Txn> settle(String id, {required String accountId, required String txnId, int? amount}) async {
+    final balance = balanceOf(id);
+    final saved = await txns.create({
+      'id': txnId,
+      'type': balance > 0 ? 'COLLECT' : 'REPAY',
+      'amount': amount ?? balance.abs(),
+      'accountId': accountId,
+      'personId': id,
+      'date': DateTime.now().toUtc().toIso8601String(),
+    });
+    return saved.txn;
+  }
+}
+
+/// In-memory `/recurring`: rules are stored as created; [upcomingValue] is
+/// what Home shows, and Confirm adds the transaction through the fake.
+class FakeRecurringRepository implements RecurringRepository {
+  FakeRecurringRepository(this.txns);
+
+  final FakeTransactionsRepository txns;
+  final List<Map<String, Object?>> created = [];
+  final List<RecurringRule> rules = [];
+  final List<String> skipped = [];
+  Upcoming upcomingValue = Upcoming.empty;
+
+  @override
+  Future<List<RecurringRule>> list() async => List.of(rules);
+
+  @override
+  Future<RecurringRule> create(Map<String, Object?> body) async {
+    created.add(body);
+    final linked = body['linkTransactionId'] as String?;
+    final account = txns.accounts.byId(body['accountId']! as String);
+    final categoryId = body['categoryId'] as String?;
+    final category = categoryId == null ? null : txns.categories.categories.firstWhere((c) => c.id == categoryId);
+    final start = parseLocalDate(body['startDate']! as String);
+    final rule = RecurringRule(
+      id: 'rule-${rules.length}',
+      type: TxnType.fromApi(body['type']! as String),
+      amount: body['amount']! as int,
+      account: AccountRef(id: account.id, name: account.name, icon: account.icon, color: account.color),
+      category: category == null
+          ? null
+          : CategoryRef(id: category.id, name: category.name, icon: category.icon, color: category.color),
+      note: body['note'] as String?,
+      frequency: Frequency.fromApi(body['frequency']! as String),
+      interval: (body['interval'] as int?) ?? 1,
+      dayOfMonth: body['dayOfMonth'] as int?,
+      startDate: start,
+      autoCreate: (body['autoCreate'] as bool?) ?? false,
+      isActive: true,
+      nextDate: DateTime(start.year, start.month + 1, start.day),
+    );
+    rules.add(rule);
+    if (linked != null) txns.markRecurring(linked, rule.id);
+    return rule;
+  }
+
+  @override
+  Future<RecurringRule> update(String id, Map<String, Object?> changes) async {
+    final i = rules.indexWhere((r) => r.id == id);
+    final old = rules[i];
+    return rules[i] = RecurringRule(
+      id: old.id,
+      type: old.type,
+      amount: (changes['amount'] as int?) ?? old.amount,
+      account: old.account,
+      category: old.category,
+      note: old.note,
+      frequency: old.frequency,
+      interval: old.interval,
+      dayOfMonth: old.dayOfMonth,
+      startDate: old.startDate,
+      autoCreate: (changes['autoCreate'] as bool?) ?? old.autoCreate,
+      isActive: (changes['isActive'] as bool?) ?? old.isActive,
+      nextDate: (changes['isActive'] as bool?) == false ? null : old.nextDate,
+    );
+  }
+
+  @override
+  Future<void> delete(String id) async => rules.removeWhere((r) => r.id == id);
+
+  @override
+  Future<Upcoming> upcoming({int days = 7}) async => upcomingValue;
+
+  void _drop(String occurrenceId) => upcomingValue = Upcoming(
+    today: upcomingValue.today,
+    pending: upcomingValue.pending.where((p) => p.id != occurrenceId).toList(),
+    upcoming: upcomingValue.upcoming,
+    dues: upcomingValue.dues,
+  );
+
+  @override
+  Future<Txn> confirm(String occurrenceId, Map<String, Object?> body) async {
+    final occurrence = upcomingValue.pending.firstWhere((p) => p.id == occurrenceId);
+    final rule = occurrence.rule;
+    final saved = await txns.create({
+      'id': body['id'],
+      'type': rule.type.api,
+      'amount': (body['amount'] as int?) ?? rule.amount,
+      'accountId': rule.account.id,
+      'categoryId': rule.category?.id,
+      'date': DateTime.now().toUtc().toIso8601String(),
+      'note': rule.note,
+    });
+    _drop(occurrenceId);
+    return saved.txn;
+  }
+
+  @override
+  Future<void> skip(String occurrenceId) async {
+    skipped.add(occurrenceId);
+    _drop(occurrenceId);
+  }
+}
+
 /// Pumps the whole app with fakes and a fixed window size.
 typedef TestApp = ({
   FakeAuthRepository repo,
@@ -821,6 +1040,8 @@ typedef TestApp = ({
   FakeTransactionsRepository txns,
   FakeBudgetsRepository budgets,
   FakeReportsRepository reports,
+  FakePeopleRepository people,
+  FakeRecurringRepository recurring,
 });
 
 Future<TestApp> pumpApp(
@@ -847,6 +1068,9 @@ Future<TestApp> pumpApp(
   final fakeTxns = FakeTransactionsRepository(fakeAccounts, fakeCategories);
   final fakeBudgets = FakeBudgetsRepository(fakeTxns, fakeCategories);
   fakeTxns.budgets = fakeBudgets;
+  final fakePeople = FakePeopleRepository(fakeTxns);
+  fakeTxns.people = fakePeople;
+  final fakeRecurring = FakeRecurringRepository(fakeTxns);
   final fakeReports = FakeReportsRepository(fakeAccounts, fakeTxns, fakeBudgets);
   final app = (
     repo: fakeRepo,
@@ -856,6 +1080,8 @@ Future<TestApp> pumpApp(
     txns: fakeTxns,
     budgets: fakeBudgets,
     reports: fakeReports,
+    people: fakePeople,
+    recurring: fakeRecurring,
   );
   await seed?.call(app);
 
@@ -869,6 +1095,8 @@ Future<TestApp> pumpApp(
         categoriesRepositoryProvider.overrideWithValue(fakeCategories),
         transactionsRepositoryProvider.overrideWithValue(fakeTxns),
         budgetsRepositoryProvider.overrideWithValue(fakeBudgets),
+        peopleRepositoryProvider.overrideWithValue(fakePeople),
+        recurringRepositoryProvider.overrideWithValue(fakeRecurring),
         reportsRepositoryProvider.overrideWithValue(fakeReports),
       ],
       child: const HisaabChatApp(),

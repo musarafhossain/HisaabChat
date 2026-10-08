@@ -106,6 +106,12 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => context.go('/settings/categories'),
             ),
             SettingsTile(
+              icon: AppIcons.recurring,
+              title: 'Recurring',
+              subtitle: 'Rent, EMIs, salary and other repeating entries',
+              onTap: () => context.go('/settings/recurring'),
+            ),
+            SettingsTile(
               icon: AppIcons.palette,
               title: 'Appearance',
               subtitle: 'Theme: $themeLabel · Reduce motion',

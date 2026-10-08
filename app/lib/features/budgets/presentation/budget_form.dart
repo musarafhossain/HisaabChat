@@ -72,6 +72,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
   );
   late BudgetKind _kind = widget.existing?.kind ?? widget.template?.kind ?? BudgetKind.variable;
   late int _alertPercent = widget.existing?.alertPercent ?? 80;
+  late bool _rollover = widget.existing?.rollover ?? false;
   late Color _color = widget.existing?.color ?? kPaletteColors.first;
   late Set<String> _categoryIds = {...?widget.existing?.categories.map((c) => c.id)};
   bool _templateApplied = false;
@@ -122,6 +123,7 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
       'amount': AmountField.paiseOf(_amount),
       'kind': _kind.api,
       'alertPercent': _alertPercent,
+      'rollover': _rollover,
       'color': toHexColor(_color),
       'icon': widget.template?.icon ?? widget.existing?.icon ?? first?.icon ?? 'savings',
       'categoryIds': _categoryIds.toList(),
@@ -266,6 +268,16 @@ class _BudgetFormState extends ConsumerState<BudgetForm> {
                 divisions: 10,
                 label: '$_alertPercent%',
                 onChanged: (value) => setState(() => _alertPercent = value.round()),
+              ),
+              SwitchListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                value: _rollover,
+                onChanged: (value) => setState(() => _rollover = value),
+                title: const Text('Carry over to next month'),
+                subtitle: Text(
+                  'Unspent money is added to next month; overspending is taken from it',
+                  style: TextStyle(color: colors.textSecondary),
+                ),
               ),
               const SectionLabel('Color'),
               ColorPalettePicker(selected: _color, onChanged: (color) => setState(() => _color = color)),

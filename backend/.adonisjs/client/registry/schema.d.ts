@@ -199,6 +199,174 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['reconcile']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'recurring.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/recurring'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/recurring_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/recurring_controller').default['index']>>>
+    }
+  }
+  'recurring.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/recurring'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/recurring').createRuleValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/recurring').createRuleValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/recurring_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/recurring_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'recurring.upcoming': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/recurring/upcoming'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/recurring').upcomingValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/recurring_controller').default['upcoming']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/recurring_controller').default['upcoming']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'recurring.update': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/recurring/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/recurring').updateRuleValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/recurring').updateRuleValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/recurring_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/recurring_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'recurring.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/recurring/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/recurring_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/recurring_controller').default['destroy']>>>
+    }
+  }
+  'recurring.confirm': {
+    methods: ["POST"]
+    pattern: '/api/v1/recurring/occurrences/:id/confirm'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/recurring').confirmOccurrenceValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/recurring').confirmOccurrenceValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/recurring_controller').default['confirm']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/recurring_controller').default['confirm']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'recurring.skip': {
+    methods: ["POST"]
+    pattern: '/api/v1/recurring/occurrences/:id/skip'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/recurring_controller').default['skip']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/recurring_controller').default['skip']>>>
+    }
+  }
+  'people.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/people'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/person').listPeopleValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/people_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/people_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'people.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/people'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/person').createPersonValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/person').createPersonValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/people_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/people_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'people.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/people/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/people_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/people_controller').default['show']>>>
+    }
+  }
+  'people.update': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/people/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/person').updatePersonValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/person').updatePersonValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/people_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/people_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'people.archive': {
+    methods: ["POST"]
+    pattern: '/api/v1/people/:id/archive'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/people_controller').default['archive']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/people_controller').default['archive']>>>
+    }
+  }
+  'people.unarchive': {
+    methods: ["POST"]
+    pattern: '/api/v1/people/:id/unarchive'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/people_controller').default['unarchive']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/people_controller').default['unarchive']>>>
+    }
+  }
+  'people.settle': {
+    methods: ["POST"]
+    pattern: '/api/v1/people/:id/settle'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/person').settlePersonValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/person').settlePersonValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/people_controller').default['settle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/people_controller').default['settle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'categories.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/categories'

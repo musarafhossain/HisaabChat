@@ -25,8 +25,13 @@ export type BudgetInput = {
   alertPercent?: number
   color?: string
   icon?: string
+  /** Carry unspent money (or overspending) into the next month. */
+  rollover?: boolean
   categoryIds: string[]
 }
+
+/** How many earlier periods rollover looks back over. */
+const ROLLOVER_LOOKBACK = 12
 
 export type BudgetChanges = Partial<BudgetInput> & { sortOrder?: number }
 
@@ -55,11 +60,19 @@ export default class BudgetService {
       period
     )
     const spent = await this.spentByBudget(user.id, period)
+    const carried = await this.rolloverFor(user, budgets, period)
 
     const statuses = budgets.map((budget) =>
-      this.status(budget, overrides.get(budget.id), spent.get(budget.id) ?? 0, period, settings)
+      this.status(
+        budget,
+        overrides.get(budget.id),
+        spent.get(budget.id) ?? 0,
+        carried.get(budget.id) ?? 0,
+        period,
+        settings
+      )
     )
-    const budgeted = statuses.reduce((sum, s) => sum + s.budgeted, 0)
+    const budgeted = statuses.reduce((sum, s) => sum + s.budgeted + s.rolloverIn, 0)
     const spentInBudgets = statuses.reduce((sum, s) => sum + s.spent, 0)
 
     return {
@@ -85,7 +98,15 @@ export default class BudgetService {
 
     const overrides = await this.overridesFor([budget.id], period)
     const spent = await this.spentFor(user.id, categoryIds, period)
-    const status = this.status(budget, overrides.get(budget.id), spent, period, settings)
+    const carried = await this.rolloverFor(user, [budget], period)
+    const status = this.status(
+      budget,
+      overrides.get(budget.id),
+      spent,
+      carried.get(budget.id) ?? 0,
+      period,
+      settings
+    )
 
     const transactions = categoryIds.length
       ? await Transaction.query()
@@ -146,7 +167,8 @@ export default class BudgetService {
     const after = await this.spentFor(user.id, categoryIds, period)
     const before = after - transaction.amount
     const overrides = await this.overridesFor([budget.id], period)
-    const budgeted = overrides.get(budget.id) ?? budget.amount
+    const carried = await this.rolloverFor(user, [budget], period)
+    const budgeted = (overrides.get(budget.id) ?? budget.amount) + (carried.get(budget.id) ?? 0)
     if (budgeted <= 0) return []
 
     const percentBefore = (before * 100) / budgeted
@@ -192,7 +214,7 @@ export default class BudgetService {
           icon: input.icon ?? first.icon,
           startDate: DateTime.fromISO(period.periodStart),
           sortOrder: sortMax === null || sortMax === undefined ? 0 : sortMax + 1,
-          rollover: false,
+          rollover: input.rollover ?? false,
           period: 'MONTHLY',
         },
         { client: trx }
@@ -301,14 +323,17 @@ export default class BudgetService {
     budget: Budget,
     override: number | undefined,
     spent: number,
+    rolloverIn: number,
     period: Period,
     settings: PeriodSettings
   ) {
     const budgeted = override ?? budget.amount
-    const remaining = budgeted - spent
-    const percent = budgeted > 0 ? Math.round((spent * 100) / budgeted) : spent > 0 ? 100 : 0
+    // What can be spent this period: the amount plus anything carried over.
+    const available = budgeted + rolloverIn
+    const remaining = available - spent
+    const percent = available > 0 ? Math.round((spent * 100) / available) : spent > 0 ? 100 : 0
     const status: BudgetStatusCode =
-      spent > budgeted ? 'EXCEEDED' : percent >= budget.alertPercent ? 'WARNING' : 'OK'
+      spent > available ? 'EXCEEDED' : percent >= budget.alertPercent ? 'WARNING' : 'OK'
     const left = daysLeft(period, settings)
 
     return {
@@ -327,7 +352,8 @@ export default class BudgetService {
       amount: budget.amount,
       budgeted,
       hasOverride: override !== undefined,
-      rolloverIn: 0,
+      rollover: budget.rollover,
+      rolloverIn,
       spent,
       remaining,
       percent,
@@ -354,6 +380,34 @@ export default class BudgetService {
     )
     const rows = result[0] as Array<{ budgetId: string | null; spent: number }>
     return new Map(rows.map((row) => [row.budgetId, Number(row.spent)]))
+  }
+
+  /**
+   * Money carried into [period] for budgets with rollover on: each earlier
+   * period's (amount − spent) is added up, oldest first, over at most
+   * ROLLOVER_LOOKBACK periods and never before the budget started. Positive
+   * means unspent money, negative means overspending to make up.
+   */
+  private static async rolloverFor(user: User, budgets: Budget[], period: Period) {
+    const carried = new Map<string, number>()
+    const rolling = budgets.filter((b) => b.rollover)
+    if (rolling.length === 0) return carried
+
+    const settings = settingsOf(user)
+    const ids = rolling.map((b) => b.id)
+    for (let i = ROLLOVER_LOOKBACK; i >= 1; i--) {
+      const past = shiftPeriod(period, -i, settings)
+      const active = rolling.filter((b) => b.startDate.toISODate()! <= past.periodEnd)
+      if (active.length === 0) continue
+      const spent = await this.spentByBudget(user.id, past)
+      const overrides = await this.overridesFor(ids, past)
+      for (const budget of active) {
+        const amount = overrides.get(budget.id) ?? budget.amount
+        const left = amount - (spent.get(budget.id) ?? 0)
+        carried.set(budget.id, (carried.get(budget.id) ?? 0) + left)
+      }
+    }
+    return carried
   }
 
   /** Category ids whose expenses count toward [budgetId]. */

@@ -143,12 +143,14 @@
 **🚀 Milestone: MVP v0.1 — all P0 requirements on Android, Windows and Web.**
 
 ### Phase 6 — Recurring, Rollover, Alerts, Trends
-- [ ] **API:** recurring rules CRUD, upcoming, occurrences confirm/skip.
-- [ ] Ace command `recurring:run` (idempotent; day-of-month clamping; advance `next_run_at`) + tests.
-- [ ] Budget rollover (≤ 12-month look-back) + tests.
+- [x] **API:** recurring rules CRUD (`/recurring`), `GET /recurring/upcoming` (pending, next 7 days, lend/borrow due dates), occurrences confirm (amount adjustable) / skip; a saved transaction can become a rule's first occurrence (`linkTransactionId`).
+- [x] Ace command `recurring:run` (idempotent via unique rule + date; day-of-month clamping; catch-up of missed dates; advances `next_run_at`); the API also catches up a user's rules on read, so no cron is needed in development. Schedule maths in `schedule.ts` with unit tests.
+- [x] Budget rollover (≤ 12-month look-back, unspent and overspent both carry) + tests; `rollover` toggle on create/update.
 - [x] `GET /reports/trend` (built in Phase 5).
-- [ ] **Flutter:** "Repeat" field in the transaction form; Settings → Recurring; Dashboard "Upcoming" and "Pending" cards (Confirm opens a prefilled form; Skip); trend chart *(done in Phase 5: Reports → money in vs out, 6 months)*; rollover shown on budget cards.
-- [ ] **Lend & borrow (People):** migration (`people`, `transactions.person_id`/`due_date`, new types + CHECK), balance effects for LEND/BORROW/COLLECT/REPAY + tests, `/people` API (list with balances, settle up, write-off), People list + **person thread** with Lent/Borrowed composer toggle, Home "You'll get / You owe" card, due dates in Upcoming.
+- [x] **Flutter:** "Repeat" field in the transaction form (auto-add or remind me); Settings → Recurring; Dashboard "Upcoming" and "Pending" cards (Confirm opens a prefilled form; Skip); trend chart *(done in Phase 5: Reports → money in vs out, 6 months)*; rollover shown on budget cards.
+- [x] **Lend & borrow (People):** migration (`people`, `transactions.person_id`/`due_date`, new types + CHECK), balance effects for LEND/BORROW/COLLECT/REPAY + tests, `/people` API (list with balances, settle up, write-off), People list + **person thread** with Lent/Borrowed composer toggle, Home "You'll get / You owe" card, due dates in Upcoming.
+- [x] Tests: 109 backend (people, recurring, rollover, schedule), 70 app (people chat + settle up, Home "Due soon" confirm/skip, Repeat, Settings → Recurring).
+- *Write-off (PPL-7) moves to Phase 7; deleting a user must remove recurring rules before accounts (see the delete-account flow there).*
 
 ### Phase 7 — Platform Polish & Packaging
 - [ ] **Dark mode** check of every screen (WhatsApp dark palette: bubbles, wallpaper, chips); golden tests at 3 sizes × 2 themes.

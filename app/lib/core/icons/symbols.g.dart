@@ -136,6 +136,10 @@ abstract final class Symbols {
   static const IconData showChart = IconData(0xe6e1, fontFamily: 'MaterialSymbolsRounded');
   static const IconData rocketLaunch = IconData(0xeb9b, fontFamily: 'MaterialSymbolsRounded');
   static const IconData taskAlt = IconData(0xe2e6, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData call = IconData(0xf0d4, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData personAdd = IconData(0xea4d, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData handshake = IconData(0xebcb, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData eventUpcoming = IconData(0xf238, fontFamily: 'MaterialSymbolsRounded');
 
   /// Icon name (as stored in the database) to glyph.
   static const Map<String, IconData> byName = {
@@ -269,5 +273,9 @@ abstract final class Symbols {
     'show_chart': showChart,
     'rocket_launch': rocketLaunch,
     'task_alt': taskAlt,
+    'call': call,
+    'person_add': personAdd,
+    'handshake': handshake,
+    'event_upcoming': eventUpcoming,
   };
 }

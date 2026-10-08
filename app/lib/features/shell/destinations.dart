@@ -7,6 +7,7 @@ enum Destination {
   transactions('Transactions', AppIcons.transactions, '/transactions'),
   budgets('Budgets', AppIcons.budgets, '/budgets'),
   accounts('Accounts', AppIcons.accounts, '/accounts'),
+  people('People', AppIcons.people, '/people'),
   reports('Reports', AppIcons.reports, '/reports'),
   settings('Settings', AppIcons.settings, '/settings')
   ;
@@ -18,11 +19,11 @@ enum Destination {
   final String path;
 
   /// Tabs in the phone's bottom navigation bar (WhatsApp has four too).
-  /// Reports and Settings live in the ⋮ menu on phones.
+  /// People, Reports and Settings live in the ⋮ menu on phones.
   static const List<Destination> bottomBar = [home, transactions, budgets, accounts];
 
   /// Sections in the top half of the desktop rail; Settings sits at the bottom.
-  static const List<Destination> railTop = [home, transactions, budgets, accounts, reports];
+  static const List<Destination> railTop = [home, transactions, budgets, accounts, people, reports];
 
   bool get isTab => bottomBar.contains(this);
 }

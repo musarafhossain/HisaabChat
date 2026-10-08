@@ -63,6 +63,34 @@ router
 
         router
           .group(() => {
+            router.get('/', [controllers.Recurring, 'index']).as('index')
+            router.post('/', [controllers.Recurring, 'store']).as('store')
+            router.get('upcoming', [controllers.Recurring, 'upcoming']).as('upcoming')
+            router.patch(':id', [controllers.Recurring, 'update']).as('update')
+            router.delete(':id', [controllers.Recurring, 'destroy']).as('destroy')
+            router.post('occurrences/:id/confirm', [controllers.Recurring, 'confirm']).as('confirm')
+            router.post('occurrences/:id/skip', [controllers.Recurring, 'skip']).as('skip')
+          })
+          .prefix('recurring')
+          .as('recurring')
+          .where('id', router.matchers.uuid())
+
+        router
+          .group(() => {
+            router.get('/', [controllers.People, 'index']).as('index')
+            router.post('/', [controllers.People, 'store']).as('store')
+            router.get(':id', [controllers.People, 'show']).as('show')
+            router.patch(':id', [controllers.People, 'update']).as('update')
+            router.post(':id/archive', [controllers.People, 'archive']).as('archive')
+            router.post(':id/unarchive', [controllers.People, 'unarchive']).as('unarchive')
+            router.post(':id/settle', [controllers.People, 'settle']).as('settle')
+          })
+          .prefix('people')
+          .as('people')
+          .where('id', router.matchers.uuid())
+
+        router
+          .group(() => {
             router.get('/', [controllers.Categories, 'index']).as('index')
             router.post('/', [controllers.Categories, 'store']).as('store')
             router.put('order', [controllers.Categories, 'reorder']).as('reorder')

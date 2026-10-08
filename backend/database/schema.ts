@@ -166,6 +166,29 @@ export class PasswordResetTokenSchema extends BaseModel {
   declare userId: string
 }
 
+export class PersonSchema extends BaseModel {
+  static $columns = ['archivedAt', 'color', 'createdAt', 'id', 'name', 'note', 'phone', 'updatedAt', 'userId'] as const
+  $columns = PersonSchema.$columns
+  @column.dateTime()
+  declare archivedAt: DateTime | null
+  @column()
+  declare color: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare name: string
+  @column()
+  declare note: string | null
+  @column()
+  declare phone: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+  @column()
+  declare userId: string
+}
+
 export class RecurringOccurrenceSchema extends BaseModel {
   static $columns = ['createdAt', 'dueDate', 'id', 'recurringRuleId', 'status', 'transactionId', 'updatedAt'] as const
   $columns = RecurringOccurrenceSchema.$columns
@@ -227,7 +250,7 @@ export class RecurringRuleSchema extends BaseModel {
 }
 
 export class TransactionSchema extends BaseModel {
-  static $columns = ['accountId', 'adjustmentDirection', 'amount', 'categoryId', 'createdAt', 'date', 'id', 'note', 'occurrenceDate', 'recurringRuleId', 'toAccountId', 'type', 'updatedAt', 'userId'] as const
+  static $columns = ['accountId', 'adjustmentDirection', 'amount', 'categoryId', 'createdAt', 'date', 'dueDate', 'id', 'note', 'occurrenceDate', 'personId', 'recurringRuleId', 'toAccountId', 'type', 'updatedAt', 'userId'] as const
   $columns = TransactionSchema.$columns
   @column()
   declare accountId: string
@@ -241,12 +264,16 @@ export class TransactionSchema extends BaseModel {
   declare createdAt: DateTime
   @column.dateTime()
   declare date: DateTime
+  @column.date()
+  declare dueDate: DateTime | null
   @column({ isPrimary: true })
   declare id: string
   @column()
   declare note: string | null
   @column.date()
   declare occurrenceDate: DateTime | null
+  @column()
+  declare personId: string | null
   @column()
   declare recurringRuleId: string | null
   @column()

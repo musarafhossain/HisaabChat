@@ -16,6 +16,9 @@ import 'package:hisaabchat/features/auth/auth_controller.dart';
 import 'package:hisaabchat/features/budgets/data/budget.dart';
 import 'package:hisaabchat/features/budgets/presentation/budget_widgets.dart';
 import 'package:hisaabchat/features/budgets/presentation/budgets_section.dart' show periodLabel;
+import 'package:hisaabchat/features/home/due_soon.dart';
+import 'package:hisaabchat/features/people/people_controller.dart';
+import 'package:hisaabchat/features/people/presentation/people_section.dart' show PeopleTotalsCard;
 import 'package:hisaabchat/features/reports/data/report.dart';
 import 'package:hisaabchat/features/reports/reports_controller.dart';
 import 'package:hisaabchat/features/shell/destinations.dart';
@@ -67,6 +70,8 @@ class HomeScreen extends ConsumerWidget {
       index: 2,
       child: _BudgetsRow(dashboard: data, loading: dashboard.isLoading),
     );
+    const dueSoon = FadeSlideIn(index: 2, child: DueSoon());
+    const people = FadeSlideIn(index: 3, child: _PeopleCard());
     final recent = FadeSlideIn(
       index: 3,
       child: _RecentList(dashboard: data, loading: dashboard.isLoading),
@@ -104,7 +109,7 @@ class HomeScreen extends ConsumerWidget {
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(child: Column(children: [balance, budgets])),
+                                  Expanded(child: Column(children: [balance, dueSoon, budgets, people])),
                                   Expanded(child: recent),
                                 ],
                               ),
@@ -123,7 +128,7 @@ class HomeScreen extends ConsumerWidget {
                         constraints: const BoxConstraints(maxWidth: 720),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [header, balance, budgets, recent],
+                          children: [header, balance, dueSoon, budgets, people, recent],
                         ),
                       ),
                     ),
@@ -307,6 +312,25 @@ class _BalanceCard extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// "You'll get ₹X · You owe ₹Y", shown once anyone owes anything.
+class _PeopleCard extends ConsumerWidget {
+  const _PeopleCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final people = ref.watch(peopleProvider).value;
+    if (people == null || (people.youGet == 0 && people.youOwe == 0)) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: PeopleTotalsCard(
+        youGet: people.youGet,
+        youOwe: people.youOwe,
+        onTap: () => context.go(Destination.people.path),
       ),
     );
   }

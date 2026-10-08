@@ -10,6 +10,8 @@ export const controllers = {
   Categories: () => import('#controllers/categories_controller'),
   Health: () => import('#controllers/health_controller'),
   Me: () => import('#controllers/me_controller'),
+  People: () => import('#controllers/people_controller'),
+  Recurring: () => import('#controllers/recurring_controller'),
   Reports: () => import('#controllers/reports_controller'),
   Transactions: () => import('#controllers/transactions_controller'),
 }
