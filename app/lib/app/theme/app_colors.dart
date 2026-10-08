@@ -33,6 +33,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.toastSuccess,
     required this.toastError,
     required this.toastInfo,
+    required this.toastWarning,
   });
 
   static const light = AppColors(
@@ -64,6 +65,7 @@ class AppColors extends ThemeExtension<AppColors> {
     toastSuccess: Color(0xFF25D366),
     toastError: Color(0xFFF15C6D),
     toastInfo: Color(0xFF53BDEB),
+    toastWarning: Color(0xFFFFBC2D),
   );
 
   static const dark = AppColors(
@@ -95,6 +97,7 @@ class AppColors extends ThemeExtension<AppColors> {
     toastSuccess: Color(0xFF1DAA61),
     toastError: Color(0xFFDC2626),
     toastInfo: Color(0xFF0284C7),
+    toastWarning: Color(0xFFD97706),
   );
 
   final Color primary;
@@ -127,6 +130,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color toastSuccess;
   final Color toastError;
   final Color toastInfo;
+  final Color toastWarning;
 
   @override
   AppColors copyWith() => this;
@@ -164,6 +168,7 @@ class AppColors extends ThemeExtension<AppColors> {
       toastSuccess: mix(toastSuccess, other.toastSuccess),
       toastError: mix(toastError, other.toastError),
       toastInfo: mix(toastInfo, other.toastInfo),
+      toastWarning: mix(toastWarning, other.toastWarning),
     );
   }
 }

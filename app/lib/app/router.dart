@@ -9,6 +9,8 @@ import 'package:hisaabchat/features/auth/presentation/login_screen.dart';
 import 'package:hisaabchat/features/auth/presentation/register_screen.dart';
 import 'package:hisaabchat/features/auth/presentation/splash_screen.dart';
 import 'package:hisaabchat/features/auth/presentation/welcome_screen.dart';
+import 'package:hisaabchat/features/budgets/presentation/budget_info.dart';
+import 'package:hisaabchat/features/budgets/presentation/budgets_section.dart';
 import 'package:hisaabchat/features/categories/presentation/categories_screen.dart';
 import 'package:hisaabchat/features/health/connection_check_screen.dart';
 import 'package:hisaabchat/features/home/home_screen.dart';
@@ -77,7 +79,27 @@ final routerProvider = Provider<GoRouter>((ref) {
         branches: [
           StatefulShellBranch(routes: [section(Destination.home, const HomeScreen())]),
           StatefulShellBranch(routes: [section(Destination.transactions, const TransactionsSection())]),
-          StatefulShellBranch(routes: [section(Destination.budgets, const BudgetsSection())]),
+          StatefulShellBranch(
+            routes: [
+              section(
+                Destination.budgets,
+                const BudgetsSection(),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    parentNavigatorKey: rootNavigatorKey,
+                    pageBuilder: (context, state) => sharedAxisPage(
+                      key: state.pageKey,
+                      child: BudgetInfoScreen(
+                        budgetId: state.pathParameters['id']!,
+                        month: state.uri.queryParameters['month'],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
           StatefulShellBranch(
             routes: [
               section(

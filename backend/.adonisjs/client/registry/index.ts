@@ -138,6 +138,48 @@ const routes = {
     tokens: [{"old":"/api/v1/categories/:id/unarchive","type":0,"val":"api","end":""},{"old":"/api/v1/categories/:id/unarchive","type":0,"val":"v1","end":""},{"old":"/api/v1/categories/:id/unarchive","type":0,"val":"categories","end":""},{"old":"/api/v1/categories/:id/unarchive","type":1,"val":"id","end":""},{"old":"/api/v1/categories/:id/unarchive","type":0,"val":"unarchive","end":""}],
     types: placeholder as Registry['categories.unarchive']['types'],
   },
+  'budgets.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/budgets',
+    tokens: [{"old":"/api/v1/budgets","type":0,"val":"api","end":""},{"old":"/api/v1/budgets","type":0,"val":"v1","end":""},{"old":"/api/v1/budgets","type":0,"val":"budgets","end":""}],
+    types: placeholder as Registry['budgets.index']['types'],
+  },
+  'budgets.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/budgets',
+    tokens: [{"old":"/api/v1/budgets","type":0,"val":"api","end":""},{"old":"/api/v1/budgets","type":0,"val":"v1","end":""},{"old":"/api/v1/budgets","type":0,"val":"budgets","end":""}],
+    types: placeholder as Registry['budgets.store']['types'],
+  },
+  'budgets.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/budgets/:id',
+    tokens: [{"old":"/api/v1/budgets/:id","type":0,"val":"api","end":""},{"old":"/api/v1/budgets/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/budgets/:id","type":0,"val":"budgets","end":""},{"old":"/api/v1/budgets/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['budgets.show']['types'],
+  },
+  'budgets.update': {
+    methods: ["PATCH"],
+    pattern: '/api/v1/budgets/:id',
+    tokens: [{"old":"/api/v1/budgets/:id","type":0,"val":"api","end":""},{"old":"/api/v1/budgets/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/budgets/:id","type":0,"val":"budgets","end":""},{"old":"/api/v1/budgets/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['budgets.update']['types'],
+  },
+  'budgets.archive': {
+    methods: ["POST"],
+    pattern: '/api/v1/budgets/:id/archive',
+    tokens: [{"old":"/api/v1/budgets/:id/archive","type":0,"val":"api","end":""},{"old":"/api/v1/budgets/:id/archive","type":0,"val":"v1","end":""},{"old":"/api/v1/budgets/:id/archive","type":0,"val":"budgets","end":""},{"old":"/api/v1/budgets/:id/archive","type":1,"val":"id","end":""},{"old":"/api/v1/budgets/:id/archive","type":0,"val":"archive","end":""}],
+    types: placeholder as Registry['budgets.archive']['types'],
+  },
+  'budgets.setOverride': {
+    methods: ["PUT"],
+    pattern: '/api/v1/budgets/:id/overrides/:month',
+    tokens: [{"old":"/api/v1/budgets/:id/overrides/:month","type":0,"val":"api","end":""},{"old":"/api/v1/budgets/:id/overrides/:month","type":0,"val":"v1","end":""},{"old":"/api/v1/budgets/:id/overrides/:month","type":0,"val":"budgets","end":""},{"old":"/api/v1/budgets/:id/overrides/:month","type":1,"val":"id","end":""},{"old":"/api/v1/budgets/:id/overrides/:month","type":0,"val":"overrides","end":""},{"old":"/api/v1/budgets/:id/overrides/:month","type":1,"val":"month","end":""}],
+    types: placeholder as Registry['budgets.setOverride']['types'],
+  },
+  'budgets.deleteOverride': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/budgets/:id/overrides/:month',
+    tokens: [{"old":"/api/v1/budgets/:id/overrides/:month","type":0,"val":"api","end":""},{"old":"/api/v1/budgets/:id/overrides/:month","type":0,"val":"v1","end":""},{"old":"/api/v1/budgets/:id/overrides/:month","type":0,"val":"budgets","end":""},{"old":"/api/v1/budgets/:id/overrides/:month","type":1,"val":"id","end":""},{"old":"/api/v1/budgets/:id/overrides/:month","type":0,"val":"overrides","end":""},{"old":"/api/v1/budgets/:id/overrides/:month","type":1,"val":"month","end":""}],
+    types: placeholder as Registry['budgets.deleteOverride']['types'],
+  },
   'transactions.index': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/transactions',

@@ -33,7 +33,7 @@ class HomeScreen extends ConsumerWidget {
     const roadmap = [
       (AppIcons.accounts, 'Accounts', 'Cash, bank and UPI, each one a chat', 'Ready'),
       (AppIcons.send, 'Quick add', 'Open an account, type “120 petrol”, send', 'Ready'),
-      (AppIcons.budgets, 'Budgets', 'Rings for Rent, Food, Bike EMI + Petrol…', 'Phase 4'),
+      (AppIcons.budgets, 'Budgets', 'Rings for Rent, Food, Bike EMI + Petrol…', 'Ready'),
       (AppIcons.home, 'Dashboard & reports', 'Your month at a glance', 'Phase 5'),
       (AppIcons.people, 'Lend & borrow', 'Who owes whom, per person', 'Phase 6'),
     ];

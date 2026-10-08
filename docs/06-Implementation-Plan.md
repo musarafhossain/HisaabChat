@@ -116,14 +116,17 @@
 **Done when:** income, expense and transfer can be logged, edited and deleted on all platforms, and `balances:check` reports no drift.
 
 ### Phase 4 — Budgets
-- [ ] **API:** `BudgetService` create/update with `categoryIds[]` → sets `categories.budget_id`; **409** naming the conflicting budget if a category is taken; archive unlinks the categories.
-- [ ] Budget status query (schema doc §6) + rollover-free math; unbudgeted total; `PUT/DELETE /budgets/:id/overrides/:month`.
-- [ ] `GET /budgets/:id?month=`: contributing transactions + 6-month history.
-- [ ] Tests: multi-category sum, sub-category inheritance, period edges (23:30 IST on the last day), override.
-- [ ] **Flutter:** `/budgets` (summary card, tiles with **`RingAvatar`** progress rings + % pill, "Not in any budget" tile).
-- [ ] Create/Edit budget form: name, amount, kind, alert %, multi-select categories (taken ones disabled with "in Food & Groceries").
-- [ ] `/budgets/:id` **Budget info** (contact-info style): big ring, stat tiles (left, per day, days left), categories, 6-month chart (fl_chart), transactions, "Change this month only", red Archive.
-- [ ] After saving an expense, invalidate the budget providers; show `budgetAlerts` as a small chip under the bubble (thread) or a SnackBar (form).
+- [x] **API:** `BudgetService` create/update with `categoryIds[]` → sets `categories.budget_id`; **422 on `categoryIds`** naming the conflicting budget if a category is taken (a field error suits the form better than 409); archive unlinks the categories and frees the name.
+- [x] Budget status query (schema doc §6) + rollover-free math; unbudgeted total; `PUT/DELETE /budgets/:id/overrides/:month`.
+- [x] `GET /budgets/:id?month=`: contributing transactions + 6-month history.
+- [x] `POST /transactions` returns `budgetAlerts` when a new expense crosses a budget's alert level or limit.
+- [x] Tests (80 backend total): multi-category sum, sub-category inheritance, period edges (23:30 IST on the last day), override, exclusivity, archive, alerts, isolation.
+- [x] **Flutter:** `/budgets` (month switcher, (summary card, tiles with **`RingAvatar`** progress rings + % pill, "Not in any budget" tile).
+- [x] Create/Edit budget form (plus suggested templates: Room Rent, Food & Groceries, Bike EMI + Petrol, Education): name, amount, kind, alert %, multi-select categories (taken ones disabled with "in Food & Groceries").
+- [x] `/budgets/:id` **Budget info** (contact-info style): big ring, stat tiles (left, per day, days left), categories, 6-month chart (fl_chart), transactions, "Change this month only", red Archive.
+- [x] After saving an expense, budgets refresh; `budgetAlerts` show as a warning/error **toast** (above the composer) from both the composer and the form.
+- [x] Shared `showAdaptiveSheet` (root navigator, 90% height cap) for account, category and budget forms.
+- [x] Widget tests (54 total): template create, ring/percent/summary, taken categories disabled, alert toast, one-month override, desktop archive.
 
 **Done when:** a "Bike EMI + Petrol" budget sums both categories and updates right after a petrol expense is logged.
 

@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hisaabchat/core/network/api_client.dart';
+import 'package:hisaabchat/features/budgets/data/budget.dart';
 import 'package:hisaabchat/features/transactions/data/txn.dart';
+
+typedef TxnSaved = ({Txn txn, List<BudgetAlert> alerts});
 
 /// Filters for `GET /transactions`.
 typedef TxnQuery = ({String? accountId, String? categoryId, TxnType? type, String? q});
@@ -30,9 +33,18 @@ class TransactionsRepository {
     );
   }
 
-  /// Idempotent: posting an existing id returns that transaction.
-  Future<Txn> create(Map<String, Object?> body) async =>
-      Txn.fromJson(await _api.post<Map<String, dynamic>>('/transactions', body: body));
+  /// Idempotent: posting an existing id returns that transaction. Also returns
+  /// the budgets this expense pushed past their alert level or limit.
+  Future<TxnSaved> create(Map<String, Object?> body) async {
+    final json = await _api.postForBody('/transactions', body: body);
+    return (
+      txn: Txn.fromJson(json['data'] as Map<String, dynamic>),
+      alerts: [
+        for (final a in (json['budgetAlerts'] as List? ?? const []).cast<Map<String, dynamic>>())
+          BudgetAlert.fromJson(a),
+      ],
+    );
+  }
 
   Future<Txn> update(String id, Map<String, Object?> changes) async =>
       Txn.fromJson(await _api.patch<Map<String, dynamic>>('/transactions/$id', body: changes));

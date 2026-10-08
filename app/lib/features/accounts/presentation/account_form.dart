@@ -5,10 +5,10 @@ import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/money/money.dart';
 import 'package:hisaabchat/core/motion/shake.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
+import 'package:hisaabchat/core/widgets/adaptive_sheet.dart';
 import 'package:hisaabchat/core/widgets/amount_field.dart';
 import 'package:hisaabchat/core/widgets/color_palette.dart';
 import 'package:hisaabchat/core/widgets/settings_tile.dart';
-import 'package:hisaabchat/core/widgets/window_class.dart';
 import 'package:hisaabchat/features/accounts/accounts_controller.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart';
 import 'package:hisaabchat/features/auth/presentation/auth_scaffold.dart';
@@ -17,24 +17,7 @@ import 'package:hisaabchat/features/auth/presentation/auth_scaffold.dart';
 /// wider windows. Returns the saved account, or null if dismissed.
 Future<Account?> showAccountForm(BuildContext context, {Account? existing, String? intro}) {
   final form = AccountForm(existing: existing, intro: intro);
-  if (context.windowClass == WindowClass.compact) {
-    return showModalBottomSheet<Account>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-        child: form,
-      ),
-    );
-  }
-  return showDialog<Account>(
-    context: context,
-    builder: (context) => Dialog(
-      child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 520), child: form),
-    ),
-  );
+  return showAdaptiveSheet<Account>(context, child: form);
 }
 
 class AccountForm extends ConsumerStatefulWidget {

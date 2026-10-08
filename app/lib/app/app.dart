@@ -4,6 +4,7 @@ import 'package:hisaabchat/app/router.dart';
 import 'package:hisaabchat/app/settings/appearance_controller.dart';
 import 'package:hisaabchat/app/theme/app_theme.dart';
 import 'package:hisaabchat/core/widgets/toast.dart';
+import 'package:hisaabchat/features/budgets/presentation/budget_alert_listener.dart';
 
 class HisaabChatApp extends ConsumerWidget {
   const HisaabChatApp({super.key});
@@ -30,7 +31,7 @@ class HisaabChatApp extends ConsumerWidget {
           data: media.copyWith(
             disableAnimations: media.disableAnimations || appearance.reduceMotion,
           ),
-          child: ToastHost(child: child!),
+          child: ToastHost(child: BudgetAlertListener(child: child!)),
         );
       },
     );

@@ -6,10 +6,10 @@ import 'package:hisaabchat/app/theme/app_colors.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/motion/entrance.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
+import 'package:hisaabchat/core/widgets/adaptive_sheet.dart';
 import 'package:hisaabchat/core/widgets/chat_tile.dart';
 import 'package:hisaabchat/core/widgets/color_palette.dart';
 import 'package:hisaabchat/core/widgets/settings_tile.dart';
-import 'package:hisaabchat/core/widgets/window_class.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart' show toHexColor;
 import 'package:hisaabchat/features/auth/presentation/auth_scaffold.dart';
 import 'package:hisaabchat/features/categories/categories_controller.dart';
@@ -103,24 +103,7 @@ class _CategoryList extends ConsumerWidget {
 /// Add/edit a category: name, color, icon (sheet on phones, dialog otherwise).
 Future<void> showCategoryForm(BuildContext context, {required CategoryType type, TxnCategory? existing}) {
   final form = _CategoryForm(type: type, existing: existing);
-  if (context.windowClass == WindowClass.compact) {
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-        child: form,
-      ),
-    );
-  }
-  return showDialog<void>(
-    context: context,
-    builder: (context) => Dialog(
-      child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 520), child: form),
-    ),
-  );
+  return showAdaptiveSheet<void>(context, child: form);
 }
 
 class _CategoryForm extends ConsumerStatefulWidget {

@@ -9,6 +9,8 @@ import 'package:hisaabchat/features/accounts/data/account.dart';
 import 'package:hisaabchat/features/accounts/data/accounts_repository.dart';
 import 'package:hisaabchat/features/auth/data/app_user.dart';
 import 'package:hisaabchat/features/auth/data/auth_repository.dart';
+import 'package:hisaabchat/features/budgets/data/budget.dart';
+import 'package:hisaabchat/features/budgets/data/budgets_repository.dart';
 import 'package:hisaabchat/features/categories/data/categories_repository.dart';
 import 'package:hisaabchat/features/categories/data/category.dart';
 import 'package:hisaabchat/features/transactions/data/transactions_repository.dart';
@@ -241,6 +243,24 @@ class FakeCategoriesRepository implements CategoriesRepository {
 
   TxnCategory byName(String name) => categories.firstWhere((c) => c.name == name);
 
+  /// Sets or clears a category's budget link (like categories.budget_id).
+  void link(String id, String? budgetId) {
+    final index = categories.indexWhere((c) => c.id == id);
+    final old = categories[index];
+    categories[index] = TxnCategory(
+      id: old.id,
+      name: old.name,
+      type: old.type,
+      color: old.color,
+      icon: old.icon,
+      sortOrder: old.sortOrder,
+      isDefault: old.isDefault,
+      archived: old.archived,
+      parentId: old.parentId,
+      budgetId: budgetId,
+    );
+  }
+
   @override
   Future<List<TxnCategory>> list() async => List.of(categories);
 
@@ -298,6 +318,9 @@ class FakeTransactionsRepository implements TransactionsRepository {
 
   /// Number of upcoming create calls that fail with a network error.
   int failNextCreates = 0;
+
+  /// Set by pumpApp so creates can report budget alerts.
+  FakeBudgetsRepository? budgets;
 
   AccountRef _accountRef(String id) {
     final a = accounts.byId(id);
@@ -363,18 +386,18 @@ class FakeTransactionsRepository implements TransactionsRepository {
   }
 
   @override
-  Future<Txn> create(Map<String, Object?> body) async {
+  Future<TxnSaved> create(Map<String, Object?> body) async {
     if (failNextCreates > 0) {
       failNextCreates--;
       throw const ApiException(message: 'Waiting for network…', isNetworkError: true);
     }
     final id = (body['id'] as String?) ?? 'txn-${txns.length}';
     final existing = txns.where((t) => t.id == id);
-    if (existing.isNotEmpty) return existing.first;
+    if (existing.isNotEmpty) return (txn: existing.first, alerts: const <BudgetAlert>[]);
     final txn = _build(id, body);
     txns.add(txn);
     _apply(txn, 1);
-    return txn;
+    return (txn: txn, alerts: budgets?.alertsFor(txn) ?? const <BudgetAlert>[]);
   }
 
   @override
@@ -413,6 +436,238 @@ class FakeTransactionsRepository implements TransactionsRepository {
   }
 }
 
+class FakeBudget {
+  FakeBudget({
+    required this.id,
+    required this.name,
+    required this.amount,
+    required this.kind,
+    required this.alertPercent,
+    required this.color,
+    required this.icon,
+  });
+
+  final String id;
+  String name;
+  int amount;
+  BudgetKind kind;
+  int alertPercent;
+  Color color;
+  String icon;
+  final Map<String, int> overrides = {};
+}
+
+/// In-memory `/budgets` for the current calendar month, computed from the
+/// fake transactions like the server does.
+class FakeBudgetsRepository implements BudgetsRepository {
+  FakeBudgetsRepository(this.txns, this.categories);
+
+  final FakeTransactionsRepository txns;
+  final FakeCategoriesRepository categories;
+  final List<FakeBudget> budgets = [];
+
+  static String get currentMonth {
+    final now = DateTime.now();
+    return '${now.year}-${now.month.toString().padLeft(2, '0')}';
+  }
+
+  List<String> _categoryIds(String budgetId) => [
+    for (final c in categories.categories)
+      if (c.budgetId == budgetId) c.id,
+  ];
+
+  int _spent(String budgetId, String month) {
+    final ids = _categoryIds(budgetId);
+    return txns.txns
+        .where(
+          (t) =>
+              t.type == TxnType.expense &&
+              ids.contains(t.category?.id) &&
+              '${t.localDate.year}-${t.localDate.month.toString().padLeft(2, '0')}' == month,
+        )
+        .fold<int>(0, (sum, t) => sum + t.amount);
+  }
+
+  BudgetStatus _status(FakeBudget b, String month) {
+    final budgeted = b.overrides[month] ?? b.amount;
+    final spent = _spent(b.id, month);
+    final percent = budgeted > 0 ? (spent * 100 / budgeted).round() : 0;
+    final now = DateTime.now();
+    final daysLeft = DateTime(now.year, now.month + 1, 0).day - now.day + 1;
+    return BudgetStatus(
+      id: b.id,
+      name: b.name,
+      kind: b.kind,
+      color: b.color,
+      icon: b.icon,
+      alertPercent: b.alertPercent,
+      categories: [
+        for (final c in categories.categories)
+          if (c.budgetId == b.id) CategoryRef(id: c.id, name: c.name, icon: c.icon, color: c.color),
+      ],
+      amount: b.amount,
+      budgeted: budgeted,
+      hasOverride: b.overrides.containsKey(month),
+      spent: spent,
+      remaining: budgeted - spent,
+      percent: percent,
+      state: spent > budgeted
+          ? BudgetState.exceeded
+          : percent >= b.alertPercent
+          ? BudgetState.warning
+          : BudgetState.ok,
+      daysLeft: daysLeft,
+      safeToSpendPerDay: b.kind == BudgetKind.variable ? ((budgeted - spent).clamp(0, 1 << 52) ~/ daysLeft) : null,
+    );
+  }
+
+  List<BudgetAlert> alertsFor(Txn txn) {
+    if (txn.type != TxnType.expense) return const [];
+    final categoryId = txn.category?.id;
+    final link = categories.categories.where((c) => c.id == categoryId).firstOrNull?.budgetId;
+    final budget = budgets.where((b) => b.id == link).firstOrNull;
+    if (budget == null) return const [];
+    final month = currentMonth;
+    final budgeted = budget.overrides[month] ?? budget.amount;
+    final after = _spent(budget.id, month);
+    final before = after - txn.amount;
+    final crossedLimit = before <= budgeted && after > budgeted;
+    final crossedAlert = before * 100 / budgeted < budget.alertPercent && after * 100 / budgeted >= budget.alertPercent;
+    if (!crossedLimit && !crossedAlert) return const [];
+    return [
+      BudgetAlert(
+        budgetId: budget.id,
+        name: budget.name,
+        percent: (after * 100 / budgeted).round(),
+        exceeded: crossedLimit,
+        remaining: budgeted - after,
+      ),
+    ];
+  }
+
+  @override
+  Future<BudgetsOverview> overview({String? month}) async {
+    final m = month ?? currentMonth;
+    final statuses = [for (final b in budgets) _status(b, m)];
+    final parts = m.split('-').map(int.parse).toList();
+    final inBudgets = {for (final b in budgets) ..._categoryIds(b.id)};
+    final unbudgeted = txns.txns
+        .where(
+          (t) =>
+              t.type == TxnType.expense &&
+              !inBudgets.contains(t.category?.id) &&
+              '${t.localDate.year}-${t.localDate.month.toString().padLeft(2, '0')}' == m,
+        )
+        .fold<int>(0, (sum, t) => sum + t.amount);
+    return BudgetsOverview(
+      month: m,
+      periodStart: DateTime(parts[0], parts[1]),
+      periodEnd: DateTime(parts[0], parts[1] + 1, 0),
+      daysLeft: statuses.isEmpty ? 1 : statuses.first.daysLeft,
+      budgets: statuses,
+      budgeted: statuses.fold(0, (sum, s) => sum + s.budgeted),
+      spent: statuses.fold(0, (sum, s) => sum + s.spent),
+      unbudgeted: unbudgeted,
+    );
+  }
+
+  @override
+  Future<BudgetDetail> detail(String id, {String? month}) async {
+    final m = month ?? currentMonth;
+    final budget = budgets.firstWhere(
+      (b) => b.id == id,
+      orElse: () => throw const ApiException(message: 'Budget not found', statusCode: 404),
+    );
+    final ids = _categoryIds(id);
+    final parts = m.split('-').map(int.parse).toList();
+    return BudgetDetail(
+      status: _status(budget, m),
+      transactions: txns.txns.where((t) => t.type == TxnType.expense && ids.contains(t.category?.id)).toList()
+        ..sort((a, b) => b.date.compareTo(a.date)),
+      history: [
+        for (var i = 5; i > 0; i--) BudgetHistoryPoint(month: _shift(m, -i), spent: 0),
+        BudgetHistoryPoint(month: m, spent: _spent(id, m), budgeted: budget.overrides[m] ?? budget.amount),
+      ],
+      periodStart: DateTime(parts[0], parts[1]),
+      periodEnd: DateTime(parts[0], parts[1] + 1, 0),
+    );
+  }
+
+  static String _shift(String month, int by) {
+    final parts = month.split('-').map(int.parse).toList();
+    final d = DateTime(parts[0], parts[1] + by);
+    return '${d.year}-${d.month.toString().padLeft(2, '0')}';
+  }
+
+  void _assertCategories(List<String> ids, {String? budgetId}) {
+    for (final id in ids) {
+      final category = categories.categories.firstWhere((c) => c.id == id);
+      if (category.budgetId != null && category.budgetId != budgetId) {
+        final other = budgets.firstWhere((b) => b.id == category.budgetId).name;
+        throw ApiException(
+          message: 'Validation failed',
+          statusCode: 422,
+          fieldErrors: {'categoryIds': '${category.name} is already in the “$other” budget'},
+        );
+      }
+    }
+  }
+
+  @override
+  Future<void> create(Map<String, Object?> body) async {
+    final ids = (body['categoryIds']! as List).cast<String>();
+    _assertCategories(ids);
+    final budget = FakeBudget(
+      id: 'budget-${budgets.length}',
+      name: body['name']! as String,
+      amount: body['amount']! as int,
+      kind: BudgetKind.fromApi((body['kind'] as String?) ?? 'VARIABLE'),
+      alertPercent: (body['alertPercent'] as int?) ?? 80,
+      color: parseHexColor((body['color'] as String?) ?? '#16A34A'),
+      icon: (body['icon'] as String?) ?? 'savings',
+    );
+    budgets.add(budget);
+    for (final id in ids) {
+      categories.link(id, budget.id);
+    }
+  }
+
+  @override
+  Future<void> update(String id, Map<String, Object?> changes) async {
+    final budget = budgets.firstWhere((b) => b.id == id);
+    if (changes['name'] != null) budget.name = changes['name']! as String;
+    if (changes['amount'] != null) budget.amount = changes['amount']! as int;
+    if (changes['kind'] != null) budget.kind = BudgetKind.fromApi(changes['kind']! as String);
+    if (changes['alertPercent'] != null) budget.alertPercent = changes['alertPercent']! as int;
+    final ids = (changes['categoryIds'] as List?)?.cast<String>();
+    if (ids != null) {
+      _assertCategories(ids, budgetId: id);
+      for (final c in List.of(categories.categories)) {
+        if (c.budgetId == id && !ids.contains(c.id)) categories.link(c.id, null);
+      }
+      for (final cid in ids) {
+        categories.link(cid, id);
+      }
+    }
+  }
+
+  @override
+  Future<void> archive(String id) async {
+    budgets.removeWhere((b) => b.id == id);
+    for (final c in List.of(categories.categories)) {
+      if (c.budgetId == id) categories.link(c.id, null);
+    }
+  }
+
+  @override
+  Future<void> setOverride(String id, String month, int amount) async =>
+      budgets.firstWhere((b) => b.id == id).overrides[month] = amount;
+
+  @override
+  Future<void> deleteOverride(String id, String month) async =>
+      budgets.firstWhere((b) => b.id == id).overrides.remove(month);
+}
+
 /// Pumps the whole app with fakes and a fixed window size.
 typedef TestApp = ({
   FakeAuthRepository repo,
@@ -420,6 +675,7 @@ typedef TestApp = ({
   FakeAccountsRepository accounts,
   FakeCategoriesRepository categories,
   FakeTransactionsRepository txns,
+  FakeBudgetsRepository budgets,
 });
 
 Future<TestApp> pumpApp(
@@ -441,6 +697,8 @@ Future<TestApp> pumpApp(
   final fakeAccounts = accounts ?? FakeAccountsRepository();
   final fakeCategories = categories ?? FakeCategoriesRepository();
   final fakeTxns = FakeTransactionsRepository(fakeAccounts, fakeCategories);
+  final fakeBudgets = FakeBudgetsRepository(fakeTxns, fakeCategories);
+  fakeTxns.budgets = fakeBudgets;
 
   await tester.pumpWidget(
     ProviderScope(
@@ -451,10 +709,18 @@ Future<TestApp> pumpApp(
         accountsRepositoryProvider.overrideWithValue(fakeAccounts),
         categoriesRepositoryProvider.overrideWithValue(fakeCategories),
         transactionsRepositoryProvider.overrideWithValue(fakeTxns),
+        budgetsRepositoryProvider.overrideWithValue(fakeBudgets),
       ],
       child: const HisaabChatApp(),
     ),
   );
   await tester.pumpAndSettle();
-  return (repo: fakeRepo, tokens: tokens, accounts: fakeAccounts, categories: fakeCategories, txns: fakeTxns);
+  return (
+    repo: fakeRepo,
+    tokens: tokens,
+    accounts: fakeAccounts,
+    categories: fakeCategories,
+    txns: fakeTxns,
+    budgets: fakeBudgets,
+  );
 }

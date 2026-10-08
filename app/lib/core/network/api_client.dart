@@ -66,6 +66,18 @@ class ApiClient {
 
   Future<T> patch<T>(String path, {Object? body}) => _send(() => _dio.patch<Object?>(path, data: body));
 
+  Future<T> put<T>(String path, {Object? body}) => _send(() => _dio.put<Object?>(path, data: body));
+
+  /// POST returning the whole JSON body (`data` plus any extras, e.g. `budgetAlerts`).
+  Future<Map<String, dynamic>> postForBody(String path, {Object? body}) async {
+    try {
+      final response = await _dio.post<Object?>(path, data: body);
+      return response.data! as Map<String, dynamic>;
+    } on DioException catch (error) {
+      throw ApiException.fromDio(error);
+    }
+  }
+
   Future<T> delete<T>(String path) => _send(() => _dio.delete<Object?>(path));
 
   Future<T> _send<T>(Future<Response<Object?>> Function() request) async {

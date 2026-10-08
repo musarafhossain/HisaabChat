@@ -10,6 +10,7 @@ import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/core/widgets/window_class.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_form.dart';
 import 'package:hisaabchat/features/auth/auth_controller.dart';
+import 'package:hisaabchat/features/budgets/presentation/budget_form.dart';
 import 'package:hisaabchat/features/shell/destinations.dart';
 import 'package:hisaabchat/features/transactions/presentation/new_transaction.dart';
 
@@ -224,7 +225,7 @@ class _Fab extends StatelessWidget {
   Widget build(BuildContext context) {
     final (IconData icon, String tooltip, String message) = switch (current) {
       Destination.accounts => (AppIcons.addAccount, 'New account', ''),
-      Destination.budgets => (AppIcons.addBudget, 'New budget', 'Budgets arrive in Phase 4.'),
+      Destination.budgets => (AppIcons.addBudget, 'New budget', ''),
       Destination.reports || Destination.settings => (AppIcons.add, '', ''),
       _ => (AppIcons.add, 'New transaction', ''),
     };
@@ -242,7 +243,7 @@ class _Fab extends StatelessWidget {
             : current == Destination.accounts
             ? () => showAccountForm(context)
             : current == Destination.budgets
-            ? () => _comingSoon(context, message)
+            ? () => showBudgetForm(context)
             : () => openNewTransaction(context),
         child: AnimatedSwitcher(
           duration: context.motion(Motion.short),

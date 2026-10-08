@@ -76,6 +76,24 @@ router
 
         router
           .group(() => {
+            router.get('/', [controllers.Budgets, 'index']).as('index')
+            router.post('/', [controllers.Budgets, 'store']).as('store')
+            router.get(':id', [controllers.Budgets, 'show']).as('show')
+            router.patch(':id', [controllers.Budgets, 'update']).as('update')
+            router.post(':id/archive', [controllers.Budgets, 'archive']).as('archive')
+            router
+              .put(':id/overrides/:month', [controllers.Budgets, 'setOverride'])
+              .as('setOverride')
+            router
+              .delete(':id/overrides/:month', [controllers.Budgets, 'deleteOverride'])
+              .as('deleteOverride')
+          })
+          .prefix('budgets')
+          .as('budgets')
+          .where('id', router.matchers.uuid())
+
+        router
+          .group(() => {
             router.get('/', [controllers.Transactions, 'index']).as('index')
             router.post('/', [controllers.Transactions, 'store']).as('store')
             router.get(':id', [controllers.Transactions, 'show']).as('show')

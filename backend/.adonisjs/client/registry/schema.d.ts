@@ -271,6 +271,90 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/categories_controller').default['unarchive']>>>
     }
   }
+  'budgets.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/budgets'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/budget').monthQueryValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'budgets.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/budgets'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/budget').createBudgetValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/budget').createBudgetValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'budgets.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/budgets/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/budget').monthQueryValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['show']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'budgets.update': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/budgets/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/budget').updateBudgetValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/budget').updateBudgetValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'budgets.archive': {
+    methods: ["POST"]
+    pattern: '/api/v1/budgets/:id/archive'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['archive']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['archive']>>>
+    }
+  }
+  'budgets.setOverride': {
+    methods: ["PUT"]
+    pattern: '/api/v1/budgets/:id/overrides/:month'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/budget').overrideValidator)>>
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; month: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/budget').overrideValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['setOverride']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['setOverride']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'budgets.deleteOverride': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/budgets/:id/overrides/:month'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/budget').overrideParamsValidator)>>
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; month: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/budget').overrideParamsValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['deleteOverride']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['deleteOverride']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'transactions.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/transactions'

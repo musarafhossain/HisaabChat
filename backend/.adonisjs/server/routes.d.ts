@@ -26,6 +26,13 @@ export type ScannedRoutes = {
     'categories.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'budgets.index': { paramsTuple?: []; params?: {} }
+    'budgets.store': { paramsTuple?: []; params?: {} }
+    'budgets.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'budgets.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'budgets.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'budgets.setOverride': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'month': ParamValue} }
+    'budgets.deleteOverride': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'month': ParamValue} }
     'transactions.index': { paramsTuple?: []; params?: {} }
     'transactions.store': { paramsTuple?: []; params?: {} }
     'transactions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -38,6 +45,8 @@ export type ScannedRoutes = {
     'accounts.index': { paramsTuple?: []; params?: {} }
     'accounts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.index': { paramsTuple?: []; params?: {} }
+    'budgets.index': { paramsTuple?: []; params?: {} }
+    'budgets.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'transactions.index': { paramsTuple?: []; params?: {} }
     'transactions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
@@ -47,6 +56,8 @@ export type ScannedRoutes = {
     'accounts.index': { paramsTuple?: []; params?: {} }
     'accounts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.index': { paramsTuple?: []; params?: {} }
+    'budgets.index': { paramsTuple?: []; params?: {} }
+    'budgets.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'transactions.index': { paramsTuple?: []; params?: {} }
     'transactions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
@@ -63,20 +74,25 @@ export type ScannedRoutes = {
     'categories.store': { paramsTuple?: []; params?: {} }
     'categories.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'budgets.store': { paramsTuple?: []; params?: {} }
+    'budgets.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'transactions.store': { paramsTuple?: []; params?: {} }
   }
   PATCH: {
     'me.update': { paramsTuple?: []; params?: {} }
     'accounts.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'budgets.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'transactions.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   DELETE: {
     'accounts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'budgets.deleteOverride': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'month': ParamValue} }
     'transactions.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   PUT: {
     'categories.reorder': { paramsTuple?: []; params?: {} }
+    'budgets.setOverride': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'month': ParamValue} }
   }
 }
 declare module '@adonisjs/core/types/http' {

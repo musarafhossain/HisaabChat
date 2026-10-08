@@ -8,7 +8,7 @@ import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/motion/motion.dart';
 import 'package:hisaabchat/core/widgets/window_class.dart';
 
-enum ToastKind { success, error, info }
+enum ToastKind { success, warning, error, info }
 
 /// App-wide toast (replaces SnackBars).
 ///
@@ -242,6 +242,7 @@ class _ToastView extends StatelessWidget {
     final colors = context.colors;
     final (IconData icon, Color iconColor) = switch (data.kind) {
       ToastKind.success => (AppIcons.ok, colors.toastSuccess),
+      ToastKind.warning => (AppIcons.warning, colors.toastWarning),
       ToastKind.error => (AppIcons.failed, colors.toastError),
       ToastKind.info => (AppIcons.info, colors.toastInfo),
     };

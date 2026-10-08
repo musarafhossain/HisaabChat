@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/misc.dart' show AsyncNotifierProviderFamily;
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/features/accounts/accounts_controller.dart';
 import 'package:hisaabchat/features/auth/auth_controller.dart';
+import 'package:hisaabchat/features/budgets/budgets_controller.dart';
 import 'package:hisaabchat/features/transactions/data/transactions_repository.dart';
 import 'package:hisaabchat/features/transactions/data/txn.dart';
 import 'package:uuid/uuid.dart';
@@ -64,9 +65,10 @@ class TxnMutations {
   static String newId() => _uuid.v7();
 
   Future<Txn> create(Map<String, Object?> body) async {
-    final txn = await _repo.create({'id': newId(), ...body});
+    final saved = await _repo.create({'id': newId(), ...body});
     await _afterChange();
-    return txn;
+    _ref.read(budgetAlertsProvider.notifier).publish(saved.alerts);
+    return saved.txn;
   }
 
   Future<Txn> update(String id, Map<String, Object?> changes) async {
@@ -84,7 +86,7 @@ class TxnMutations {
   Future<Txn> restore(Txn txn) async {
     final restored = await _repo.create(txn.toCreateBody());
     await _afterChange();
-    return restored;
+    return restored.txn;
   }
 
   Future<Txn?> reconcile(String accountId, int actualBalance) async {
@@ -103,9 +105,10 @@ class TxnMutations {
       store.add(pending);
     }
     try {
-      await _repo.create(pending.body);
+      final saved = await _repo.create(pending.body);
       await _afterChange();
       store.remove(pending.id);
+      _ref.read(budgetAlertsProvider.notifier).publish(saved.alerts);
     } on ApiException {
       store.setStatus(pending.id, PendingStatus.failed);
     }
@@ -115,6 +118,7 @@ class TxnMutations {
     _ref
       ..invalidate(accountThreadProvider)
       ..invalidate(transactionsListProvider);
+    invalidateBudgets(_ref);
     await _ref.read(accountsProvider.notifier).refresh();
   }
 }

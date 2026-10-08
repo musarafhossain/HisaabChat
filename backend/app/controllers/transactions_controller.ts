@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import BudgetService from '#services/budget_service'
 import TransactionService from '#services/transaction_service'
 import TransactionTransformer from '#transformers/transaction_transformer'
 import {
@@ -27,10 +28,14 @@ export default class TransactionsController {
    * with the same id.
    */
   async store({ auth, request, response, serialize }: HttpContext) {
+    const user = auth.getUserOrFail()
     const input = await request.validateUsing(createTransactionValidator)
-    const { transaction, created } = await TransactionService.create(auth.getUserOrFail(), input)
+    const { transaction, created } = await TransactionService.create(user, input)
     response.status(created ? 201 : 200)
-    return serialize(TransactionTransformer.transform(transaction))
+    const data = await serialize.withoutWrapping(TransactionTransformer.transform(transaction))
+    // Budgets this expense pushed past their alert level or limit.
+    const budgetAlerts = created ? await BudgetService.alertsForNewExpense(user, transaction) : []
+    return { data, budgetAlerts }
   }
 
   async show({ auth, params, serialize }: HttpContext) {

@@ -32,6 +32,15 @@ export interface ApiDefinition {
     archive: typeof routes['categories.archive']
     unarchive: typeof routes['categories.unarchive']
   }
+  budgets: {
+    index: typeof routes['budgets.index']
+    store: typeof routes['budgets.store']
+    show: typeof routes['budgets.show']
+    update: typeof routes['budgets.update']
+    archive: typeof routes['budgets.archive']
+    setOverride: typeof routes['budgets.setOverride']
+    deleteOverride: typeof routes['budgets.deleteOverride']
+  }
   transactions: {
     index: typeof routes['transactions.index']
     store: typeof routes['transactions.store']

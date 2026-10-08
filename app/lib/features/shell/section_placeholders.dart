@@ -50,20 +50,6 @@ class _SectionPlaceholderState extends State<SectionPlaceholder> {
   }
 }
 
-class BudgetsSection extends StatelessWidget {
-  const BudgetsSection({super.key});
-
-  @override
-  Widget build(BuildContext context) => const SectionPlaceholder(
-    icon: AppIcons.budgets,
-    title: 'No budgets yet',
-    message: 'Budgets like Room Rent, Food & Groceries and Bike EMI + Petrol arrive in Phase 4.',
-    searchHint: 'Search budgets',
-    filters: ['This month', 'Fixed', 'Variable'],
-    detailMessage: 'Select a budget to see how it’s going',
-  );
-}
-
 class ReportsSection extends StatelessWidget {
   const ReportsSection({super.key});
 
