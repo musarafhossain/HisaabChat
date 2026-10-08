@@ -4,6 +4,7 @@ import 'package:hisaabchat/features/auth/auth_controller.dart';
 import 'package:hisaabchat/features/budgets/data/budget.dart';
 import 'package:hisaabchat/features/budgets/data/budgets_repository.dart';
 import 'package:hisaabchat/features/categories/categories_controller.dart';
+import 'package:hisaabchat/features/reports/reports_controller.dart';
 
 /// Budgets for a period; `null` = the current one.
 final FutureProviderFamily<BudgetsOverview, String?> budgetsOverviewProvider =
@@ -86,8 +87,9 @@ class BudgetMutations {
   }
 }
 
-/// Forget cached budget numbers (after any transaction or budget change).
+/// Forget cached budget and report numbers (after any transaction or budget change).
 void invalidateBudgets(Ref ref) {
+  invalidateReports(ref);
   ref
     ..invalidate(budgetsOverviewProvider)
     ..invalidate(budgetDetailProvider);

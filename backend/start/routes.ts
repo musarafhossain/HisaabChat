@@ -74,6 +74,15 @@ router
           .as('categories')
           .where('id', router.matchers.uuid())
 
+        router.get('dashboard', [controllers.Reports, 'dashboard']).as('dashboard')
+        router
+          .group(() => {
+            router.get('categories', [controllers.Reports, 'byCategory']).as('byCategory')
+            router.get('trend', [controllers.Reports, 'trend']).as('trend')
+          })
+          .prefix('reports')
+          .as('reports')
+
         router
           .group(() => {
             router.get('/', [controllers.Budgets, 'index']).as('index')

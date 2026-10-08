@@ -132,6 +132,10 @@ abstract final class Symbols {
   static const IconData homeRepairService = IconData(0xf100, fontFamily: 'MaterialSymbolsRounded');
   static const IconData cleaningServices = IconData(0xf0ff, fontFamily: 'MaterialSymbolsRounded');
   static const IconData localLaundryService = IconData(0xe54a, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData pieChart = IconData(0xf0da, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData showChart = IconData(0xe6e1, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData rocketLaunch = IconData(0xeb9b, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData taskAlt = IconData(0xe2e6, fontFamily: 'MaterialSymbolsRounded');
 
   /// Icon name (as stored in the database) to glyph.
   static const Map<String, IconData> byName = {
@@ -261,5 +265,9 @@ abstract final class Symbols {
     'home_repair_service': homeRepairService,
     'cleaning_services': cleaningServices,
     'local_laundry_service': localLaundryService,
+    'pie_chart': pieChart,
+    'show_chart': showChart,
+    'rocket_launch': rocketLaunch,
+    'task_alt': taskAlt,
   };
 }

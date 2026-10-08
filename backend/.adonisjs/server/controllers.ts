@@ -10,5 +10,6 @@ export const controllers = {
   Categories: () => import('#controllers/categories_controller'),
   Health: () => import('#controllers/health_controller'),
   Me: () => import('#controllers/me_controller'),
+  Reports: () => import('#controllers/reports_controller'),
   Transactions: () => import('#controllers/transactions_controller'),
 }

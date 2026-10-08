@@ -51,7 +51,7 @@ void main() {
     expect(find.text('Enter your password'), findsOneWidget);
   });
 
-  testWidgets('register creates an account and opens Home', (tester) async {
+  testWidgets('register creates an account and opens setup, then Home', (tester) async {
     final app = await pumpApp(tester);
     await tester.tap(find.text('Get started'));
     await tester.pumpAndSettle();
@@ -63,7 +63,12 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Create account'));
     await tester.pumpAndSettle();
 
+    expect(find.text('Your month'), findsOneWidget);
+    await tester.tap(find.text('Skip setup'));
+    await tester.pumpAndSettle();
+
     expect(find.textContaining('Neha'), findsWidgets);
+    expect(app.repo.onboardingCompletions, 1);
     expect(app.tokens.token, 'oat_new');
   });
 

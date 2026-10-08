@@ -138,6 +138,24 @@ const routes = {
     tokens: [{"old":"/api/v1/categories/:id/unarchive","type":0,"val":"api","end":""},{"old":"/api/v1/categories/:id/unarchive","type":0,"val":"v1","end":""},{"old":"/api/v1/categories/:id/unarchive","type":0,"val":"categories","end":""},{"old":"/api/v1/categories/:id/unarchive","type":1,"val":"id","end":""},{"old":"/api/v1/categories/:id/unarchive","type":0,"val":"unarchive","end":""}],
     types: placeholder as Registry['categories.unarchive']['types'],
   },
+  'dashboard': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/dashboard',
+    tokens: [{"old":"/api/v1/dashboard","type":0,"val":"api","end":""},{"old":"/api/v1/dashboard","type":0,"val":"v1","end":""},{"old":"/api/v1/dashboard","type":0,"val":"dashboard","end":""}],
+    types: placeholder as Registry['dashboard']['types'],
+  },
+  'reports.byCategory': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/reports/categories',
+    tokens: [{"old":"/api/v1/reports/categories","type":0,"val":"api","end":""},{"old":"/api/v1/reports/categories","type":0,"val":"v1","end":""},{"old":"/api/v1/reports/categories","type":0,"val":"reports","end":""},{"old":"/api/v1/reports/categories","type":0,"val":"categories","end":""}],
+    types: placeholder as Registry['reports.byCategory']['types'],
+  },
+  'reports.trend': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/reports/trend',
+    tokens: [{"old":"/api/v1/reports/trend","type":0,"val":"api","end":""},{"old":"/api/v1/reports/trend","type":0,"val":"v1","end":""},{"old":"/api/v1/reports/trend","type":0,"val":"reports","end":""},{"old":"/api/v1/reports/trend","type":0,"val":"trend","end":""}],
+    types: placeholder as Registry['reports.trend']['types'],
+  },
   'budgets.index': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/budgets',

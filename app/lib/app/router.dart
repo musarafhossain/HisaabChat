@@ -14,12 +14,14 @@ import 'package:hisaabchat/features/budgets/presentation/budgets_section.dart';
 import 'package:hisaabchat/features/categories/presentation/categories_screen.dart';
 import 'package:hisaabchat/features/health/connection_check_screen.dart';
 import 'package:hisaabchat/features/home/home_screen.dart';
+import 'package:hisaabchat/features/onboarding/onboarding_screen.dart';
+import 'package:hisaabchat/features/reports/presentation/category_transactions.dart';
+import 'package:hisaabchat/features/reports/presentation/reports_section.dart';
 import 'package:hisaabchat/features/settings/appearance_screen.dart';
 import 'package:hisaabchat/features/settings/profile_screen.dart';
 import 'package:hisaabchat/features/settings/settings_screen.dart';
 import 'package:hisaabchat/features/shell/app_shell.dart';
 import 'package:hisaabchat/features/shell/destinations.dart';
-import 'package:hisaabchat/features/shell/section_placeholders.dart';
 import 'package:hisaabchat/features/transactions/presentation/account_thread.dart';
 import 'package:hisaabchat/features/transactions/presentation/transactions_section.dart';
 
@@ -57,9 +59,14 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       if (auth.isLoading || auth.hasError) return location == '/splash' ? null : '/splash';
 
-      final signedIn = auth.value != null;
-      if (!signedIn) return _publicPaths.contains(location) ? null : '/welcome';
-      if (_publicPaths.contains(location) || location == '/splash') return Destination.home.path;
+      final user = auth.value;
+      if (user == null) return _publicPaths.contains(location) ? null : '/welcome';
+
+      // New users set up their month, accounts and budgets first.
+      if (user.onboardedAt == null) return location == '/onboarding' ? null : '/onboarding';
+      if (_publicPaths.contains(location) || location == '/splash' || location == '/onboarding') {
+        return Destination.home.path;
+      }
       return null;
     },
     routes: [
@@ -73,6 +80,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       fullScreen('/login', const LoginScreen()),
       fullScreen('/register', const RegisterScreen()),
+      GoRoute(
+        path: '/onboarding',
+        pageBuilder: (context, state) => fadeThroughPage(key: state.pageKey, child: const OnboardingScreen()),
+      ),
       StatefulShellRoute(
         builder: (context, state, shell) => shell,
         navigatorContainerBuilder: (context, shell, children) => AppShell(shell: shell, children: children),
@@ -128,7 +139,33 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          StatefulShellBranch(routes: [section(Destination.reports, const ReportsSection())]),
+          StatefulShellBranch(
+            routes: [
+              section(
+                Destination.reports,
+                const ReportsSection(),
+                routes: [
+                  GoRoute(
+                    path: 'category/:id',
+                    parentNavigatorKey: rootNavigatorKey,
+                    pageBuilder: (context, state) {
+                      final query = state.uri.queryParameters;
+                      return sharedAxisPage(
+                        key: state.pageKey,
+                        child: CategoryTransactionsScreen(
+                          categoryId: state.pathParameters['id']!,
+                          name: query['name'] ?? 'Category',
+                          from: DateTime.parse(query['from']!),
+                          to: DateTime.parse(query['to']!),
+                          period: query['period'] ?? '',
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
           StatefulShellBranch(
             routes: [
               section(

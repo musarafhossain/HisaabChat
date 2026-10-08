@@ -144,3 +144,9 @@ receipt
 home_repair_service
 cleaning_services
 local_laundry_service
+
+# Dashboard, onboarding & reports (phase 5)
+pie_chart
+show_chart
+rocket_launch
+task_alt

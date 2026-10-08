@@ -58,6 +58,11 @@ class AuthController extends AsyncNotifier<AppUser?> {
     return user;
   }
 
+  /// Marks the first-run setup as done (the router then leaves /onboarding).
+  Future<void> completeOnboarding() async {
+    state = AsyncData(await _repo.completeOnboarding());
+  }
+
   /// Signs out this device. The local session is cleared even when offline.
   Future<void> logout() async {
     try {

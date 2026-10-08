@@ -91,6 +91,12 @@ abstract final class AppIcons {
   static const IconData noResults = Symbols.searchOff;
   static const IconData scrollDown = Symbols.keyboardArrowDown;
 
+  // Dashboard, onboarding & reports
+  static const IconData pieChart = Symbols.pieChart;
+  static const IconData trend = Symbols.showChart;
+  static const IconData start = Symbols.rocketLaunch;
+  static const IconData done = Symbols.taskAlt;
+
   /// Curated icons offered when creating a category (keys stored in the DB).
   static const List<String> categoryChoices = [
     'home',

@@ -271,6 +271,42 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/categories_controller').default['unarchive']>>>
     }
   }
+  'dashboard': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/dashboard'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/report').dashboardValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/reports_controller').default['dashboard']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/reports_controller').default['dashboard']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'reports.byCategory': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/reports/categories'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/report').byCategoryValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/reports_controller').default['byCategory']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/reports_controller').default['byCategory']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'reports.trend': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/reports/trend'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/report').trendValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/reports_controller').default['trend']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/reports_controller').default['trend']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'budgets.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/budgets'

@@ -32,6 +32,11 @@ export interface ApiDefinition {
     archive: typeof routes['categories.archive']
     unarchive: typeof routes['categories.unarchive']
   }
+  dashboard: typeof routes['dashboard']
+  reports: {
+    byCategory: typeof routes['reports.byCategory']
+    trend: typeof routes['reports.trend']
+  }
   budgets: {
     index: typeof routes['budgets.index']
     store: typeof routes['budgets.store']

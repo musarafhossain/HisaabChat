@@ -131,11 +131,12 @@
 **Done when:** a "Bike EMI + Petrol" budget sums both categories and updates right after a petrol expense is logged.
 
 ### Phase 5 — Dashboard, Onboarding & Reports → **MVP**
-- [ ] **API:** `GET /dashboard?month=`, `GET /reports/by-category`, `POST /me/onboarding/complete`.
-- [ ] **Flutter Home:** balance card (In/Out), **budget rings row** (status-row style), Upcoming with count badge, Recent tiles. Skeleton tiles while loading.
-- [ ] **Onboarding wizard** (3 steps: preferences → accounts → budget templates); the router redirects until `onboardedAt` is set.
-- [ ] `/reports`: spending donut + ranked list; tap → filtered transactions.
-- [ ] Empty and error states everywhere; offline banner.
+- [x] **API:** `GET /dashboard?month=` (net worth, month in/out, budgets, latest 8), `GET /reports/categories?type=&month=` (ranked, with percentages and exact UTC bounds for drill-down), `POST /me/onboarding/complete`. 86 backend tests.
+- [x] **Flutter Home:** balance card (In/Out), **budget rings row** (status-row style), Recent tiles, skeletons while loading; two columns on wide windows. *Upcoming card moves to Phase 6 with recurring.*
+- [x] **Onboarding wizard** (3 steps: preferences → accounts → budget templates); the router redirects until `onboardedAt` is set.
+- [x] `/reports`: spending/income donut + ranked list with share bars; tap → that category's transactions for the period; month switcher.
+- [x] Empty and error states; offline banner with Retry on Home and Reports (cached numbers stay visible).
+- [x] Widget tests (63 app total): dashboard, refresh after save, offline banner, reports drill-down, onboarding (create, back, skip).
 - [ ] `integration_test`: register → onboarding → add expense → budget and dashboard update (run on Android emulator, Windows, Chrome).
 - [ ] Deploy to a staging VPS (see Phase 8 steps) and **use it daily for a week** on phone + laptop.
 
@@ -145,8 +146,8 @@
 - [ ] **API:** recurring rules CRUD, upcoming, occurrences confirm/skip.
 - [ ] Ace command `recurring:run` (idempotent; day-of-month clamping; advance `next_run_at`) + tests.
 - [ ] Budget rollover (≤ 12-month look-back) + tests.
-- [ ] `GET /reports/trend`.
-- [ ] **Flutter:** "Repeat" field in the transaction form; Settings → Recurring; Dashboard "Upcoming" and "Pending" cards (Confirm opens a prefilled form; Skip); trend chart; rollover shown on budget cards.
+- [x] `GET /reports/trend` (built in Phase 5).
+- [ ] **Flutter:** "Repeat" field in the transaction form; Settings → Recurring; Dashboard "Upcoming" and "Pending" cards (Confirm opens a prefilled form; Skip); trend chart *(done in Phase 5: Reports → money in vs out, 6 months)*; rollover shown on budget cards.
 - [ ] **Lend & borrow (People):** migration (`people`, `transactions.person_id`/`due_date`, new types + CHECK), balance effects for LEND/BORROW/COLLECT/REPAY + tests, `/people` API (list with balances, settle up, write-off), People list + **person thread** with Lent/Borrowed composer toggle, Home "You'll get / You owe" card, due dates in Upcoming.
 
 ### Phase 7 — Platform Polish & Packaging

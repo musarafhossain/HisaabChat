@@ -29,6 +29,7 @@ class ChatTile extends StatelessWidget {
     required this.title,
     super.key,
     this.subtitle,
+    this.subtitleWidget,
     this.trailing,
     this.trailingCaption,
     this.badge,
@@ -40,6 +41,9 @@ class ChatTile extends StatelessWidget {
   final Widget leading;
   final String title;
   final String? subtitle;
+
+  /// Extra content under the title (e.g. a progress bar).
+  final Widget? subtitleWidget;
 
   /// Top-right value, e.g. an amount or balance.
   final Widget? trailing;
@@ -89,6 +93,7 @@ class ChatTile extends StatelessWidget {
                         style: theme.listTileTheme.subtitleTextStyle,
                       ),
                     ],
+                    ?subtitleWidget,
                   ],
                 ),
               ),

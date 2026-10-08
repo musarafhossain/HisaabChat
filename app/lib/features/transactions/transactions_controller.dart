@@ -189,7 +189,7 @@ class AccountThreadController extends _PagedTxns {
   final String accountId;
 
   @override
-  TxnQuery get query => (accountId: accountId, categoryId: null, type: null, q: null);
+  TxnQuery get query => (accountId: accountId, categoryId: null, type: null, q: null, from: null, to: null);
 }
 
 final AsyncNotifierProviderFamily<AccountThreadController, TxnListState, String> accountThreadProvider =
@@ -207,7 +207,7 @@ class TransactionsListController extends _PagedTxns {
   final TxnFilter filter;
 
   @override
-  TxnQuery get query => (accountId: null, categoryId: null, type: filter.type, q: filter.q);
+  TxnQuery get query => (accountId: null, categoryId: null, type: filter.type, q: filter.q, from: null, to: null);
 }
 
 final AsyncNotifierProviderFamily<TransactionsListController, TxnListState, TxnFilter> transactionsListProvider =

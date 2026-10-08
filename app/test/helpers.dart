@@ -13,6 +13,8 @@ import 'package:hisaabchat/features/budgets/data/budget.dart';
 import 'package:hisaabchat/features/budgets/data/budgets_repository.dart';
 import 'package:hisaabchat/features/categories/data/categories_repository.dart';
 import 'package:hisaabchat/features/categories/data/category.dart';
+import 'package:hisaabchat/features/reports/data/report.dart';
+import 'package:hisaabchat/features/reports/data/reports_repository.dart';
 import 'package:hisaabchat/features/transactions/data/transactions_repository.dart';
 import 'package:hisaabchat/features/transactions/data/txn.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,9 +30,26 @@ const testUser = AppUser(
   theme: ThemeMode.light,
 );
 
+/// [user] with some fields replaced (the fakes' stand-in for PATCH /me).
+AppUser copyUser(AppUser user, {int? monthStartDay, DateTime? onboardedAt}) => AppUser(
+  id: user.id,
+  email: user.email,
+  fullName: user.fullName,
+  initials: user.initials,
+  currency: user.currency,
+  timezone: user.timezone,
+  monthStartDay: monthStartDay ?? user.monthStartDay,
+  theme: user.theme,
+  onboardedAt: onboardedAt ?? user.onboardedAt,
+);
+
 /// In-memory stand-in for the auth endpoints.
 class FakeAuthRepository implements AuthRepository {
-  FakeAuthRepository({this.meError});
+  FakeAuthRepository({this.meError, bool onboarded = true})
+    : user = onboarded ? copyUser(testUser, onboardedAt: DateTime.utc(2026)) : testUser;
+
+  /// The signed-in user as the server sees them.
+  AppUser user;
 
   /// Thrown by [me] (e.g. a 401 for an expired token).
   ApiException? meError;
@@ -44,7 +63,7 @@ class FakeAuthRepository implements AuthRepository {
     if (email != testUser.email || password != _password) {
       throw const ApiException(message: 'Invalid user credentials', statusCode: 400);
     }
-    return (user: testUser, token: 'oat_test');
+    return (user: user, token: 'oat_test');
   }
 
   @override
@@ -62,6 +81,16 @@ class FakeAuthRepository implements AuthRepository {
         fieldErrors: {'email': 'The email has already been taken'},
       );
     }
+    user = AppUser(
+      id: 'new-user',
+      email: email,
+      fullName: fullName,
+      initials: 'NU',
+      currency: 'INR',
+      timezone: timezone ?? 'Asia/Kolkata',
+      monthStartDay: 1,
+      theme: ThemeMode.system,
+    );
     return (
       user: AppUser(
         id: 'new-user',
@@ -80,17 +109,22 @@ class FakeAuthRepository implements AuthRepository {
   @override
   Future<AppUser> me() async {
     if (meError != null) throw meError!;
-    return testUser;
+    return user;
   }
 
   @override
   Future<AppUser> updateProfile(Map<String, Object?> changes) async {
     lastProfileUpdate = changes;
-    return testUser;
+    return user = copyUser(user, monthStartDay: changes['monthStartDay'] as int?);
   }
 
+  int onboardingCompletions = 0;
+
   @override
-  Future<AppUser> completeOnboarding() async => testUser;
+  Future<AppUser> completeOnboarding() async {
+    onboardingCompletions++;
+    return user = copyUser(user, onboardedAt: DateTime.now().toUtc());
+  }
 
   @override
   Future<void> logout() async => logoutCalls++;
@@ -370,6 +404,9 @@ class FakeTransactionsRepository implements TransactionsRepository {
               (t) =>
                   (query.accountId == null || t.account.id == query.accountId || t.toAccount?.id == query.accountId) &&
                   (query.type == null || t.type == query.type) &&
+                  (query.categoryId == null || t.category?.id == query.categoryId) &&
+                  (query.from == null || !t.date.isBefore(query.from!)) &&
+                  (query.to == null || t.date.isBefore(query.to!)) &&
                   (q.isEmpty ||
                       (t.note ?? '').toLowerCase().contains(q) ||
                       (t.category?.name ?? '').toLowerCase().contains(q)),
@@ -668,6 +705,113 @@ class FakeBudgetsRepository implements BudgetsRepository {
       budgets.firstWhere((b) => b.id == id).overrides.remove(month);
 }
 
+/// `/dashboard` and `/reports` for the current calendar month, computed
+/// from the fake accounts, transactions and budgets.
+class FakeReportsRepository implements ReportsRepository {
+  FakeReportsRepository(this.accounts, this.txns, this.budgets);
+
+  final FakeAccountsRepository accounts;
+  final FakeTransactionsRepository txns;
+  final FakeBudgetsRepository budgets;
+
+  /// Thrown by every call when set (e.g. a network error).
+  ApiException? error;
+
+  static String _monthOf(DateTime date) => '${date.year}-${date.month.toString().padLeft(2, '0')}';
+
+  (DateTime, DateTime) _bounds(String month) {
+    final parts = month.split('-').map(int.parse).toList();
+    return (DateTime(parts[0], parts[1]), DateTime(parts[0], parts[1] + 1));
+  }
+
+  Iterable<Txn> _in(String month) => txns.txns.where((t) => _monthOf(t.localDate) == month);
+
+  int _sum(String month, TxnType type) =>
+      _in(month).where((t) => t.type == type).fold<int>(0, (sum, t) => sum + t.amount);
+
+  @override
+  Future<Dashboard> dashboard({String? month}) async {
+    if (error != null) throw error!;
+    final m = month ?? FakeBudgetsRepository.currentMonth;
+    final (start, end) = _bounds(m);
+    final overview = await budgets.overview(month: m);
+    final page = await accounts.list();
+    final active = page.accounts.where((a) => !a.archived);
+    final recent = [...txns.txns]..sort((a, b) => b.date.compareTo(a.date));
+    return Dashboard(
+      month: m,
+      periodStart: start,
+      periodEnd: end.subtract(const Duration(days: 1)),
+      netWorth: active.fold<int>(0, (sum, a) => sum + a.balance),
+      accountsCount: active.length,
+      income: _sum(m, TxnType.income),
+      expense: _sum(m, TxnType.expense),
+      budgets: overview.budgets,
+      budgeted: overview.budgeted,
+      spent: overview.spent,
+      recent: recent.take(8).toList(),
+    );
+  }
+
+  @override
+  Future<CategoryReport> byCategory({required TxnType type, String? month}) async {
+    if (error != null) throw error!;
+    final m = month ?? FakeBudgetsRepository.currentMonth;
+    final (start, end) = _bounds(m);
+    final byId = <String, List<Txn>>{};
+    for (final t in _in(m).where((t) => t.type == type && t.category != null)) {
+      (byId[t.category!.id] ??= []).add(t);
+    }
+    final total = byId.values.expand((l) => l).fold<int>(0, (sum, t) => sum + t.amount);
+    final items = [
+      for (final entry in byId.entries)
+        CategorySpend(
+          categoryId: entry.key,
+          name: entry.value.first.category!.name,
+          icon: entry.value.first.category!.icon,
+          color: entry.value.first.category!.color,
+          total: entry.value.fold<int>(0, (sum, t) => sum + t.amount),
+          count: entry.value.length,
+          percent: 0,
+        ),
+    ]..sort((a, b) => b.total.compareTo(a.total));
+    return CategoryReport(
+      month: m,
+      periodStart: start,
+      periodEnd: end.subtract(const Duration(days: 1)),
+      from: start.toUtc(),
+      to: end.toUtc(),
+      type: type,
+      total: total,
+      items: [
+        for (final i in items)
+          CategorySpend(
+            categoryId: i.categoryId,
+            name: i.name,
+            icon: i.icon,
+            color: i.color,
+            total: i.total,
+            count: i.count,
+            percent: total > 0 ? (i.total * 1000 / total).round() / 10 : 0,
+          ),
+      ],
+    );
+  }
+
+  @override
+  Future<List<TrendPoint>> trend({int months = 6, String? month}) async {
+    if (error != null) throw error!;
+    final parts = (month ?? FakeBudgetsRepository.currentMonth).split('-').map(int.parse).toList();
+    return [
+      for (var i = months - 1; i >= 0; i--)
+        () {
+          final m = _monthOf(DateTime(parts[0], parts[1] - i));
+          return TrendPoint(month: m, income: _sum(m, TxnType.income), expense: _sum(m, TxnType.expense));
+        }(),
+    ];
+  }
+}
+
 /// Pumps the whole app with fakes and a fixed window size.
 typedef TestApp = ({
   FakeAuthRepository repo,
@@ -676,6 +820,7 @@ typedef TestApp = ({
   FakeCategoriesRepository categories,
   FakeTransactionsRepository txns,
   FakeBudgetsRepository budgets,
+  FakeReportsRepository reports,
 });
 
 Future<TestApp> pumpApp(
@@ -685,6 +830,9 @@ Future<TestApp> pumpApp(
   FakeAccountsRepository? accounts,
   FakeCategoriesRepository? categories,
   Size size = const Size(400, 860),
+
+  /// Adds data (transactions, budgets…) before the app first loads.
+  Future<void> Function(TestApp app)? seed,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -699,6 +847,17 @@ Future<TestApp> pumpApp(
   final fakeTxns = FakeTransactionsRepository(fakeAccounts, fakeCategories);
   final fakeBudgets = FakeBudgetsRepository(fakeTxns, fakeCategories);
   fakeTxns.budgets = fakeBudgets;
+  final fakeReports = FakeReportsRepository(fakeAccounts, fakeTxns, fakeBudgets);
+  final app = (
+    repo: fakeRepo,
+    tokens: tokens,
+    accounts: fakeAccounts,
+    categories: fakeCategories,
+    txns: fakeTxns,
+    budgets: fakeBudgets,
+    reports: fakeReports,
+  );
+  await seed?.call(app);
 
   await tester.pumpWidget(
     ProviderScope(
@@ -710,17 +869,11 @@ Future<TestApp> pumpApp(
         categoriesRepositoryProvider.overrideWithValue(fakeCategories),
         transactionsRepositoryProvider.overrideWithValue(fakeTxns),
         budgetsRepositoryProvider.overrideWithValue(fakeBudgets),
+        reportsRepositoryProvider.overrideWithValue(fakeReports),
       ],
       child: const HisaabChatApp(),
     ),
   );
   await tester.pumpAndSettle();
-  return (
-    repo: fakeRepo,
-    tokens: tokens,
-    accounts: fakeAccounts,
-    categories: fakeCategories,
-    txns: fakeTxns,
-    budgets: fakeBudgets,
-  );
+  return app;
 }
