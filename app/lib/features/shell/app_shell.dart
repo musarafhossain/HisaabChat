@@ -7,6 +7,7 @@ import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/motion/animated_icons.dart';
 import 'package:hisaabchat/core/motion/motion.dart';
 import 'package:hisaabchat/core/widgets/window_class.dart';
+import 'package:hisaabchat/features/accounts/presentation/account_form.dart';
 import 'package:hisaabchat/features/auth/auth_controller.dart';
 import 'package:hisaabchat/features/shell/destinations.dart';
 
@@ -215,7 +216,7 @@ class _Fab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (IconData icon, String tooltip, String message) = switch (current) {
-      Destination.accounts => (AppIcons.addAccount, 'New account', 'Adding accounts arrives in Phase 2.'),
+      Destination.accounts => (AppIcons.addAccount, 'New account', ''),
       Destination.budgets => (AppIcons.addBudget, 'New budget', 'Budgets arrive in Phase 4.'),
       Destination.reports || Destination.settings => (AppIcons.add, '', ''),
       _ => (AppIcons.add, 'New transaction', 'Adding transactions arrives in Phase 3.'),
@@ -229,7 +230,11 @@ class _Fab extends StatelessWidget {
       child: FloatingActionButton(
         tooltip: visible ? tooltip : null,
         mini: small,
-        onPressed: visible ? () => _comingSoon(context, message) : null,
+        onPressed: !visible
+            ? null
+            : current == Destination.accounts
+            ? () => showAccountForm(context)
+            : () => _comingSoon(context, message),
         child: AnimatedSwitcher(
           duration: context.motion(Motion.short),
           transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),

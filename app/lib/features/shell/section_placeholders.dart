@@ -78,20 +78,6 @@ class BudgetsSection extends StatelessWidget {
   );
 }
 
-class AccountsSection extends StatelessWidget {
-  const AccountsSection({super.key});
-
-  @override
-  Widget build(BuildContext context) => const SectionPlaceholder(
-    icon: AppIcons.accounts,
-    title: 'No accounts yet',
-    message: 'Cash, bank and UPI accounts (each one a chat) arrive in Phase 2.',
-    searchHint: 'Search accounts',
-    filters: ['All', 'Cash', 'Bank', 'UPI', 'Cards'],
-    detailMessage: 'Select an account to see its transactions',
-  );
-}
-
 class ReportsSection extends StatelessWidget {
   const ReportsSection({super.key});
 

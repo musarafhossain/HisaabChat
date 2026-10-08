@@ -13,3 +13,5 @@ linter:
     public_member_api_docs: false
     lines_longer_than_80_chars: false
     sort_pub_dependencies: false
+    # Riverpod notifiers expose intent-named methods (select, refresh…).
+    use_setters_to_change_properties: false

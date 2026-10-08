@@ -81,11 +81,13 @@
 **Done when:** sign up and log in work on Android, Windows and Web, the shell adapts as the window is resized, and default categories exist in the DB.
 
 ### Phase 2 — Accounts
-- [ ] **API:** `AccountService` (create sets `balance = opening_balance`; update; archive; delete → 409 if it has transactions), list with `meta.netWorth`.
-- [ ] Functional tests: CRUD, net worth respects `include_in_total`, 404 for another user's account.
-- [ ] **Flutter:** `AccountsRepository` + providers; `/accounts` as a **chat-style list** (net worth card, `AccountAvatar` tiles with balance; last-transaction preview added in Phase 3).
-- [ ] Add/Edit account form (bottom sheet on compact, dialog otherwise): name, type, opening balance (`AmountField`), color, icon, include in total, credit limit.
-- [ ] `/accounts/:id/info` Account info page (contact-info style); `/accounts/:id` thread placeholder.
+- [x] **API:** `AccountService` (create sets `balance = opening_balance`; update shifts the balance when the opening balance changes, with the row locked; archive/unarchive; delete → 409 `E_ACCOUNT_IN_USE` if it has transactions), list with `meta.netWorth`. Type defaults for icon and color; duplicate names → 422 on `name`.
+- [x] Exception handler: every error is `{ errors: [{ message, code?, field? }] }` (no stack-trace dumps for 404/409).
+- [x] Functional tests (55 total): CRUD, credit cards, net worth with `include_in_total` and archived, opening-balance edits, validation, delete rules, 404 for another user's account, error format.
+- [x] **Flutter:** `AccountsRepository` + `accountsProvider`; `/accounts` as a **chat-style list** (total balance card, search, type chips, tiles with balance or card outstanding, archived section, pull to refresh; last-transaction preview added in Phase 3). Home shows the total balance.
+- [x] Add/Edit account form (bottom sheet on compact, dialog otherwise): type chips, name, balance or card outstanding (`AmountField`, accepts `120+80`), credit limit, 12-color palette, include in total. Icon follows the type.
+- [x] Account info page (contact-info style: avatar Hero, balance, stat tiles, edit, archive, delete): full screen at `/accounts/:id` on phones, in the detail pane on desktop. The chat-style thread replaces its placeholder in Phase 3.
+- [x] Widget tests (28 total): add first account, credit card outstanding, duplicate name, search and chips, archive, delete conflict on desktop, Home total.
 
 **Done when:** Cash, Bank and UPI accounts can be added and net worth is correct on all three platforms.
 

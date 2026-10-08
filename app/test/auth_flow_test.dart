@@ -20,7 +20,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Asha'), findsWidgets);
-    expect(find.text('Your HisaabChat is ready'), findsOneWidget);
+    expect(find.text('Add your first account'), findsOneWidget);
     expect(app.tokens.token, 'oat_test');
   });
 
@@ -35,7 +35,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Incorrect email or password'), findsOneWidget);
-    expect(find.text('Your HisaabChat is ready'), findsNothing);
+    expect(find.text('Add your first account'), findsNothing);
   });
 
   testWidgets('client-side validation runs before calling the API', (tester) async {
@@ -90,7 +90,7 @@ void main() {
     await pumpApp(tester, savedToken: 'oat_saved');
 
     expect(find.text('Welcome to HisaabChat'), findsNothing);
-    expect(find.text('Your HisaabChat is ready'), findsOneWidget);
+    expect(find.text('Add your first account'), findsOneWidget);
   });
 
   testWidgets('an expired token signs the user out', (tester) async {
@@ -110,7 +110,7 @@ void main() {
     repo.meError = null;
     await tester.tap(find.text('Try again'));
     await tester.pumpAndSettle();
-    expect(find.text('Your HisaabChat is ready'), findsOneWidget);
+    expect(find.text('Add your first account'), findsOneWidget);
   });
 
   testWidgets('logout from Settings returns to Welcome', (tester) async {

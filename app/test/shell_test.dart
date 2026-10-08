@@ -31,7 +31,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('No accounts yet'), findsOneWidget);
     expect(find.byType(EmptyDetailPane), findsOneWidget);
-    expect(find.text('Select an account to see its transactions'), findsOneWidget);
+    expect(find.text('Select an account to see its details'), findsOneWidget);
   });
 
   testWidgets('Settings → Appearance switches the theme and saves it to the profile', (tester) async {

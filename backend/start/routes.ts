@@ -45,6 +45,20 @@ router
         router
           .post('me/onboarding/complete', [controllers.Me, 'completeOnboarding'])
           .as('me.completeOnboarding')
+
+        router
+          .group(() => {
+            router.get('/', [controllers.Accounts, 'index']).as('index')
+            router.post('/', [controllers.Accounts, 'store']).as('store')
+            router.get(':id', [controllers.Accounts, 'show']).as('show')
+            router.patch(':id', [controllers.Accounts, 'update']).as('update')
+            router.delete(':id', [controllers.Accounts, 'destroy']).as('destroy')
+            router.post(':id/archive', [controllers.Accounts, 'archive']).as('archive')
+            router.post(':id/unarchive', [controllers.Accounts, 'unarchive']).as('unarchive')
+          })
+          .prefix('accounts')
+          .as('accounts')
+          .where('id', router.matchers.uuid())
       })
       .use(middleware.auth())
   })

@@ -51,6 +51,17 @@ class ApiClient {
   Future<T> get<T>(String path, {Map<String, dynamic>? query}) =>
       _send(() => _dio.get<Object?>(path, queryParameters: query));
 
+  /// Like [get] but returns the whole `{ data, meta }` envelope (lists with totals).
+  Future<({T data, Map<String, dynamic> meta})> getWithMeta<T>(String path, {Map<String, dynamic>? query}) async {
+    try {
+      final response = await _dio.get<Object?>(path, queryParameters: query);
+      final body = response.data! as Map<String, dynamic>;
+      return (data: body['data'] as T, meta: (body['meta'] as Map<String, dynamic>?) ?? const {});
+    } on DioException catch (error) {
+      throw ApiException.fromDio(error);
+    }
+  }
+
   Future<T> post<T>(String path, {Object? body}) => _send(() => _dio.post<Object?>(path, data: body));
 
   Future<T> patch<T>(String path, {Object? body}) => _send(() => _dio.patch<Object?>(path, data: body));

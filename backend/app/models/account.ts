@@ -25,4 +25,9 @@ export default class Account extends AccountSchema {
   static assignId(account: Account) {
     assignUuid(account)
   }
+
+  /** Archived accounts are hidden from pickers and totals but keep their history. */
+  get archived() {
+    return this.archivedAt !== null && this.archivedAt !== undefined
+  }
 }

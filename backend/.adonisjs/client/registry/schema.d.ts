@@ -103,4 +103,88 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/me_controller').default['completeOnboarding']>>>
     }
   }
+  'accounts.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/accounts'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/account').listAccountsValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'accounts.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/accounts'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/account').createAccountValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/account').createAccountValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'accounts.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/accounts/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['show']>>>
+    }
+  }
+  'accounts.update': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/accounts/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/account').updateAccountValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/account').updateAccountValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'accounts.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/accounts/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['destroy']>>>
+    }
+  }
+  'accounts.archive': {
+    methods: ["POST"]
+    pattern: '/api/v1/accounts/:id/archive'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['archive']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['archive']>>>
+    }
+  }
+  'accounts.unarchive': {
+    methods: ["POST"]
+    pattern: '/api/v1/accounts/:id/unarchive'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['unarchive']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/accounts_controller').default['unarchive']>>>
+    }
+  }
 }

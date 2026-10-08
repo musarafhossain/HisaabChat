@@ -14,4 +14,13 @@ export interface ApiDefinition {
     update: typeof routes['me.update']
     completeOnboarding: typeof routes['me.completeOnboarding']
   }
+  accounts: {
+    index: typeof routes['accounts.index']
+    store: typeof routes['accounts.store']
+    show: typeof routes['accounts.show']
+    update: typeof routes['accounts.update']
+    destroy: typeof routes['accounts.destroy']
+    archive: typeof routes['accounts.archive']
+    unarchive: typeof routes['accounts.unarchive']
+  }
 }

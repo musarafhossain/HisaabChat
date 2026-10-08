@@ -54,6 +54,48 @@ const routes = {
     tokens: [{"old":"/api/v1/me/onboarding/complete","type":0,"val":"api","end":""},{"old":"/api/v1/me/onboarding/complete","type":0,"val":"v1","end":""},{"old":"/api/v1/me/onboarding/complete","type":0,"val":"me","end":""},{"old":"/api/v1/me/onboarding/complete","type":0,"val":"onboarding","end":""},{"old":"/api/v1/me/onboarding/complete","type":0,"val":"complete","end":""}],
     types: placeholder as Registry['me.completeOnboarding']['types'],
   },
+  'accounts.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/accounts',
+    tokens: [{"old":"/api/v1/accounts","type":0,"val":"api","end":""},{"old":"/api/v1/accounts","type":0,"val":"v1","end":""},{"old":"/api/v1/accounts","type":0,"val":"accounts","end":""}],
+    types: placeholder as Registry['accounts.index']['types'],
+  },
+  'accounts.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/accounts',
+    tokens: [{"old":"/api/v1/accounts","type":0,"val":"api","end":""},{"old":"/api/v1/accounts","type":0,"val":"v1","end":""},{"old":"/api/v1/accounts","type":0,"val":"accounts","end":""}],
+    types: placeholder as Registry['accounts.store']['types'],
+  },
+  'accounts.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/accounts/:id',
+    tokens: [{"old":"/api/v1/accounts/:id","type":0,"val":"api","end":""},{"old":"/api/v1/accounts/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/accounts/:id","type":0,"val":"accounts","end":""},{"old":"/api/v1/accounts/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['accounts.show']['types'],
+  },
+  'accounts.update': {
+    methods: ["PATCH"],
+    pattern: '/api/v1/accounts/:id',
+    tokens: [{"old":"/api/v1/accounts/:id","type":0,"val":"api","end":""},{"old":"/api/v1/accounts/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/accounts/:id","type":0,"val":"accounts","end":""},{"old":"/api/v1/accounts/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['accounts.update']['types'],
+  },
+  'accounts.destroy': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/accounts/:id',
+    tokens: [{"old":"/api/v1/accounts/:id","type":0,"val":"api","end":""},{"old":"/api/v1/accounts/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/accounts/:id","type":0,"val":"accounts","end":""},{"old":"/api/v1/accounts/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['accounts.destroy']['types'],
+  },
+  'accounts.archive': {
+    methods: ["POST"],
+    pattern: '/api/v1/accounts/:id/archive',
+    tokens: [{"old":"/api/v1/accounts/:id/archive","type":0,"val":"api","end":""},{"old":"/api/v1/accounts/:id/archive","type":0,"val":"v1","end":""},{"old":"/api/v1/accounts/:id/archive","type":0,"val":"accounts","end":""},{"old":"/api/v1/accounts/:id/archive","type":1,"val":"id","end":""},{"old":"/api/v1/accounts/:id/archive","type":0,"val":"archive","end":""}],
+    types: placeholder as Registry['accounts.archive']['types'],
+  },
+  'accounts.unarchive': {
+    methods: ["POST"],
+    pattern: '/api/v1/accounts/:id/unarchive',
+    tokens: [{"old":"/api/v1/accounts/:id/unarchive","type":0,"val":"api","end":""},{"old":"/api/v1/accounts/:id/unarchive","type":0,"val":"v1","end":""},{"old":"/api/v1/accounts/:id/unarchive","type":0,"val":"accounts","end":""},{"old":"/api/v1/accounts/:id/unarchive","type":1,"val":"id","end":""},{"old":"/api/v1/accounts/:id/unarchive","type":0,"val":"unarchive","end":""}],
+    types: placeholder as Registry['accounts.unarchive']['types'],
+  },
 } as const satisfies Record<string, AdonisEndpoint>
 
 export { routes }
