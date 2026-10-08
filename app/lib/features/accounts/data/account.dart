@@ -38,6 +38,7 @@ class Account {
     required this.includeInTotal,
     required this.archived,
     this.creditLimit,
+    this.lastTransaction,
   });
 
   factory Account.fromJson(Map<String, dynamic> json) => Account(
@@ -51,6 +52,9 @@ class Account {
     icon: json['icon'] as String,
     includeInTotal: json['includeInTotal'] as bool,
     archived: json['archived'] as bool? ?? false,
+    lastTransaction: json['lastTransaction'] == null
+        ? null
+        : LastTxnPreview.fromJson(json['lastTransaction'] as Map<String, dynamic>),
   );
 
   final String id;
@@ -64,6 +68,9 @@ class Account {
   final bool includeInTotal;
   final bool archived;
 
+  /// Newest transaction touching this account (the chat-list preview line).
+  final LastTxnPreview? lastTransaction;
+
   bool get isCreditCard => type == AccountType.creditCard;
 
   /// Amount owed on a credit card (positive), or 0.
@@ -76,3 +83,29 @@ class Account {
 Color parseHexColor(String hex) => Color(int.parse(hex.replaceFirst('#', ''), radix: 16) | 0xFF000000);
 
 String toHexColor(Color color) => '#${(color.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
+
+/// "Last message" shown under an account in the list.
+@immutable
+class LastTxnPreview {
+  const LastTxnPreview({
+    required this.amount,
+    required this.date,
+    required this.incoming,
+    required this.label,
+    this.note,
+  });
+
+  factory LastTxnPreview.fromJson(Map<String, dynamic> json) => LastTxnPreview(
+    amount: (json['amount'] as num).toInt(),
+    date: DateTime.parse(json['date'] as String).toUtc(),
+    incoming: json['direction'] == 'IN',
+    label: json['label'] as String,
+    note: json['note'] as String?,
+  );
+
+  final int amount;
+  final DateTime date;
+  final bool incoming;
+  final String label;
+  final String? note;
+}

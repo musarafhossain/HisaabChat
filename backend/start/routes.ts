@@ -55,9 +55,35 @@ router
             router.delete(':id', [controllers.Accounts, 'destroy']).as('destroy')
             router.post(':id/archive', [controllers.Accounts, 'archive']).as('archive')
             router.post(':id/unarchive', [controllers.Accounts, 'unarchive']).as('unarchive')
+            router.post(':id/reconcile', [controllers.Accounts, 'reconcile']).as('reconcile')
           })
           .prefix('accounts')
           .as('accounts')
+          .where('id', router.matchers.uuid())
+
+        router
+          .group(() => {
+            router.get('/', [controllers.Categories, 'index']).as('index')
+            router.post('/', [controllers.Categories, 'store']).as('store')
+            router.put('order', [controllers.Categories, 'reorder']).as('reorder')
+            router.patch(':id', [controllers.Categories, 'update']).as('update')
+            router.post(':id/archive', [controllers.Categories, 'archive']).as('archive')
+            router.post(':id/unarchive', [controllers.Categories, 'unarchive']).as('unarchive')
+          })
+          .prefix('categories')
+          .as('categories')
+          .where('id', router.matchers.uuid())
+
+        router
+          .group(() => {
+            router.get('/', [controllers.Transactions, 'index']).as('index')
+            router.post('/', [controllers.Transactions, 'store']).as('store')
+            router.get(':id', [controllers.Transactions, 'show']).as('show')
+            router.patch(':id', [controllers.Transactions, 'update']).as('update')
+            router.delete(':id', [controllers.Transactions, 'destroy']).as('destroy')
+          })
+          .prefix('transactions')
+          .as('transactions')
           .where('id', router.matchers.uuid())
       })
       .use(middleware.auth())

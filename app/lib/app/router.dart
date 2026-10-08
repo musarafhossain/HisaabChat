@@ -9,6 +9,7 @@ import 'package:hisaabchat/features/auth/presentation/login_screen.dart';
 import 'package:hisaabchat/features/auth/presentation/register_screen.dart';
 import 'package:hisaabchat/features/auth/presentation/splash_screen.dart';
 import 'package:hisaabchat/features/auth/presentation/welcome_screen.dart';
+import 'package:hisaabchat/features/categories/presentation/categories_screen.dart';
 import 'package:hisaabchat/features/health/connection_check_screen.dart';
 import 'package:hisaabchat/features/home/home_screen.dart';
 import 'package:hisaabchat/features/settings/appearance_screen.dart';
@@ -17,6 +18,8 @@ import 'package:hisaabchat/features/settings/settings_screen.dart';
 import 'package:hisaabchat/features/shell/app_shell.dart';
 import 'package:hisaabchat/features/shell/destinations.dart';
 import 'package:hisaabchat/features/shell/section_placeholders.dart';
+import 'package:hisaabchat/features/transactions/presentation/account_thread.dart';
+import 'package:hisaabchat/features/transactions/presentation/transactions_section.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
@@ -86,8 +89,18 @@ final routerProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: rootNavigatorKey,
                     pageBuilder: (context, state) => sharedAxisPage(
                       key: state.pageKey,
-                      child: AccountInfoScreen(accountId: state.pathParameters['id']!),
+                      child: AccountThreadScreen(accountId: state.pathParameters['id']!),
                     ),
+                    routes: [
+                      GoRoute(
+                        path: 'info',
+                        parentNavigatorKey: rootNavigatorKey,
+                        pageBuilder: (context, state) => sharedAxisPage(
+                          key: state.pageKey,
+                          child: AccountInfoScreen(accountId: state.pathParameters['id']!),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -102,6 +115,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                 routes: [
                   fullScreen('profile', const ProfileScreen()),
                   fullScreen('appearance', const AppearanceScreen()),
+                  fullScreen('categories', const CategoriesScreen()),
                   fullScreen('connection', const ConnectionCheckScreen()),
                 ],
               ),

@@ -1,24 +1,37 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import AccountService from '#services/account_service'
+import TransactionService from '#services/transaction_service'
 import AccountTransformer from '#transformers/account_transformer'
+import TransactionTransformer, {
+  lastTransactionPreview,
+} from '#transformers/transaction_transformer'
 import {
   createAccountValidator,
   listAccountsValidator,
   updateAccountValidator,
 } from '#validators/account'
+import { reconcileValidator } from '#validators/transaction'
 
 export default class AccountsController {
   /**
-   * GET /accounts?includeArchived=true → { data: Account[], meta: { netWorth } }
+   * GET /accounts?includeArchived=true
+   * → { data: Account[] (each with lastTransaction), meta: { netWorth } }
    */
   async index({ auth, request, serialize }: HttpContext) {
+    const user = auth.getUserOrFail()
     const { includeArchived } = await request.validateUsing(listAccountsValidator, {
       data: request.qs(),
     })
-    const { accounts, netWorth } = await AccountService.list(auth.getUserOrFail(), {
-      includeArchived,
+    const { accounts, netWorth } = await AccountService.list(user, { includeArchived })
+    const latest = await TransactionService.latestPerAccount(user.id)
+
+    const serialized = (await serialize.withoutWrapping(
+      AccountTransformer.transform(accounts)
+    )) as Array<{ id: string }>
+    const data = serialized.map((account) => {
+      const last = latest.get(account.id)
+      return { ...account, lastTransaction: last ? lastTransactionPreview(account.id, last) : null }
     })
-    const data = await serialize.withoutWrapping(AccountTransformer.transform(accounts))
     return { data, meta: { netWorth } }
   }
 
@@ -48,6 +61,21 @@ export default class AccountsController {
   async unarchive({ auth, params, serialize }: HttpContext) {
     const account = await AccountService.setArchived(auth.getUserOrFail(), params.id, false)
     return serialize(AccountTransformer.transform(account))
+  }
+
+  /**
+   * POST /accounts/:id/reconcile { actualBalance } → the ADJUSTMENT created,
+   * or { data: null } when the balance already matched.
+   */
+  async reconcile({ auth, params, request, serialize }: HttpContext) {
+    const { actualBalance } = await request.validateUsing(reconcileValidator)
+    const adjustment = await TransactionService.reconcile(
+      auth.getUserOrFail(),
+      params.id,
+      actualBalance
+    )
+    if (!adjustment) return { data: null }
+    return serialize(TransactionTransformer.transform(adjustment))
   }
 
   async destroy({ auth, params, response }: HttpContext) {

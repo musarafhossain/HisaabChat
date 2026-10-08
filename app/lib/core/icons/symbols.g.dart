@@ -99,6 +99,39 @@ abstract final class Symbols {
   static const IconData undo = IconData(0xe166, fontFamily: 'MaterialSymbolsRounded');
   static const IconData addCircle = IconData(0xe990, fontFamily: 'MaterialSymbolsRounded');
   static const IconData category = IconData(0xe72c, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData today = IconData(0xe8df, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData history = IconData(0xe8b3, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData notes = IconData(0xe26c, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData balance = IconData(0xeaf6, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData expandMore = IconData(0xe5cf, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData searchOff = IconData(0xea76, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData keyboardArrowDown = IconData(0xe313, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData localCafe = IconData(0xeb44, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData fastfood = IconData(0xe57a, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData lunchDining = IconData(0xea61, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData localPizza = IconData(0xe552, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData localGroceryStore = IconData(0xe8cc, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData directionsCar = IconData(0xeff7, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData directionsBus = IconData(0xeff6, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData train = IconData(0xe570, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData localTaxi = IconData(0xe559, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData menuBook = IconData(0xea19, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData waterDrop = IconData(0xe798, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData checkroom = IconData(0xf19e, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData medication = IconData(0xf033, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData fitnessCenter = IconData(0xeb43, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData contentCut = IconData(0xe14e, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData sportsEsports = IconData(0xea28, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData musicNote = IconData(0xe405, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData pets = IconData(0xe91d, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData childCare = IconData(0xeb41, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData celebration = IconData(0xea65, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData volunteerActivism = IconData(0xea70, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData trendingUp = IconData(0xe8e5, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData receipt = IconData(0xe8b0, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData homeRepairService = IconData(0xf100, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData cleaningServices = IconData(0xf0ff, fontFamily: 'MaterialSymbolsRounded');
+  static const IconData localLaundryService = IconData(0xe54a, fontFamily: 'MaterialSymbolsRounded');
 
   /// Icon name (as stored in the database) to glyph.
   static const Map<String, IconData> byName = {
@@ -195,5 +228,38 @@ abstract final class Symbols {
     'undo': undo,
     'add_circle': addCircle,
     'category': category,
+    'today': today,
+    'history': history,
+    'notes': notes,
+    'balance': balance,
+    'expand_more': expandMore,
+    'search_off': searchOff,
+    'keyboard_arrow_down': keyboardArrowDown,
+    'local_cafe': localCafe,
+    'fastfood': fastfood,
+    'lunch_dining': lunchDining,
+    'local_pizza': localPizza,
+    'local_grocery_store': localGroceryStore,
+    'directions_car': directionsCar,
+    'directions_bus': directionsBus,
+    'train': train,
+    'local_taxi': localTaxi,
+    'menu_book': menuBook,
+    'water_drop': waterDrop,
+    'checkroom': checkroom,
+    'medication': medication,
+    'fitness_center': fitnessCenter,
+    'content_cut': contentCut,
+    'sports_esports': sportsEsports,
+    'music_note': musicNote,
+    'pets': pets,
+    'child_care': childCare,
+    'celebration': celebration,
+    'volunteer_activism': volunteerActivism,
+    'trending_up': trendingUp,
+    'receipt': receipt,
+    'home_repair_service': homeRepairService,
+    'cleaning_services': cleaningServices,
+    'local_laundry_service': localLaundryService,
   };
 }

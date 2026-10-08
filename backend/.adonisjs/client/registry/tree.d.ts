@@ -22,5 +22,21 @@ export interface ApiDefinition {
     destroy: typeof routes['accounts.destroy']
     archive: typeof routes['accounts.archive']
     unarchive: typeof routes['accounts.unarchive']
+    reconcile: typeof routes['accounts.reconcile']
+  }
+  categories: {
+    index: typeof routes['categories.index']
+    store: typeof routes['categories.store']
+    reorder: typeof routes['categories.reorder']
+    update: typeof routes['categories.update']
+    archive: typeof routes['categories.archive']
+    unarchive: typeof routes['categories.unarchive']
+  }
+  transactions: {
+    index: typeof routes['transactions.index']
+    store: typeof routes['transactions.store']
+    show: typeof routes['transactions.show']
+    update: typeof routes['transactions.update']
+    destroy: typeof routes['transactions.destroy']
   }
 }

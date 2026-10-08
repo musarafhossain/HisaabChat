@@ -15,24 +15,64 @@ import 'package:hisaabchat/features/accounts/data/account.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_form.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_info.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_tile.dart';
+import 'package:hisaabchat/features/transactions/presentation/account_thread.dart';
 
-/// Accounts tab: the "chats" list. On desktop the selected account opens in
-/// the detail pane; on phones it opens full screen.
-class AccountsSection extends ConsumerWidget {
+/// Accounts tab: the "chats" list. On desktop the selected account's thread
+/// opens in the detail pane (WhatsApp Desktop); on phones it opens full screen.
+class AccountsSection extends ConsumerStatefulWidget {
   const AccountsSection({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AccountsSection> createState() => _AccountsSectionState();
+}
+
+class _AccountsSectionState extends ConsumerState<AccountsSection> {
+  /// Desktop: show "Account info" instead of the thread for this account.
+  String? _infoFor;
+
+  @override
+  Widget build(BuildContext context) {
     final selectedId = ref.watch(selectedAccountProvider);
-    return ListDetailLayout(
-      list: const _AccountsList(),
-      detail: selectedId == null
-          ? const EmptyDetailPane(icon: AppIcons.accounts, message: 'Select an account to see its details')
-          : Material(
-              key: ValueKey(selectedId),
-              child: AccountInfoView(accountId: selectedId),
+    final colors = context.colors;
+
+    Widget detail;
+    if (selectedId == null) {
+      detail = const EmptyDetailPane(icon: AppIcons.accounts, message: 'Select an account to see its transactions');
+    } else if (_infoFor == selectedId) {
+      detail = Material(
+        key: ValueKey('info-$selectedId'),
+        child: Column(
+          children: [
+            Container(
+              height: 64,
+              decoration: BoxDecoration(
+                color: colors.panel,
+                border: Border(bottom: BorderSide(color: colors.divider)),
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    tooltip: 'Back to chat',
+                    icon: const Icon(AppIcons.back),
+                    onPressed: () => setState(() => _infoFor = null),
+                  ),
+                  const Text('Account info', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+                ],
+              ),
             ),
-    );
+            Expanded(child: AccountInfoView(accountId: selectedId)),
+          ],
+        ),
+      );
+    } else {
+      detail = AccountThread(
+        key: ValueKey('thread-$selectedId'),
+        accountId: selectedId,
+        fullScreen: false,
+        onOpenInfo: () => setState(() => _infoFor = selectedId),
+      );
+    }
+    return ListDetailLayout(list: const _AccountsList(), detail: detail);
   }
 }
 

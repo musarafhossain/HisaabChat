@@ -99,6 +99,12 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => context.go('/settings/profile'),
             ),
             SettingsTile(
+              icon: AppIcons.categories,
+              title: 'Categories',
+              subtitle: 'Expense and income categories',
+              onTap: () => context.go('/settings/categories'),
+            ),
+            SettingsTile(
               icon: AppIcons.palette,
               title: 'Appearance',
               subtitle: 'Theme: $themeLabel · Reduce motion',

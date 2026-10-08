@@ -96,6 +96,78 @@ const routes = {
     tokens: [{"old":"/api/v1/accounts/:id/unarchive","type":0,"val":"api","end":""},{"old":"/api/v1/accounts/:id/unarchive","type":0,"val":"v1","end":""},{"old":"/api/v1/accounts/:id/unarchive","type":0,"val":"accounts","end":""},{"old":"/api/v1/accounts/:id/unarchive","type":1,"val":"id","end":""},{"old":"/api/v1/accounts/:id/unarchive","type":0,"val":"unarchive","end":""}],
     types: placeholder as Registry['accounts.unarchive']['types'],
   },
+  'accounts.reconcile': {
+    methods: ["POST"],
+    pattern: '/api/v1/accounts/:id/reconcile',
+    tokens: [{"old":"/api/v1/accounts/:id/reconcile","type":0,"val":"api","end":""},{"old":"/api/v1/accounts/:id/reconcile","type":0,"val":"v1","end":""},{"old":"/api/v1/accounts/:id/reconcile","type":0,"val":"accounts","end":""},{"old":"/api/v1/accounts/:id/reconcile","type":1,"val":"id","end":""},{"old":"/api/v1/accounts/:id/reconcile","type":0,"val":"reconcile","end":""}],
+    types: placeholder as Registry['accounts.reconcile']['types'],
+  },
+  'categories.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/categories',
+    tokens: [{"old":"/api/v1/categories","type":0,"val":"api","end":""},{"old":"/api/v1/categories","type":0,"val":"v1","end":""},{"old":"/api/v1/categories","type":0,"val":"categories","end":""}],
+    types: placeholder as Registry['categories.index']['types'],
+  },
+  'categories.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/categories',
+    tokens: [{"old":"/api/v1/categories","type":0,"val":"api","end":""},{"old":"/api/v1/categories","type":0,"val":"v1","end":""},{"old":"/api/v1/categories","type":0,"val":"categories","end":""}],
+    types: placeholder as Registry['categories.store']['types'],
+  },
+  'categories.reorder': {
+    methods: ["PUT"],
+    pattern: '/api/v1/categories/order',
+    tokens: [{"old":"/api/v1/categories/order","type":0,"val":"api","end":""},{"old":"/api/v1/categories/order","type":0,"val":"v1","end":""},{"old":"/api/v1/categories/order","type":0,"val":"categories","end":""},{"old":"/api/v1/categories/order","type":0,"val":"order","end":""}],
+    types: placeholder as Registry['categories.reorder']['types'],
+  },
+  'categories.update': {
+    methods: ["PATCH"],
+    pattern: '/api/v1/categories/:id',
+    tokens: [{"old":"/api/v1/categories/:id","type":0,"val":"api","end":""},{"old":"/api/v1/categories/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/categories/:id","type":0,"val":"categories","end":""},{"old":"/api/v1/categories/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['categories.update']['types'],
+  },
+  'categories.archive': {
+    methods: ["POST"],
+    pattern: '/api/v1/categories/:id/archive',
+    tokens: [{"old":"/api/v1/categories/:id/archive","type":0,"val":"api","end":""},{"old":"/api/v1/categories/:id/archive","type":0,"val":"v1","end":""},{"old":"/api/v1/categories/:id/archive","type":0,"val":"categories","end":""},{"old":"/api/v1/categories/:id/archive","type":1,"val":"id","end":""},{"old":"/api/v1/categories/:id/archive","type":0,"val":"archive","end":""}],
+    types: placeholder as Registry['categories.archive']['types'],
+  },
+  'categories.unarchive': {
+    methods: ["POST"],
+    pattern: '/api/v1/categories/:id/unarchive',
+    tokens: [{"old":"/api/v1/categories/:id/unarchive","type":0,"val":"api","end":""},{"old":"/api/v1/categories/:id/unarchive","type":0,"val":"v1","end":""},{"old":"/api/v1/categories/:id/unarchive","type":0,"val":"categories","end":""},{"old":"/api/v1/categories/:id/unarchive","type":1,"val":"id","end":""},{"old":"/api/v1/categories/:id/unarchive","type":0,"val":"unarchive","end":""}],
+    types: placeholder as Registry['categories.unarchive']['types'],
+  },
+  'transactions.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/transactions',
+    tokens: [{"old":"/api/v1/transactions","type":0,"val":"api","end":""},{"old":"/api/v1/transactions","type":0,"val":"v1","end":""},{"old":"/api/v1/transactions","type":0,"val":"transactions","end":""}],
+    types: placeholder as Registry['transactions.index']['types'],
+  },
+  'transactions.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/transactions',
+    tokens: [{"old":"/api/v1/transactions","type":0,"val":"api","end":""},{"old":"/api/v1/transactions","type":0,"val":"v1","end":""},{"old":"/api/v1/transactions","type":0,"val":"transactions","end":""}],
+    types: placeholder as Registry['transactions.store']['types'],
+  },
+  'transactions.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/transactions/:id',
+    tokens: [{"old":"/api/v1/transactions/:id","type":0,"val":"api","end":""},{"old":"/api/v1/transactions/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/transactions/:id","type":0,"val":"transactions","end":""},{"old":"/api/v1/transactions/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['transactions.show']['types'],
+  },
+  'transactions.update': {
+    methods: ["PATCH"],
+    pattern: '/api/v1/transactions/:id',
+    tokens: [{"old":"/api/v1/transactions/:id","type":0,"val":"api","end":""},{"old":"/api/v1/transactions/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/transactions/:id","type":0,"val":"transactions","end":""},{"old":"/api/v1/transactions/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['transactions.update']['types'],
+  },
+  'transactions.destroy': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/transactions/:id',
+    tokens: [{"old":"/api/v1/transactions/:id","type":0,"val":"api","end":""},{"old":"/api/v1/transactions/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/transactions/:id","type":0,"val":"transactions","end":""},{"old":"/api/v1/transactions/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['transactions.destroy']['types'],
+  },
 } as const satisfies Record<string, AdonisEndpoint>
 
 export { routes }

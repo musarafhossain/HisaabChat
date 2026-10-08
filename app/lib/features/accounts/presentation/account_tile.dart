@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hisaabchat/app/theme/app_colors.dart';
+import 'package:hisaabchat/core/format/dates.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/money/money.dart';
 import 'package:hisaabchat/core/motion/animated_amount.dart';
@@ -25,6 +26,14 @@ class AccountTile extends StatelessWidget {
     return parts.join(' · ');
   }
 
+  /// WhatsApp-style last message: "Petrol −₹200", "From Bank +₹2,000".
+  static String? _preview(Account account) {
+    final last = account.lastTransaction;
+    if (last == null) return null;
+    final amount = Money.format(last.incoming ? last.amount : -last.amount, signed: true);
+    return '${last.label} $amount';
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -39,7 +48,7 @@ class AccountTile extends StatelessWidget {
           child: IconAvatar(icon: AppIcons.byKey(account.icon), color: account.color, solid: true),
         ),
         title: account.name,
-        subtitle: describe(account),
+        subtitle: _preview(account) ?? describe(account),
         trailing: AnimatedAmount(
           account.isCreditCard ? account.outstanding : account.balance,
           countUpOnFirstShow: false,
@@ -49,7 +58,9 @@ class AccountTile extends StatelessWidget {
             color: negative && !account.isCreditCard ? colors.expense : colors.textPrimary,
           ),
         ),
-        trailingCaption: account.isCreditCard ? 'Outstanding' : null,
+        trailingCaption: account.isCreditCard
+            ? 'Outstanding'
+            : (account.lastTransaction == null ? null : Dates.listStamp(account.lastTransaction!.date.toLocal())),
       ),
     );
   }

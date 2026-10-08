@@ -10,6 +10,7 @@ import 'package:hisaabchat/core/widgets/window_class.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_form.dart';
 import 'package:hisaabchat/features/auth/auth_controller.dart';
 import 'package:hisaabchat/features/shell/destinations.dart';
+import 'package:hisaabchat/features/transactions/presentation/new_transaction.dart';
 
 /// The WhatsApp-style app frame around every signed-in section
 /// (docs/04-UI-UX-Design-Brief.md §3).
@@ -141,7 +142,6 @@ class _RailShell extends ConsumerWidget {
     }
 
     return Scaffold(
-      floatingActionButton: _Fab(current: current, small: true),
       body: Row(
         children: [
           Container(
@@ -150,6 +150,10 @@ class _RailShell extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Column(
               children: [
+                // The 'new' action lives in the rail (like WhatsApp Desktop's new-chat
+                // button) so it never covers a thread's Send button.
+                _Fab(current: current, small: true),
+                const SizedBox(height: 12),
                 for (final d in Destination.railTop) railButton(d),
                 const Spacer(),
                 railButton(Destination.settings),
@@ -219,7 +223,7 @@ class _Fab extends StatelessWidget {
       Destination.accounts => (AppIcons.addAccount, 'New account', ''),
       Destination.budgets => (AppIcons.addBudget, 'New budget', 'Budgets arrive in Phase 4.'),
       Destination.reports || Destination.settings => (AppIcons.add, '', ''),
-      _ => (AppIcons.add, 'New transaction', 'Adding transactions arrives in Phase 3.'),
+      _ => (AppIcons.add, 'New transaction', ''),
     };
     final visible = tooltip.isNotEmpty;
 
@@ -234,7 +238,9 @@ class _Fab extends StatelessWidget {
             ? null
             : current == Destination.accounts
             ? () => showAccountForm(context)
-            : () => _comingSoon(context, message),
+            : current == Destination.budgets
+            ? () => _comingSoon(context, message)
+            : () => openNewTransaction(context),
         child: AnimatedSwitcher(
           duration: context.motion(Motion.short),
           transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),

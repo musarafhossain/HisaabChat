@@ -93,23 +93,25 @@
 
 ### Phase 3 — Categories & Transactions *(core; get this right)*
 **Backend**
-- [ ] `BalanceService` (`effectsOf`, `negate`, `applyEffects`) per the schema doc.
-- [ ] `TransactionService` create/update/delete inside `db.transaction` with `forUpdate()`, ownership and type checks, and **idempotent create by client id**.
-- [ ] `GET /transactions`: filters, search (`note LIKE` / category name), cursor pagination on `(date, id)`, `meta.totals`.
-- [ ] Categories API: list, create, update, archive, reorder.
-- [ ] `POST /accounts/:id/reconcile` → ADJUSTMENT.
-- [ ] **Functional tests for the balance invariant:** every type; editing amount, account and type (Expense → Transfer); delete; repeated POST with the same id.
+- [x] `BalanceService` (`effectsOf`, `negate`, `applyEffects`, plus `findBalanceDrift` for the integrity check).
+- [x] `TransactionService` create/update/delete inside `db.transaction` with `forUpdate()`, ownership and type checks, and **idempotent create by client id**.
+- [x] `GET /transactions`: filters, search (`note LIKE` / category name), cursor pagination on `(date, id)`, `meta.totals`.
+- [x] Categories API: list, create, update, archive/unarchive, reorder.
+- [x] `POST /accounts/:id/reconcile` → ADJUSTMENT (adjustments can be deleted, not edited).
+- [x] Accounts list includes each account's `lastTransaction` (WhatsApp "last message").
+- [x] **Functional tests for the balance invariant** (70 backend tests total, drift query checked after every scenario): every type; editing amount, account and type (Expense → Transfer); delete; repeated POST with the same id.
 
 **Flutter**
-- [ ] Widgets: `AmountField` (large, numeric keypad, supports `120+80`), `TxnTypeSegmentedButton`, `CategoryChipPicker` + full `CategoryGridSheet`, `AccountPicker`, `DateTimeField`.
-- [ ] **Add/Edit Transaction** form, available globally (FAB, rail button, Ctrl+N). Generates a UUID v7 for new records. Remembers the last-used account.
-- [ ] `/transactions`: chat-list tiles, day headers with totals, infinite scroll, search pill, filter chips (All/Expense/Income/Transfer/month), more filters in ⋮. Expanded: tile selection opens the form in the detail pane.
-- [ ] Delete: confirm → optimistic remove → SnackBar **Undo** (re-POST with the same id). Swipe-to-delete on Android; right-click menu on Windows/Web.
-- [ ] Settings → Categories (tabs Expense/Income; add, edit, archive, drag to reorder).
-- [ ] **Account thread:** `ThreadView` (reversed list, `DoodleWallpaper`, `DateChip`, `SystemChip`, `TxnBubble` with in/out sides and 🕒/✓/⚠ status, jump-to-latest).
-- [ ] **Quick-add composer:** `QuickEntryParser` (**unit tested**: amounts, math, category aliases, notes) + `QuickComposer` (± toggle, suggestion chips, 📎 → full form, ➤/Enter to send; optimistic bubble).
-- [ ] Long-press **selection mode** (delete/duplicate several); Reconcile from Account info.
-- [ ] Accounts list preview line = last transaction; sorted by recent activity.
+- [x] Form pieces: `AmountField` (supports `120+80`), type segmented button, category chips (+ "More"), account dropdowns with balances, date & time picker, note.
+- [x] **Add/Edit Transaction** form (full-screen on phones, dialog on wider windows) from the + button / rail; UUID v7 ids. *Ctrl+N and remembering the last-used account move to Phase 7.*
+- [x] `/transactions`: chat-list tiles, day headers with totals, infinite scroll, search pill, filter chips (All/Expense/Income/Transfer/month), more filters in ⋮. Expanded: tile selection opens the form in the detail pane.
+- [x] Delete → SnackBar **Undo** (re-POST with the same id). *Swipe-to-delete and right-click menus move to Phase 7.*
+- [x] Settings → Categories (tabs Expense/Income; add, edit with color + icon picker, archive/unarchive). *Drag-to-reorder UI moves to Phase 7 (API is ready).*
+- [x] **Account thread:** `ThreadView` (reversed list, `DoodleWallpaper`, `DateChip`, `SystemChip`, `TxnBubble` with in/out sides and 🕒/✓/⚠ status, jump-to-latest).
+- [x] **Quick-add composer:** `QuickEntryParser` (**unit tested**: amounts, math, category aliases, notes) + `QuickComposer` (± toggle, suggestion chips, 📎 → full form, ➤/Enter to send; optimistic bubble).
+- [x] Long-press **selection mode** (delete/duplicate several, with Undo); Reconcile from the thread menu and Account info.
+- [x] Accounts list preview line = last transaction + WhatsApp-style time stamp. *Sorting by recent activity is left to Phase 7 (accounts keep their own order for now).*
+- [x] Widget tests (48 total): quick add, category hint, income side, failed send + retry, transfer, edit, delete + undo, multi-select, reconcile, Transactions tab search, categories.
 
 **Done when:** income, expense and transfer can be logged, edited and deleted on all platforms, and `balances:check` reports no drift.
 

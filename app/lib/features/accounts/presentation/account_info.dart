@@ -12,6 +12,7 @@ import 'package:hisaabchat/core/widgets/settings_tile.dart';
 import 'package:hisaabchat/features/accounts/accounts_controller.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_form.dart';
+import 'package:hisaabchat/features/transactions/presentation/reconcile_dialog.dart';
 
 /// Full-screen account info (phones; pushed from the accounts list).
 class AccountInfoScreen extends ConsumerWidget {
@@ -165,13 +166,15 @@ class AccountInfoView extends ConsumerWidget {
             ],
           ),
         ),
-        const SectionLabel('Transactions'),
-        ListTile(
-          leading: Icon(AppIcons.transactions, color: colors.textSecondary),
-          title: const Text('Chat-style history'),
-          subtitle: const Text('This account’s transactions appear here as a chat in Phase 3.'),
-        ),
+        const SizedBox(height: 8),
         const Divider(),
+        if (!account.archived)
+          SettingsTile(
+            icon: AppIcons.reconcile,
+            title: 'Reconcile balance',
+            subtitle: 'Match the app to your real balance',
+            onTap: () => showReconcileDialog(context, account),
+          ),
         SettingsTile(
           icon: AppIcons.edit,
           title: 'Edit account',

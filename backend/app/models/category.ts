@@ -31,4 +31,9 @@ export default class Category extends CategorySchema {
   static assignId(category: Category) {
     assignUuid(category)
   }
+
+  /** Archived categories are hidden from pickers; past transactions keep them. */
+  get archived() {
+    return this.archivedAt !== null && this.archivedAt !== undefined
+  }
 }

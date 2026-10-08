@@ -9,6 +9,10 @@ import 'package:hisaabchat/features/accounts/data/account.dart';
 import 'package:hisaabchat/features/accounts/data/accounts_repository.dart';
 import 'package:hisaabchat/features/auth/data/app_user.dart';
 import 'package:hisaabchat/features/auth/data/auth_repository.dart';
+import 'package:hisaabchat/features/categories/data/categories_repository.dart';
+import 'package:hisaabchat/features/categories/data/category.dart';
+import 'package:hisaabchat/features/transactions/data/transactions_repository.dart';
+import 'package:hisaabchat/features/transactions/data/txn.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const testUser = AppUser(
@@ -177,6 +181,26 @@ class FakeAccountsRepository implements AccountsRepository {
     );
   }
 
+  /// Moves a balance (used by [FakeTransactionsRepository]).
+  void applyDelta(String id, int delta) {
+    final index = accounts.indexWhere((a) => a.id == id);
+    final old = accounts[index];
+    accounts[index] = Account(
+      id: old.id,
+      name: old.name,
+      type: old.type,
+      openingBalance: old.openingBalance,
+      balance: old.balance + delta,
+      creditLimit: old.creditLimit,
+      color: old.color,
+      icon: old.icon,
+      includeInTotal: old.includeInTotal,
+      archived: old.archived,
+    );
+  }
+
+  Account byId(String id) => accounts.firstWhere((a) => a.id == id);
+
   @override
   Future<void> delete(String id) async {
     if (usedIds.contains(id)) {
@@ -186,12 +210,224 @@ class FakeAccountsRepository implements AccountsRepository {
   }
 }
 
+/// Default categories (subset of the server's seed).
+List<TxnCategory> defaultCategories() {
+  var order = 0;
+  TxnCategory cat(String name, String icon, CategoryType type) => TxnCategory(
+    id: 'cat-${name.toLowerCase().replaceAll(RegExp('[^a-z]+'), '-')}',
+    name: name,
+    type: type,
+    color: const Color(0xFF10B981),
+    icon: icon,
+    sortOrder: order++,
+    isDefault: true,
+  );
+  return [
+    cat('Room Rent', 'home', CategoryType.expense),
+    cat('Food & Groceries', 'shopping_cart', CategoryType.expense),
+    cat('Eating Out', 'restaurant', CategoryType.expense),
+    cat('Bike EMI', 'two_wheeler', CategoryType.expense),
+    cat('Petrol', 'local_gas_station', CategoryType.expense),
+    cat('Education', 'school', CategoryType.expense),
+    cat('Salary', 'work', CategoryType.income),
+    cat('Refund', 'undo', CategoryType.income),
+  ];
+}
+
+class FakeCategoriesRepository implements CategoriesRepository {
+  FakeCategoriesRepository([List<TxnCategory>? seed]) : categories = seed ?? defaultCategories();
+
+  final List<TxnCategory> categories;
+
+  TxnCategory byName(String name) => categories.firstWhere((c) => c.name == name);
+
+  @override
+  Future<List<TxnCategory>> list() async => List.of(categories);
+
+  @override
+  Future<TxnCategory> create(Map<String, Object?> body) async {
+    final category = TxnCategory(
+      id: 'cat-new-${categories.length}',
+      name: body['name']! as String,
+      type: CategoryType.fromApi(body['type']! as String),
+      color: parseHexColor(body['color']! as String),
+      icon: body['icon']! as String,
+      sortOrder: categories.length,
+    );
+    categories.add(category);
+    return category;
+  }
+
+  @override
+  Future<TxnCategory> update(String id, Map<String, Object?> changes) async {
+    final index = categories.indexWhere((c) => c.id == id);
+    final old = categories[index];
+    return categories[index] = TxnCategory(
+      id: old.id,
+      name: (changes['name'] as String?) ?? old.name,
+      type: old.type,
+      color: changes['color'] == null ? old.color : parseHexColor(changes['color']! as String),
+      icon: (changes['icon'] as String?) ?? old.icon,
+      sortOrder: old.sortOrder,
+    );
+  }
+
+  @override
+  Future<TxnCategory> setArchived(String id, {required bool archived}) async {
+    final index = categories.indexWhere((c) => c.id == id);
+    final old = categories[index];
+    return categories[index] = TxnCategory(
+      id: old.id,
+      name: old.name,
+      type: old.type,
+      color: old.color,
+      icon: old.icon,
+      sortOrder: old.sortOrder,
+      archived: archived,
+    );
+  }
+}
+
+/// In-memory `/transactions` that moves the fake account balances like the server.
+class FakeTransactionsRepository implements TransactionsRepository {
+  FakeTransactionsRepository(this.accounts, this.categories);
+
+  final FakeAccountsRepository accounts;
+  final FakeCategoriesRepository categories;
+  final List<Txn> txns = [];
+
+  /// Number of upcoming create calls that fail with a network error.
+  int failNextCreates = 0;
+
+  AccountRef _accountRef(String id) {
+    final a = accounts.byId(id);
+    return AccountRef(id: a.id, name: a.name, icon: a.icon, color: a.color);
+  }
+
+  Txn _build(String id, Map<String, Object?> body) {
+    final type = TxnType.fromApi(body['type']! as String);
+    final categoryId = body['categoryId'] as String?;
+    final category = categoryId == null ? null : categories.categories.firstWhere((c) => c.id == categoryId);
+    return Txn(
+      id: id,
+      type: type,
+      amount: body['amount']! as int,
+      date: DateTime.parse(body['date']! as String).toUtc(),
+      note: body['note'] as String?,
+      account: _accountRef(body['accountId']! as String),
+      toAccount: body['toAccountId'] == null ? null : _accountRef(body['toAccountId']! as String),
+      category: category == null
+          ? null
+          : CategoryRef(id: category.id, name: category.name, icon: category.icon, color: category.color),
+      adjustmentIncrease: body['adjustmentIncrease'] as bool?,
+    );
+  }
+
+  void _apply(Txn t, int sign) {
+    switch (t.type) {
+      case TxnType.income:
+        accounts.applyDelta(t.account.id, sign * t.amount);
+      case TxnType.expense:
+        accounts.applyDelta(t.account.id, -sign * t.amount);
+      case TxnType.transfer:
+        accounts
+          ..applyDelta(t.account.id, -sign * t.amount)
+          ..applyDelta(t.toAccount!.id, sign * t.amount);
+      case TxnType.adjustment:
+        accounts.applyDelta(t.account.id, sign * (t.adjustmentIncrease! ? t.amount : -t.amount));
+    }
+  }
+
+  @override
+  Future<TxnPage> list(TxnQuery query, {String? cursor, int limit = 30}) async {
+    final q = query.q?.toLowerCase() ?? '';
+    final items =
+        txns
+            .where(
+              (t) =>
+                  (query.accountId == null || t.account.id == query.accountId || t.toAccount?.id == query.accountId) &&
+                  (query.type == null || t.type == query.type) &&
+                  (q.isEmpty ||
+                      (t.note ?? '').toLowerCase().contains(q) ||
+                      (t.category?.name ?? '').toLowerCase().contains(q)),
+            )
+            .toList()
+          ..sort((a, b) => b.date.compareTo(a.date));
+    final income = items.where((t) => t.type == TxnType.income).fold<int>(0, (s, t) => s + t.amount);
+    final expense = items.where((t) => t.type == TxnType.expense).fold<int>(0, (s, t) => s + t.amount);
+    return (
+      items: items,
+      nextCursor: null,
+      totals: TxnTotals(income: income, expense: expense, count: items.length),
+    );
+  }
+
+  @override
+  Future<Txn> create(Map<String, Object?> body) async {
+    if (failNextCreates > 0) {
+      failNextCreates--;
+      throw const ApiException(message: 'Waiting for network…', isNetworkError: true);
+    }
+    final id = (body['id'] as String?) ?? 'txn-${txns.length}';
+    final existing = txns.where((t) => t.id == id);
+    if (existing.isNotEmpty) return existing.first;
+    final txn = _build(id, body);
+    txns.add(txn);
+    _apply(txn, 1);
+    return txn;
+  }
+
+  @override
+  Future<Txn> update(String id, Map<String, Object?> changes) async {
+    final index = txns.indexWhere((t) => t.id == id);
+    final old = txns[index];
+    _apply(old, -1);
+    final merged = {...old.toCreateBody(), ...changes};
+    final updated = _build(id, merged);
+    txns[index] = updated;
+    _apply(updated, 1);
+    return updated;
+  }
+
+  @override
+  Future<void> delete(String id) async {
+    final index = txns.indexWhere((t) => t.id == id);
+    _apply(txns.removeAt(index), -1);
+  }
+
+  @override
+  Future<Txn?> reconcile(String accountId, int actualBalance) async {
+    final diff = actualBalance - accounts.byId(accountId).balance;
+    if (diff == 0) return null;
+    final txn = _build('adj-${txns.length}', {
+      'type': 'ADJUSTMENT',
+      'amount': diff.abs(),
+      'accountId': accountId,
+      'date': DateTime.now().toUtc().toIso8601String(),
+      'note': 'Balance adjusted',
+      'adjustmentIncrease': diff > 0,
+    });
+    txns.add(txn);
+    _apply(txn, 1);
+    return txn;
+  }
+}
+
 /// Pumps the whole app with fakes and a fixed window size.
-Future<({FakeAuthRepository repo, MemoryTokenStore tokens, FakeAccountsRepository accounts})> pumpApp(
+typedef TestApp = ({
+  FakeAuthRepository repo,
+  MemoryTokenStore tokens,
+  FakeAccountsRepository accounts,
+  FakeCategoriesRepository categories,
+  FakeTransactionsRepository txns,
+});
+
+Future<TestApp> pumpApp(
   WidgetTester tester, {
   String? savedToken,
   FakeAuthRepository? repo,
   FakeAccountsRepository? accounts,
+  FakeCategoriesRepository? categories,
   Size size = const Size(400, 860),
 }) async {
   tester.view.physicalSize = size;
@@ -203,6 +439,8 @@ Future<({FakeAuthRepository repo, MemoryTokenStore tokens, FakeAccountsRepositor
   final fakeRepo = repo ?? FakeAuthRepository();
   final tokens = MemoryTokenStore(savedToken);
   final fakeAccounts = accounts ?? FakeAccountsRepository();
+  final fakeCategories = categories ?? FakeCategoriesRepository();
+  final fakeTxns = FakeTransactionsRepository(fakeAccounts, fakeCategories);
 
   await tester.pumpWidget(
     ProviderScope(
@@ -211,10 +449,12 @@ Future<({FakeAuthRepository repo, MemoryTokenStore tokens, FakeAccountsRepositor
         tokenStoreProvider.overrideWithValue(tokens),
         authRepositoryProvider.overrideWithValue(fakeRepo),
         accountsRepositoryProvider.overrideWithValue(fakeAccounts),
+        categoriesRepositoryProvider.overrideWithValue(fakeCategories),
+        transactionsRepositoryProvider.overrideWithValue(fakeTxns),
       ],
       child: const HisaabChatApp(),
     ),
   );
   await tester.pumpAndSettle();
-  return (repo: fakeRepo, tokens: tokens, accounts: fakeAccounts);
+  return (repo: fakeRepo, tokens: tokens, accounts: fakeAccounts, categories: fakeCategories, txns: fakeTxns);
 }

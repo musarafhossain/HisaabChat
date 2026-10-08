@@ -10,6 +10,13 @@ import 'helpers.dart';
 Finder _inAccounts(Finder finder) => find.descendant(of: find.byType(AccountsSection), matching: finder);
 Finder _inForm(Finder finder) => find.descendant(of: find.byType(AccountForm), matching: finder);
 
+Future<void> _openAccountInfo(WidgetTester tester) async {
+  await tester.tap(find.byTooltip('More options').last);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Account info'));
+  await tester.pumpAndSettle();
+}
+
 /// Scrolls the form's submit button into view (it can sit below the fold on phones) and taps it.
 Future<void> _submitForm(WidgetTester tester, String label) async {
   final button = _inForm(find.text(label));
@@ -126,12 +133,16 @@ void main() {
 
     await tester.tap(find.widgetWithText(AccountTile, 'Old Wallet'));
     await tester.pumpAndSettle();
+    // The account opens as a chat; its info is in the ⋮ menu.
+    await _openAccountInfo(tester);
     expect(find.text('Archive account'), findsOneWidget);
 
     await tester.tap(find.text('Archive account'));
     await tester.pumpAndSettle();
     expect(find.text('Unarchive account'), findsOneWidget);
 
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();
     expect(_inAccounts(find.text('₹1,000')), findsNWidgets(2)); // Cash tile + total
@@ -146,6 +157,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(AccountTile, 'Cash').first);
     await tester.pumpAndSettle();
+    await _openAccountInfo(tester);
 
     // Desktop: the info opens in the detail pane, next to the list.
     expect(find.text('Delete account'), findsOneWidget);

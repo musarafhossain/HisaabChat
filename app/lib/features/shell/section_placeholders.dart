@@ -50,20 +50,6 @@ class _SectionPlaceholderState extends State<SectionPlaceholder> {
   }
 }
 
-class TransactionsSection extends StatelessWidget {
-  const TransactionsSection({super.key});
-
-  @override
-  Widget build(BuildContext context) => const SectionPlaceholder(
-    icon: AppIcons.transactions,
-    title: 'No transactions yet',
-    message: 'Logging income, expenses and transfers arrives in Phase 3.',
-    searchHint: 'Search transactions',
-    filters: ['All', 'Expense', 'Income', 'Transfer'],
-    detailMessage: 'Select a transaction to see its details',
-  );
-}
-
 class BudgetsSection extends StatelessWidget {
   const BudgetsSection({super.key});
 

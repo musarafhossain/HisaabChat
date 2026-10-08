@@ -82,6 +82,70 @@ abstract final class AppIcons {
   static const IconData motion = Symbols.animation;
   static const IconData privacy = Symbols.lockPerson;
 
+  // Transactions
+  static const IconData today = Symbols.today;
+  static const IconData history = Symbols.history;
+  static const IconData note = Symbols.notes;
+  static const IconData reconcile = Symbols.balance;
+  static const IconData expand = Symbols.expandMore;
+  static const IconData noResults = Symbols.searchOff;
+  static const IconData scrollDown = Symbols.keyboardArrowDown;
+
+  /// Curated icons offered when creating a category (keys stored in the DB).
+  static const List<String> categoryChoices = [
+    'home',
+    'shopping_cart',
+    'local_grocery_store',
+    'restaurant',
+    'local_cafe',
+    'fastfood',
+    'lunch_dining',
+    'local_pizza',
+    'two_wheeler',
+    'directions_car',
+    'local_gas_station',
+    'directions_bus',
+    'train',
+    'local_taxi',
+    'flight',
+    'build',
+    'home_repair_service',
+    'school',
+    'menu_book',
+    'bolt',
+    'water_drop',
+    'wifi',
+    'smartphone',
+    'shopping_bag',
+    'checkroom',
+    'medical_services',
+    'medication',
+    'fitness_center',
+    'spa',
+    'content_cut',
+    'movie',
+    'sports_esports',
+    'music_note',
+    'pets',
+    'child_care',
+    'redeem',
+    'celebration',
+    'volunteer_activism',
+    'cleaning_services',
+    'local_laundry_service',
+    'receipt',
+    'savings',
+    'trending_up',
+    'work',
+    'laptop_mac',
+    'family_restroom',
+    'percent',
+    'undo',
+    'add_circle',
+    'payments',
+    'more_horiz',
+  ];
+
   /// Resolves an icon key stored in the database (accounts, categories,
   /// budgets); unknown keys fall back to a neutral glyph.
   static IconData byKey(String key) => Symbols.byName[key] ?? Symbols.category;
