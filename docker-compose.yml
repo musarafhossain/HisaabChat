@@ -1,0 +1,29 @@
+# Optional local database (alternative to XAMPP). Matches production: MariaDB 11.4 LTS.
+#   docker compose up -d
+# Then set DB_PASSWORD=hisaabchat in backend/.env.
+services:
+  mariadb:
+    image: mariadb:11.4
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: hisaabchat
+      MARIADB_USER: hisaabchat
+      MARIADB_PASSWORD: hisaabchat
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mariadb-data:/var/lib/mysql
+      - ./deploy/db-init:/docker-entrypoint-initdb.d:ro
+
+  adminer:
+    image: adminer:4
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mariadb
+
+volumes:
+  mariadb-data:

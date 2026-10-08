@@ -1,0 +1,109 @@
+# Material Symbols (Rounded) glyphs bundled with the app.
+# One icon name per line (https://fonts.google.com/icons). After editing, run:
+#   python tool/icons/generate_icons.py <font .ttf> <.codepoints file>
+# which rewrites assets/fonts/MaterialSymbolsRounded.ttf and lib/core/icons/symbols.g.dart.
+
+# Navigation & app bar
+home
+receipt_long
+donut_large
+account_balance_wallet
+bar_chart
+settings
+search
+more_vert
+arrow_back
+arrow_forward
+close
+add
+add_card
+add_chart
+filter_list
+calendar_month
+edit
+delete
+content_copy
+push_pin
+archive
+download
+share
+refresh
+chevron_right
+check
+groups
+
+# Transaction types & status
+north_east
+south_west
+swap_horiz
+tune
+autorenew
+schedule
+done
+done_all
+error
+check_circle
+warning
+info
+cloud_done
+cloud_off
+
+# Composer
+remove
+attach_file
+send
+keyboard_double_arrow_down
+
+# Auth & settings
+mail
+lock
+visibility
+visibility_off
+person
+badge
+sell
+palette
+database
+help
+logout
+devices
+currency_rupee
+public
+event
+brightness_auto
+light_mode
+dark_mode
+animation
+lock_person
+
+# Account types
+payments
+account_balance
+smartphone
+credit_card
+savings
+wallet
+
+# Default categories
+shopping_cart
+restaurant
+two_wheeler
+local_gas_station
+build
+school
+bolt
+wifi
+shopping_bag
+medical_services
+movie
+flight
+spa
+redeem
+more_horiz
+work
+laptop_mac
+family_restroom
+percent
+undo
+add_circle
+category

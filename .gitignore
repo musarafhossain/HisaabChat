@@ -1,0 +1,11 @@
+# OS / editors
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+
+# Local env files (backend/.gitignore and app/.gitignore cover the rest)
+.env
+.env.*
+!.env.example
+!.env.test
