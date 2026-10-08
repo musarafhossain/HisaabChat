@@ -1,6 +1,7 @@
 import env from '#start/env'
 import app from '@adonisjs/core/services/app'
 import { defineConfig } from '@adonisjs/core/http'
+import proxyAddr from 'proxy-addr'
 
 /**
  * The app URL can be used in various places where you want to create absolute
@@ -18,6 +19,12 @@ export const http = defineConfig({
    * Useful to correlate logs and debug a request flow.
    */
   generateRequestId: true,
+
+  /**
+   * Trust X-Forwarded-For from a reverse proxy on the same machine (nginx),
+   * so request.ip() is the visitor's address. Login rate limits depend on it.
+   */
+  trustProxy: proxyAddr.compile('loopback'),
 
   /**
    * Allow HTTP method spoofing via the "_method" form/query parameter.
