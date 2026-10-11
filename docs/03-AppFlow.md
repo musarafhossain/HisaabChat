@@ -49,7 +49,8 @@ App (authenticated)
 - **Medium (600–839 dp):** 64 dp icon rail + one full-width pane. Threads and info pages push over the list.
 - **Expanded (≥ 840 dp, Windows/desktop web), like WhatsApp Desktop:** icon rail (the + and 🔍 at the top, then Home, Transactions, Budgets, Accounts, People, Reports; Settings and the profile avatar at the bottom; the rail scrolls in short windows) + **list panel** + **detail pane** (account or person thread, budget info, transaction form). The detail pane shows a placeholder until something is selected.
 - The full transaction form opens as a **full-screen page** (compact) or a **dialog** (wider); editing from the desktop Transactions list opens it in the detail pane.
-- **Keyboard (Windows/Web):** Ctrl+1…6 switch sections, Ctrl+F search everything, Esc back/close, Enter send. *Planned: Ctrl+N new transaction, ↑/↓ in lists, Del delete.*
+- **Keyboard (Windows/Web):** Ctrl+1…6 switch sections, Ctrl+F search everything, Ctrl+N new transaction, Del delete the open transaction (Transactions on desktop) or the selected chat bubbles, Esc back/close, Enter send. *Planned: ↑/↓ in lists.*
+- **Right-click (Windows/Web):** transactions anywhere → Edit, Duplicate, Delete (with Undo); chat bubbles also → Select; accounts → Open, Edit, Reconcile, Export CSV, Archive; people → Open chat, Settle up, Write off, Edit name, Export CSV; budgets → Open, Edit.
 - **Back (every platform):** closes whatever is on top first (form, sheet, dialog, menu, chat, Settings page). On any section other than Home it goes to Home; only Back on Home leaves the app (Android). Triggers: Android Back, the browser's Back (open forms and dialogs have their own history entry, so the page underneath doesn't change), Esc, and the mouse back button. Esc never closes the app.
 
 ## 2. Overall Flow
@@ -144,7 +145,7 @@ Same sheet with the **Income** tab selected. The category list shows income cate
 2. Change any field (including type, account or amount) → Save → balances are recalculated (old effect reversed, new effect applied).
 3. **Delete** → confirm dialog → deleted → toast with **Undo** (5 s).
 4. **Long-press** a tile or bubble → WhatsApp-style selection mode (the app bar shows the count, 🗑 delete, ⧉ duplicate). Tap more items to select several.
-5. *Planned (Phase 7):* swipe left on a tile to delete (Android); hover chevron or right-click menu and the Del key (Windows/Web).
+5. Windows/Web: right-click menu (Edit, Duplicate, Delete) and the Del key. *Planned: swipe left on a tile to delete (Android), a hover chevron.*
 
 ### 3.6 Transactions List
 - Chat-list style tiles (category avatar · category · `Account · note` · amount + time), grouped under small headers like `TODAY · −₹540`. Newest first, **paged as you scroll** (40 at a time). A day header shows its total only once that whole day has loaded, never a partial sum.

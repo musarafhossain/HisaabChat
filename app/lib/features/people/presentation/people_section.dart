@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,15 +8,19 @@ import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/money/money.dart';
 import 'package:hisaabchat/core/motion/entrance.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
+import 'package:hisaabchat/core/widgets/context_menu.dart';
 import 'package:hisaabchat/core/widgets/empty_state.dart';
 import 'package:hisaabchat/core/widgets/list_detail_layout.dart';
 import 'package:hisaabchat/core/widgets/search_pill.dart';
 import 'package:hisaabchat/core/widgets/window_class.dart';
+import 'package:hisaabchat/features/export/export_actions.dart';
 import 'package:hisaabchat/features/people/data/person.dart';
 import 'package:hisaabchat/features/people/people_controller.dart';
 import 'package:hisaabchat/features/people/presentation/people_widgets.dart';
 import 'package:hisaabchat/features/people/presentation/person_form.dart';
 import 'package:hisaabchat/features/people/presentation/person_thread.dart';
+import 'package:hisaabchat/features/people/presentation/settle_dialog.dart';
+import 'package:hisaabchat/features/people/presentation/write_off_dialog.dart';
 
 /// People: who owes you and whom you owe. Each person is a chat.
 class PeopleSection extends ConsumerWidget {
@@ -99,6 +105,33 @@ class _PeopleListState extends ConsumerState<_PeopleList> {
     }
   }
 
+  /// Right-click menu for a person row.
+  List<ContextMenuItem> _menu(Person person) => [
+    ContextMenuItem(label: 'Open chat', icon: AppIcons.forward, onSelected: () => _open(person)),
+    if (!person.settled) ...[
+      ContextMenuItem(
+        label: 'Settle up',
+        icon: AppIcons.settle,
+        onSelected: () => unawaited(showSettleDialog(context, person)),
+      ),
+      ContextMenuItem(
+        label: 'Write off',
+        icon: AppIcons.done,
+        onSelected: () => unawaited(showWriteOffDialog(context, person)),
+      ),
+    ],
+    ContextMenuItem(
+      label: 'Edit name',
+      icon: AppIcons.edit,
+      onSelected: () => unawaited(showPersonForm(context, existing: person)),
+    ),
+    ContextMenuItem(
+      label: 'Export CSV',
+      icon: AppIcons.download,
+      onSelected: () => unawaited(exportCsvFor(context, ref, personId: person.id)),
+    ),
+  ];
+
   bool _matches(Person p) =>
       (_query.isEmpty || p.name.toLowerCase().contains(_query.toLowerCase())) &&
       switch (_filter) {
@@ -173,7 +206,14 @@ class _PeopleListState extends ConsumerState<_PeopleList> {
             FadeSlideIn(
               key: ValueKey(person.id),
               index: i,
-              child: PersonTile(person: person, selected: wide && person.id == selectedId, onTap: () => _open(person)),
+              child: ContextMenuRegion(
+                items: () => _menu(person),
+                child: PersonTile(
+                  person: person,
+                  selected: wide && person.id == selectedId,
+                  onTap: () => _open(person),
+                ),
+              ),
             ),
           if (state.archived.isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -189,7 +229,14 @@ class _PeopleListState extends ConsumerState<_PeopleList> {
             ),
             if (_showArchived)
               for (final person in archived)
-                PersonTile(person: person, selected: wide && person.id == selectedId, onTap: () => _open(person)),
+                ContextMenuRegion(
+                  items: () => _menu(person),
+                  child: PersonTile(
+                    person: person,
+                    selected: wide && person.id == selectedId,
+                    onTap: () => _open(person),
+                  ),
+                ),
           ],
         ],
       ),

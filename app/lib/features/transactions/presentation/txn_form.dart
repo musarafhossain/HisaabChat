@@ -88,10 +88,12 @@ Future<bool?> showTxnForm(BuildContext context, {Txn? existing, TxnDraft? draft}
 }
 
 /// Shows a toast with Undo after deleting [txns].
-void showDeletedToast(BuildContext context, WidgetRef ref, List<Txn> txns) {
-  final toast = AppToast.of(context);
-  // Read now: the calling widget (e.g. the edit form) may be gone when Undo is tapped.
-  final mutations = ref.read(txnMutationsProvider);
+void showDeletedToast(BuildContext context, WidgetRef ref, List<Txn> txns) =>
+    // Read now: the calling widget (e.g. the edit form) may be gone when Undo is tapped.
+    showDeletedToastWith(AppToast.of(context), ref.read(txnMutationsProvider), txns);
+
+/// [showDeletedToast] for callers that may be gone by the time it shows.
+void showDeletedToastWith(ToastHostState toast, TxnMutations mutations, List<Txn> txns) {
   final label = txns.length == 1
       ? 'Deleted ${Money.format(txns.single.amount)} ${txns.single.labelFor(null)}'
       : 'Deleted ${txns.length} transactions';

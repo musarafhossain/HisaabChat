@@ -11,8 +11,8 @@ import 'package:hisaabchat/core/motion/entrance.dart';
 import 'package:hisaabchat/core/motion/motion.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/chat_tile.dart';
+import 'package:hisaabchat/core/widgets/context_menu.dart';
 import 'package:hisaabchat/core/widgets/empty_state.dart';
-import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/features/accounts/accounts_controller.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_form.dart';
@@ -22,6 +22,7 @@ import 'package:hisaabchat/features/transactions/presentation/doodle_wallpaper.d
 import 'package:hisaabchat/features/transactions/presentation/quick_composer.dart';
 import 'package:hisaabchat/features/transactions/presentation/reconcile_dialog.dart';
 import 'package:hisaabchat/features/transactions/presentation/thread_widgets.dart';
+import 'package:hisaabchat/features/transactions/presentation/txn_actions.dart';
 import 'package:hisaabchat/features/transactions/presentation/txn_form.dart';
 import 'package:hisaabchat/features/transactions/transactions_controller.dart';
 
@@ -63,6 +64,7 @@ class _AccountThreadState extends ConsumerState<AccountThread> {
   final _scroll = ScrollController();
   final Set<String> _selected = {};
   final Map<String, int> _shakes = {};
+  final _keys = FocusNode(debugLabel: 'account thread');
   bool _showJump = false;
 
   @override
@@ -73,6 +75,7 @@ class _AccountThreadState extends ConsumerState<AccountThread> {
 
   @override
   void dispose() {
+    _keys.dispose();
     _scroll.dispose();
     super.dispose();
   }
@@ -129,34 +132,11 @@ class _AccountThreadState extends ConsumerState<AccountThread> {
   }
 
   Future<void> _deleteSelected(List<Txn> txns) async {
-    final mutations = ref.read(txnMutationsProvider);
-    try {
-      for (final txn in txns) {
-        await mutations.delete(txn.id);
-      }
-      if (!mounted) return;
-      setState(_selected.clear);
-      showDeletedToast(context, ref, txns);
-    } on ApiException catch (error) {
-      if (mounted) AppToast.error(context, error.message);
-    }
+    if (await deleteTxns(context, ref, txns) && mounted) setState(_selected.clear);
   }
 
   Future<void> _duplicateSelected(List<Txn> txns) async {
-    final mutations = ref.read(txnMutationsProvider);
-    try {
-      for (final txn in txns.reversed) {
-        final body = txn.toCreateBody()
-          ..remove('id')
-          ..['date'] = DateTime.now().toUtc().toIso8601String();
-        await mutations.create(body);
-      }
-      if (!mounted) return;
-      setState(_selected.clear);
-      AppToast.success(context, txns.length == 1 ? 'Duplicated' : 'Duplicated ${txns.length} transactions');
-    } on ApiException catch (error) {
-      if (mounted) AppToast.error(context, error.message);
-    }
+    if (await duplicateTxns(context, ref, txns) && mounted) setState(_selected.clear);
   }
 
   void _onBubbleTap(_TxnEntry entry) {
@@ -173,6 +153,7 @@ class _AccountThreadState extends ConsumerState<AccountThread> {
   void _toggleSelected(_TxnEntry entry) {
     if (entry.status != null) return; // only saved transactions
     setState(() => _selected.contains(entry.txn.id) ? _selected.remove(entry.txn.id) : _selected.add(entry.txn.id));
+    if (_selected.isNotEmpty) _keys.requestFocus();
   }
 
   @override
@@ -196,7 +177,7 @@ class _AccountThreadState extends ConsumerState<AccountThread> {
         if (e is _TxnEntry && e.txn.category != null) e.txn.category!.id,
     ];
 
-    final list = switch (thread) {
+    final threadList = switch (thread) {
       AsyncError(:final error) when thread.value == null => EmptyState(
         icon: AppIcons.offline,
         title: 'Couldn’t load transactions',
@@ -221,15 +202,26 @@ class _AccountThreadState extends ConsumerState<AccountThread> {
             );
           }
           return switch (entries[index]) {
-            _TxnEntry(:final txn, :final status) => TxnBubble(
+            _TxnEntry(:final txn, :final status) => TxnContextMenu(
               key: ValueKey(txn.id),
               txn: txn,
-              accountId: account.id,
-              status: status,
-              selected: _selected.contains(txn.id),
-              shakeTrigger: _shakes[txn.id] ?? 0,
-              onTap: () => _onBubbleTap(entries[index] as _TxnEntry),
-              onLongPress: () => _toggleSelected(entries[index] as _TxnEntry),
+              enabled: status == null && _selected.isEmpty,
+              extra: [
+                ContextMenuItem(
+                  label: 'Select',
+                  icon: AppIcons.check,
+                  onSelected: () => _toggleSelected(entries[index] as _TxnEntry),
+                ),
+              ],
+              child: TxnBubble(
+                txn: txn,
+                accountId: account.id,
+                status: status,
+                selected: _selected.contains(txn.id),
+                shakeTrigger: _shakes[txn.id] ?? 0,
+                onTap: () => _onBubbleTap(entries[index] as _TxnEntry),
+                onLongPress: () => _toggleSelected(entries[index] as _TxnEntry),
+              ),
             ),
             _DayEntry(:final label) => ThreadChip(text: label),
             _SystemEntry(:final text) => ThreadChip(text: text, icon: AppIcons.info),
@@ -237,6 +229,11 @@ class _AccountThreadState extends ConsumerState<AccountThread> {
         },
       ),
     };
+    // Del deletes the selected bubbles (desktop); focus moves here on select.
+    final list = DeleteKeyShortcut(
+      onDelete: selectedTxns.isEmpty ? null : () => unawaited(_deleteSelected(selectedTxns)),
+      child: Focus(focusNode: _keys, child: threadList),
+    );
 
     final body = Column(
       children: [

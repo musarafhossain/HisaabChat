@@ -305,7 +305,7 @@ A single `AppShell` widget picks the layout with `LayoutBuilder`/`MediaQuery.siz
 | Platform | Details |
 |---|---|
 | **Android** | minSdk 24 (Android 7.0); edge-to-edge; haptic feedback on save; share sheet for exports. **Predictive back is off** (`enableOnBackInvokedCallback="false"`) so every Back goes through the router: close the top screen, else go to Home, else leave the app |
-| **Windows** | Windows 10/11 x64; `window_manager` minimum size 400×640; keyboard: Ctrl+1…6 sections, Ctrl+F search, Esc and the mouse back button = Back; hover states; MSIX package. *Planned: Ctrl+N, right-click menus* |
+| **Windows** | Windows 10/11 x64; `window_manager` minimum size 400×640; keyboard: Ctrl+1…6 sections, Ctrl+F search, Ctrl+N new transaction, Del deletes the open/selected transaction (not while typing), Esc and the mouse back button = Back; right-click menus on transactions (Edit, Duplicate, Delete), chat bubbles (+ Select), accounts, people and budgets; hover states; MSIX package. *Planned: ↑/↓ in lists* |
 | **Web** | Chrome/Edge/Firefox/Safari (last 2 versions); path URLs; loading splash in `index.html` while the engine starts. Forms, sheets and dialogs get their own browser-history entry, so browser Back closes them instead of changing the page; Esc works as Back. `<meta name="theme-color">` follows the accent color |
 
 ### 5.5 Networking

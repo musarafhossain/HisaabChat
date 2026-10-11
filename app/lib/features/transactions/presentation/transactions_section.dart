@@ -9,11 +9,13 @@ import 'package:hisaabchat/core/money/money.dart';
 import 'package:hisaabchat/core/motion/entrance.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/chat_tile.dart';
+import 'package:hisaabchat/core/widgets/context_menu.dart';
 import 'package:hisaabchat/core/widgets/empty_state.dart';
 import 'package:hisaabchat/core/widgets/list_detail_layout.dart';
 import 'package:hisaabchat/core/widgets/search_pill.dart';
 import 'package:hisaabchat/core/widgets/window_class.dart';
 import 'package:hisaabchat/features/transactions/data/txn.dart';
+import 'package:hisaabchat/features/transactions/presentation/txn_actions.dart';
 import 'package:hisaabchat/features/transactions/presentation/txn_form.dart';
 import 'package:hisaabchat/features/transactions/transactions_controller.dart';
 
@@ -51,22 +53,25 @@ class TransactionTile extends StatelessWidget {
       if (txn.note != null && txn.note!.isNotEmpty && txn.note != txn.labelFor(null)) txn.note!,
     ].join(' · ');
 
-    return ChatTile(
-      selected: selected,
-      onTap: onTap,
-      leading: IconAvatar(icon: icon, color: color),
-      title: txn.labelFor(null),
-      subtitle: subtitle,
-      trailing: Text(
-        amount,
-        style: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-          color: amountColor,
-          fontFeatures: const [FontFeature.tabularFigures()],
+    return TxnContextMenu(
+      txn: txn,
+      child: ChatTile(
+        selected: selected,
+        onTap: onTap,
+        leading: IconAvatar(icon: icon, color: color),
+        title: txn.labelFor(null),
+        subtitle: subtitle,
+        trailing: Text(
+          amount,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: amountColor,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
         ),
+        trailingCaption: Dates.time(txn.localDate),
       ),
-      trailingCaption: Dates.time(txn.localDate),
     );
   }
 }
@@ -87,6 +92,9 @@ class _TransactionsSectionState extends ConsumerState<TransactionsSection> {
   int _typeIndex = 0;
   Txn? _selected;
 
+  /// Keyboard focus for the list, so Del can delete the open transaction.
+  final _keys = FocusNode(debugLabel: 'transactions');
+
   TxnFilter get _filter => (type: _types[_typeIndex], q: _query);
 
   @override
@@ -101,6 +109,7 @@ class _TransactionsSectionState extends ConsumerState<TransactionsSection> {
 
   @override
   void dispose() {
+    _keys.dispose();
     _debounce?.cancel();
     _scroll.dispose();
     super.dispose();
@@ -114,6 +123,7 @@ class _TransactionsSectionState extends ConsumerState<TransactionsSection> {
   void _open(Txn txn) {
     if (context.windowClass == WindowClass.expanded) {
       setState(() => _selected = txn);
+      _keys.requestFocus();
     } else {
       unawaited(showTxnForm(context, existing: txn));
     }
@@ -122,6 +132,18 @@ class _TransactionsSectionState extends ConsumerState<TransactionsSection> {
   @override
   Widget build(BuildContext context) {
     final selected = _selected;
+    return DeleteKeyShortcut(
+      onDelete: selected == null ? null : () => unawaited(_delete(selected)),
+      child: Focus(focusNode: _keys, child: _layout(context, selected)),
+    );
+  }
+
+  /// Desktop: Del on the open transaction deletes it (with Undo).
+  Future<void> _delete(Txn txn) async {
+    if (await deleteTxns(context, ref, [txn]) && mounted) setState(() => _selected = null);
+  }
+
+  Widget _layout(BuildContext context, Txn? selected) {
     return ListDetailLayout(
       list: _list(context),
       detail: selected == null

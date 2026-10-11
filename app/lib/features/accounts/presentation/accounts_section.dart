@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,16 +8,20 @@ import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/motion/animated_amount.dart';
 import 'package:hisaabchat/core/motion/entrance.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
+import 'package:hisaabchat/core/widgets/context_menu.dart';
 import 'package:hisaabchat/core/widgets/empty_state.dart';
 import 'package:hisaabchat/core/widgets/list_detail_layout.dart';
 import 'package:hisaabchat/core/widgets/search_pill.dart';
+import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/core/widgets/window_class.dart';
 import 'package:hisaabchat/features/accounts/accounts_controller.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_form.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_info.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_tile.dart';
+import 'package:hisaabchat/features/export/export_actions.dart';
 import 'package:hisaabchat/features/transactions/presentation/account_thread.dart';
+import 'package:hisaabchat/features/transactions/presentation/reconcile_dialog.dart';
 
 /// Accounts tab: the "chats" list. On desktop the selected account's thread
 /// opens in the detail pane (WhatsApp Desktop); on phones it opens full screen.
@@ -93,6 +99,42 @@ class _AccountsListState extends ConsumerState<_AccountsList> {
       ref.read(selectedAccountProvider.notifier).select(account.id);
     } else {
       context.go('/accounts/${account.id}');
+    }
+  }
+
+  /// Right-click menu for an account row.
+  List<ContextMenuItem> _menu(Account account) => [
+    ContextMenuItem(label: 'Open', icon: AppIcons.forward, onSelected: () => _open(account)),
+    ContextMenuItem(
+      label: 'Edit account',
+      icon: AppIcons.edit,
+      onSelected: () => unawaited(showAccountForm(context, existing: account)),
+    ),
+    if (!account.archived)
+      ContextMenuItem(
+        label: 'Reconcile balance',
+        icon: AppIcons.reconcile,
+        onSelected: () => unawaited(showReconcileDialog(context, account)),
+      ),
+    ContextMenuItem(
+      label: 'Export CSV',
+      icon: AppIcons.download,
+      onSelected: () => unawaited(exportCsvFor(context, ref, accountId: account.id)),
+    ),
+    ContextMenuItem(
+      label: account.archived ? 'Unarchive' : 'Archive',
+      icon: AppIcons.archive,
+      onSelected: () => unawaited(_setArchived(account, archived: !account.archived)),
+    ),
+  ];
+
+  Future<void> _setArchived(Account account, {required bool archived}) async {
+    final toast = AppToast.of(context);
+    try {
+      await ref.read(accountsProvider.notifier).setArchived(account.id, archived: archived);
+      toast.show(archived ? '${account.name} archived' : '${account.name} is back', kind: ToastKind.success);
+    } on ApiException catch (error) {
+      toast.show(error.message, kind: ToastKind.error);
     }
   }
 
@@ -188,10 +230,13 @@ class _AccountsListState extends ConsumerState<_AccountsList> {
             FadeSlideIn(
               key: ValueKey(account.id),
               index: i,
-              child: AccountTile(
-                account: account,
-                selected: account.id == selectedId && context.windowClass == WindowClass.expanded,
-                onTap: () => _open(account),
+              child: ContextMenuRegion(
+                items: () => _menu(account),
+                child: AccountTile(
+                  account: account,
+                  selected: account.id == selectedId && context.windowClass == WindowClass.expanded,
+                  onTap: () => _open(account),
+                ),
               ),
             ),
           if (state.archived.isNotEmpty) ...[
@@ -214,10 +259,13 @@ class _AccountsListState extends ConsumerState<_AccountsList> {
                   ? Column(
                       children: [
                         for (final account in archived)
-                          AccountTile(
-                            account: account,
-                            selected: account.id == selectedId && context.windowClass == WindowClass.expanded,
-                            onTap: () => _open(account),
+                          ContextMenuRegion(
+                            items: () => _menu(account),
+                            child: AccountTile(
+                              account: account,
+                              selected: account.id == selectedId && context.windowClass == WindowClass.expanded,
+                              onTap: () => _open(account),
+                            ),
                           ),
                       ],
                     )

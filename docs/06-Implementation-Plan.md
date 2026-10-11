@@ -170,7 +170,8 @@
 - [ ] **Icon audit:** no `Icons.*` or emoji left in the UI; every icon button has a tooltip and semantics label.
 - [ ] Our own **doodle wallpaper** SVG (light/dark tints) + Appearance setting (Doodle / Plain / None).
 - [x] **Keyboard & mouse** (Windows/Web), first part: Ctrl+1…6 sections, Ctrl+F search, Esc and the mouse back button as Back.
-- [ ] Keyboard & mouse, rest: Ctrl+N, ↑/↓ in lists, Del, focus order, hover states, right-click context menus, visible scrollbars.
+- [x] Keyboard & mouse, second part: Ctrl+N (new transaction anywhere), Del (open transaction on desktop / selected bubbles; ignored while typing), right-click menus (`ContextMenuRegion`) on transactions, bubbles, accounts, people and budgets. Tests in `test/keyboard_mouse_test.dart`.
+- [ ] Keyboard & mouse, rest: ↑/↓ in lists, a hover ⌄ chevron, focus-order pass.
 - [x] **Exports:** `GET /export/transactions.csv` (local-day range, account/person filters, BOM, formula-safe cells) and `GET /export/all.json`; Settings → Export data, plus Export CSV on accounts and people. Web → browser download; Windows → Save As; Android → share sheet.
 - [x] **Delete account:** `DELETE /me` with the password (`AccountDeletionService`, ordered deletes in one transaction; tests check every table is empty for that user and another user is untouched). Settings → Delete account dialog (type DELETE + password).
 - [x] **Forgot password:** `@adonisjs/mail` over SMTP (Gmail app password, settings only in `.env`), `POST /auth/forgot-password` emails a 6-digit code (hashed, 15 min, per-email limits), `POST /auth/reset-password` sets the password and signs out everywhere. App: Login → Forgot password? → code + new password → signed in.

@@ -41,6 +41,7 @@ class AppShell extends ConsumerWidget {
       for (final (i, d) in Destination.railTop.indexed)
         SingleActivator(LogicalKeyboardKey(0x31 + i), control: true): () => _go(d),
       const SingleActivator(LogicalKeyboardKey.keyF, control: true): () => openSearch(context),
+      const SingleActivator(LogicalKeyboardKey.keyN, control: true): () => openNewTransaction(context),
     };
 
     final content = switch (context.windowClass) {

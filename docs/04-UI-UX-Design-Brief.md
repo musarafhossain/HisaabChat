@@ -605,7 +605,7 @@ Segmented tabs **Spending · Income · Trend**. A donut chart with the total in 
 | Scrollbars | Overlay | Thin, visible on hover | Thin, visible on hover |
 | Export | Share sheet | Save As dialog | Browser download |
 
-**Keyboard (Windows/Web):** Ctrl+1…6 switch rail section · Ctrl+F search everything · Esc back/close · Enter send. *Planned (Phase 7): Ctrl+N new transaction, ↑/↓ move through the list, Del delete selected.*
+**Keyboard (Windows/Web):** Ctrl+1…6 switch rail section · Ctrl+F search everything · Ctrl+N new transaction · Del delete the open or selected transaction(s) · Esc back/close · Enter send. Right-click opens a context menu on transactions, bubbles, accounts, people and budgets. *Planned: ↑/↓ move through the list, the hover ⌄ chevron.*
 
 ## 8. Accessibility
 - Contrast ≥ 4.5:1 for text in both themes. Bubble colors are checked against their text colors.

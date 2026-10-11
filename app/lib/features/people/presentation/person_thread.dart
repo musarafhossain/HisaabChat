@@ -25,6 +25,7 @@ import 'package:hisaabchat/features/transactions/data/txn.dart';
 import 'package:hisaabchat/features/transactions/domain/quick_entry_parser.dart';
 import 'package:hisaabchat/features/transactions/presentation/doodle_wallpaper.dart';
 import 'package:hisaabchat/features/transactions/presentation/thread_widgets.dart';
+import 'package:hisaabchat/features/transactions/presentation/txn_actions.dart';
 import 'package:hisaabchat/features/transactions/presentation/txn_form.dart';
 import 'package:hisaabchat/features/transactions/transactions_controller.dart';
 
@@ -89,12 +90,15 @@ class PersonThread extends ConsumerWidget {
           itemBuilder: (context, index) => index >= entries.length
               ? const LoadMoreFooter()
               : switch (entries[index]) {
-                  final Txn txn => TxnBubble(
+                  final Txn txn => TxnContextMenu(
                     key: ValueKey(txn.id),
                     txn: txn,
-                    accountId: txn.account.id,
-                    label: '${txn.personLabel} · ${txn.account.name}',
-                    onTap: () => _showEntryActions(context, ref, txn),
+                    child: TxnBubble(
+                      txn: txn,
+                      accountId: txn.account.id,
+                      label: '${txn.personLabel} · ${txn.account.name}',
+                      onTap: () => _showEntryActions(context, ref, txn),
+                    ),
                   ),
                   final String day => ThreadChip(text: day),
                   _ => const SizedBox.shrink(),

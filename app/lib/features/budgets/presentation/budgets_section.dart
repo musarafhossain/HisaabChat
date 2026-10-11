@@ -10,6 +10,7 @@ import 'package:hisaabchat/core/motion/animated_amount.dart';
 import 'package:hisaabchat/core/motion/entrance.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/chat_tile.dart';
+import 'package:hisaabchat/core/widgets/context_menu.dart';
 import 'package:hisaabchat/core/widgets/empty_state.dart';
 import 'package:hisaabchat/core/widgets/list_detail_layout.dart';
 import 'package:hisaabchat/core/widgets/search_pill.dart';
@@ -133,10 +134,24 @@ class _BudgetListState extends ConsumerState<_BudgetList> {
               FadeSlideIn(
                 key: ValueKey(budget.id),
                 index: i,
-                child: BudgetTile(
-                  budget: budget,
-                  selected: selected == budget.id && context.windowClass == WindowClass.expanded,
-                  onTap: () => _open(context, ref, budget),
+                child: ContextMenuRegion(
+                  items: () => [
+                    ContextMenuItem(
+                      label: 'Open',
+                      icon: AppIcons.forward,
+                      onSelected: () => _open(context, ref, budget),
+                    ),
+                    ContextMenuItem(
+                      label: 'Edit budget',
+                      icon: AppIcons.edit,
+                      onSelected: () => unawaited(showBudgetForm(context, existing: budget)),
+                    ),
+                  ],
+                  child: BudgetTile(
+                    budget: budget,
+                    selected: selected == budget.id && context.windowClass == WindowClass.expanded,
+                    onTap: () => _open(context, ref, budget),
+                  ),
                 ),
               ),
             if (_query.isEmpty) ...[
