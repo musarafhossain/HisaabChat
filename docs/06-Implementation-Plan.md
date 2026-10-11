@@ -174,7 +174,7 @@
 - [x] **Exports:** `GET /export/transactions.csv` (local-day range, account/person filters, BOM, formula-safe cells) and `GET /export/all.json`; Settings → Export data, plus Export CSV on accounts and people. Web → browser download; Windows → Save As; Android → share sheet.
 - [x] **Delete account:** `DELETE /me` with the password (`AccountDeletionService`, ordered deletes in one transaction; tests check every table is empty for that user and another user is untouched). Settings → Delete account dialog (type DELETE + password).
 - [ ] Forgot/reset password (needs SMTP).
-- [ ] **Write off** a person's remaining balance (PPL-7).
+- [x] **Write off** a person's remaining balance (PPL-7): `POST /people/:id/write-off` saves COLLECT+EXPENSE or REPAY+INCOME together (no money moves; the loss or gift shows in reports and budgets). Person ⋮ → Write off dialog (amount, category, account).
 - [ ] **App identity:** `flutter_launcher_icons` (Android adaptive, Windows .ico, web favicons/manifest) and `flutter_native_splash`.
 - [ ] **Android:** release signing config, `flutter build apk --split-per-abi` / `appbundle`, minSdk 24, edge-to-edge (predictive back stays off; see above). *Blocked locally: the dev network can't reach `storage.googleapis.com`.*
 - [ ] **Windows:** `msix` config (name, publisher, logo, self-signed cert) → `dart run msix:create`.

@@ -85,6 +85,7 @@ router
             router.post(':id/archive', [controllers.People, 'archive']).as('archive')
             router.post(':id/unarchive', [controllers.People, 'unarchive']).as('unarchive')
             router.post(':id/settle', [controllers.People, 'settle']).as('settle')
+            router.post(':id/write-off', [controllers.People, 'writeOff']).as('writeOff')
           })
           .prefix('people')
           .as('people')

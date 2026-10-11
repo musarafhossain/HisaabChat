@@ -225,7 +225,7 @@ Write SQL that runs on both databases:
 | `GET/PATCH /people/:id` · `POST /people/:id/archive` · `/unarchive` | Archive needs a settled balance (422 otherwise) |
 | `GET /transactions?personId=` | The person's thread |
 | `POST /people/:id/settle` | `{accountId, amount?}` → the COLLECT/REPAY for all (or part) of the balance |
-| `POST /people/:id/write-off` | Forgive: turns the remaining balance into an EXPENSE (they owed you) or INCOME (you owed them) *(Phase 7, not built yet)* |
+| `POST /people/:id/write-off` | Forgive `{accountId, amount?, categoryId?, date?, note?}` (amount defaults to the whole balance). Saves a pair in one DB transaction on that account, so its balance doesn't change: they owed you → COLLECT + EXPENSE (default category Gifts, then Other); you owed them → REPAY + INCOME (default Other Income). Returns `{ settlement, writeOff }` |
 | **Dashboard & reports** | |
 | `GET /dashboard?month=` | Net worth, account count, month income/expense/net, budget statuses, latest 8 transactions (upcoming and pending come from `/recurring/upcoming`) |
 | `GET /reports/categories?month=&type=EXPENSE\|INCOME` | Totals and % per category, plus the period's UTC `from`/`to` for drill-down |

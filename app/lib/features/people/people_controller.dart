@@ -32,6 +32,12 @@ class PeopleController extends AsyncNotifier<PeopleState> {
     return txn;
   }
 
+  /// Write off: clears the balance (or part) and refreshes balances, budgets and reports.
+  Future<void> writeOff(String id, {required String accountId, int? amount, String? categoryId}) async {
+    await _repo.writeOff(id, accountId: accountId, amount: amount, categoryId: categoryId);
+    await ref.read(txnMutationsProvider).refreshAfterChange();
+  }
+
   Future<T> _mutate<T>(Future<T> Function() action) async {
     final result = await action();
     await refresh();

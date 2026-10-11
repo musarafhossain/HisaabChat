@@ -2,7 +2,9 @@ import db from '@adonisjs/lucid/services/db'
 import { Exception } from '@adonisjs/core/exceptions'
 import { errors as vineErrors } from '@vinejs/vine'
 import { DateTime } from 'luxon'
+import Category from '#models/category'
 import Person from '#models/person'
+import Transaction from '#models/transaction'
 import type User from '#models/user'
 import { formatMoney } from '#services/money'
 import TransactionService from '#services/transaction_service'
@@ -129,6 +131,96 @@ export default class PeopleService {
       note: input.note ?? null,
     })
     return transaction
+  }
+
+  /**
+   * "Forget it": clears what's left with someone without any money moving.
+   *
+   * Recorded as a pair in one DB transaction, both on [accountId] so its
+   * balance doesn't change:
+   * - they owe you → COLLECT (as if paid back) + EXPENSE (the money you lost),
+   * - you owe them → REPAY (as if you paid) + INCOME (the money you were given).
+   * The person's balance drops by `amount`, and the loss or gift shows up in
+   * reports and budgets under the chosen category.
+   */
+  static async writeOff(
+    user: User,
+    id: string,
+    input: {
+      accountId: string
+      amount?: number
+      categoryId?: string
+      date?: DateTime
+      note?: string | null
+    }
+  ) {
+    const { person, balance } = await this.find(user, id)
+    if (balance === 0) throw fieldError('amount', `You and ${person.name} are already settled`)
+    const outstanding = Math.abs(balance)
+    const amount = input.amount ?? outstanding
+    if (amount > outstanding) {
+      throw fieldError(
+        'amount',
+        `That's more than the ${formatMoney(outstanding)} outstanding`,
+        'max'
+      )
+    }
+    const theyOwe = balance > 0
+    const categoryType = theyOwe ? 'EXPENSE' : 'INCOME'
+    const categoryId = input.categoryId ?? (await this.writeOffCategory(user, categoryType))
+    if (!categoryId) throw fieldError('categoryId', 'Pick a category for this write-off')
+    const date = input.date ?? DateTime.utc().startOf('second')
+
+    const ids = await db.transaction(async (trx) => {
+      const settlement = await TransactionService.createWithin(trx, user, {
+        type: theyOwe ? 'COLLECT' : 'REPAY',
+        amount,
+        accountId: input.accountId,
+        personId: person.id,
+        date,
+        note: 'Written off',
+      })
+      const result = await TransactionService.createWithin(trx, user, {
+        type: categoryType,
+        amount,
+        accountId: input.accountId,
+        categoryId,
+        date,
+        note:
+          input.note ??
+          (theyOwe
+            ? `Written off: ${person.name} owed you`
+            : `Written off: you owed ${person.name}`),
+      })
+      return [settlement.id, result.id] as const
+    })
+    const [settlement, writeOff] = await Promise.all(ids.map((txnId) => this.loadTxn(txnId)))
+    return { settlement, writeOff }
+  }
+
+  private static loadTxn(id: string) {
+    return Transaction.query()
+      .where('id', id)
+      .preload('account')
+      .preload('toAccount')
+      .preload('category')
+      .preload('person')
+      .firstOrFail()
+  }
+
+  /** Gifts / Other for losses; Other Income for gifts; else the first one of that type. */
+  private static async writeOffCategory(user: User, type: 'EXPENSE' | 'INCOME') {
+    const names = type === 'EXPENSE' ? ['Gifts', 'Other'] : ['Other Income']
+    const categories = await Category.query()
+      .where('userId', user.id)
+      .where('type', type)
+      .whereNull('archivedAt')
+      .orderBy('sortOrder')
+    for (const name of names) {
+      const match = categories.find((c) => c.name === name && c.parentId === null)
+      if (match) return match.id
+    }
+    return categories[0]?.id ?? null
   }
 
   private static statsFor(stats: Map<string, Omit<PersonEntry, 'person'>>, id: string) {

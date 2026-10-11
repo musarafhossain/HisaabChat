@@ -35,6 +35,7 @@ export type ScannedRoutes = {
     'people.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'people.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'people.settle': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'people.writeOff': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.index': { paramsTuple?: []; params?: {} }
     'categories.store': { paramsTuple?: []; params?: {} }
     'categories.reorder': { paramsTuple?: []; params?: {} }
@@ -119,6 +120,7 @@ export type ScannedRoutes = {
     'people.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'people.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'people.settle': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'people.writeOff': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.store': { paramsTuple?: []; params?: {} }
     'categories.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

@@ -42,6 +42,7 @@ export interface ApiDefinition {
     archive: typeof routes['people.archive']
     unarchive: typeof routes['people.unarchive']
     settle: typeof routes['people.settle']
+    writeOff: typeof routes['people.writeOff']
   }
   categories: {
     index: typeof routes['categories.index']

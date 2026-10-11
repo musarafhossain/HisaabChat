@@ -20,6 +20,7 @@ import 'package:hisaabchat/features/people/people_controller.dart';
 import 'package:hisaabchat/features/people/presentation/people_widgets.dart';
 import 'package:hisaabchat/features/people/presentation/person_form.dart';
 import 'package:hisaabchat/features/people/presentation/settle_dialog.dart';
+import 'package:hisaabchat/features/people/presentation/write_off_dialog.dart';
 import 'package:hisaabchat/features/transactions/data/txn.dart';
 import 'package:hisaabchat/features/transactions/domain/quick_entry_parser.dart';
 import 'package:hisaabchat/features/transactions/presentation/doodle_wallpaper.dart';
@@ -262,6 +263,7 @@ class _PersonMenu extends ConsumerWidget {
       icon: const Icon(AppIcons.more),
       onSelected: (value) => switch (value) {
         'settle' => unawaited(showSettleDialog(context, person)),
+        'writeoff' => unawaited(showWriteOffDialog(context, person)),
         'edit' => unawaited(showPersonForm(context, existing: person)),
         'archive' => unawaited(archive(archived: true)),
         'unarchive' => unawaited(archive(archived: false)),
@@ -270,6 +272,7 @@ class _PersonMenu extends ConsumerWidget {
       },
       itemBuilder: (context) => [
         if (!person.settled) const PopupMenuItem(value: 'settle', child: Text('Settle up')),
+        if (!person.settled) const PopupMenuItem(value: 'writeoff', child: Text('Write off')),
         const PopupMenuItem(value: 'edit', child: Text('Edit name')),
         if (person.archived)
           const PopupMenuItem(value: 'unarchive', child: Text('Unarchive'))

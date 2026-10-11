@@ -192,6 +192,12 @@ const routes = {
     tokens: [{"old":"/api/v1/people/:id/settle","type":0,"val":"api","end":""},{"old":"/api/v1/people/:id/settle","type":0,"val":"v1","end":""},{"old":"/api/v1/people/:id/settle","type":0,"val":"people","end":""},{"old":"/api/v1/people/:id/settle","type":1,"val":"id","end":""},{"old":"/api/v1/people/:id/settle","type":0,"val":"settle","end":""}],
     types: placeholder as Registry['people.settle']['types'],
   },
+  'people.writeOff': {
+    methods: ["POST"],
+    pattern: '/api/v1/people/:id/write-off',
+    tokens: [{"old":"/api/v1/people/:id/write-off","type":0,"val":"api","end":""},{"old":"/api/v1/people/:id/write-off","type":0,"val":"v1","end":""},{"old":"/api/v1/people/:id/write-off","type":0,"val":"people","end":""},{"old":"/api/v1/people/:id/write-off","type":1,"val":"id","end":""},{"old":"/api/v1/people/:id/write-off","type":0,"val":"write-off","end":""}],
+    types: placeholder as Registry['people.writeOff']['types'],
+  },
   'categories.index': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/categories',

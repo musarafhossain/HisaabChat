@@ -379,6 +379,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/people_controller').default['settle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'people.writeOff': {
+    methods: ["POST"]
+    pattern: '/api/v1/people/:id/write-off'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/person').writeOffPersonValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/person').writeOffPersonValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/people_controller').default['writeOff']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/people_controller').default['writeOff']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'categories.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/categories'

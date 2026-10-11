@@ -218,7 +218,7 @@ flowchart LR
 ```
 - The composer has four chips, **Lent · Borrowed · Got back · Paid back**, the account it comes from or goes into, and (for Lent/Borrowed) an optional **due date**.
 - **Settle up** records all or part of what's owed into or out of one account; archiving needs a settled balance.
-- *Planned (Phase 7):* **Forgive / write off** a balance nobody will pay back.
+- **Write off** (⋮ menu, when not settled): forget all or part of a balance. What they owed you is counted as spending in a category you pick (Gifts by default); what you owed them is counted as income (Other Income by default). No money moves: it's saved as a "Got back" / "Paid back" entry plus the expense / income on one account, so that account's balance stays the same.
 - **Lend** = money out of your account (right bubble); **Borrow** = money in (left bubble). **Collect** and **Repay** settle the balance partly or fully.
 - These entries update account balances but never appear in income/expense totals or budgets.
 - A due date adds an item to Home → Due soon ("Pay back Amit · Due Friday") until it's paid back.

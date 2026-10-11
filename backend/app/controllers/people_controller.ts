@@ -7,6 +7,7 @@ import {
   listPeopleValidator,
   settlePersonValidator,
   updatePersonValidator,
+  writeOffPersonValidator,
 } from '#validators/person'
 
 export default class PeopleController {
@@ -55,5 +56,25 @@ export default class PeopleController {
     const transaction = await PeopleService.settle(auth.getUserOrFail(), params.id, input)
     response.status(201)
     return serialize(TransactionTransformer.transform(transaction))
+  }
+
+  /**
+   * POST /people/:id/write-off: clears the balance (or part of it) without
+   * money moving → { settlement, writeOff } (COLLECT+EXPENSE or REPAY+INCOME).
+   */
+  async writeOff({ auth, params, request, response, serialize }: HttpContext) {
+    const input = await request.validateUsing(writeOffPersonValidator)
+    const { settlement, writeOff } = await PeopleService.writeOff(
+      auth.getUserOrFail(),
+      params.id,
+      input
+    )
+    response.status(201)
+    return {
+      data: {
+        settlement: await serialize.withoutWrapping(TransactionTransformer.transform(settlement)),
+        writeOff: await serialize.withoutWrapping(TransactionTransformer.transform(writeOff)),
+      },
+    }
   }
 }

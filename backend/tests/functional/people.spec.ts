@@ -38,6 +38,18 @@ async function setup(client: ApiClient) {
   return { token, userId, post, get, data, cash, person, entry, balanceOf }
 }
 
+type Setup = Awaited<ReturnType<typeof setup>>
+
+async function personBalance(s: Setup, id: string) {
+  const person = await s.data(`/api/v1/people/${id}`)
+  return person.balance as number
+}
+
+async function dashboardIncome(s: Setup) {
+  const dashboard = await s.data('/api/v1/dashboard')
+  return dashboard.income as number
+}
+
 test.group('people', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())
 
@@ -109,6 +121,110 @@ test.group('people', (group) => {
     assert.deepEqual(people.meta, { youGet: 0, youOwe: 0 })
     assert.equal(await s.balanceOf(s.cash.id), 1_000_000)
     assert.deepEqual(await findBalanceDrift(s.userId), [])
+  })
+
+  test('write-off clears what they owe as an expense, without moving money', async ({
+    client,
+    assert,
+  }) => {
+    const s = await setup(client)
+    const amit = await s.person('Amit')
+    await s.entry('LEND', 50_000, amit.id)
+    const cashBefore = await s.balanceOf(s.cash.id)
+
+    // Part of it first, then the rest (default amount = what's left).
+    const part = await s.post(`/api/v1/people/${amit.id}/write-off`, {
+      accountId: s.cash.id,
+      amount: 20_000,
+    })
+    part.assertStatus(201)
+    part.assertBodyContains({
+      data: {
+        settlement: {
+          type: 'COLLECT',
+          amount: 20_000,
+          person: { name: 'Amit' },
+          note: 'Written off',
+        },
+        writeOff: {
+          type: 'EXPENSE',
+          amount: 20_000,
+          category: { name: 'Gifts' },
+          note: 'Written off: Amit owed you',
+        },
+      },
+    })
+    assert.equal(await personBalance(s, amit.id), 30_000)
+
+    const rest = await s.post(`/api/v1/people/${amit.id}/write-off`, {
+      accountId: s.cash.id,
+      note: 'He moved away',
+    })
+    rest.assertBodyContains({ data: { writeOff: { amount: 30_000, note: 'He moved away' } } })
+
+    assert.equal(await personBalance(s, amit.id), 0)
+    assert.equal(await s.balanceOf(s.cash.id), cashBefore)
+    const dashboard = await s.get('/api/v1/dashboard')
+    assert.equal(dashboard.data.expense, 50_000)
+    assert.equal(dashboard.data.income, 0)
+
+    const again = await s.post(`/api/v1/people/${amit.id}/write-off`, { accountId: s.cash.id })
+    again.assertStatus(422)
+    assert.deepEqual(await findBalanceDrift(s.userId), [])
+  })
+
+  test('write-off of what you owe is income; category and amount are checked', async ({
+    client,
+    assert,
+  }) => {
+    const s = await setup(client)
+    const riya = await s.person('Riya')
+    await s.entry('BORROW', 40_000, riya.id)
+    const cashBefore = await s.balanceOf(s.cash.id)
+    const categories = await s.data('/api/v1/categories')
+    const byName = (name: string) => categories.find((c: any) => c.name === name).id
+
+    const tooMuch = await s.post(`/api/v1/people/${riya.id}/write-off`, {
+      accountId: s.cash.id,
+      amount: 40_001,
+    })
+    tooMuch.assertStatus(422)
+    tooMuch.assertBodyContains({ errors: [{ field: 'amount' }] })
+
+    // An expense category can't hold a gift you received.
+    const wrongType = await s.post(`/api/v1/people/${riya.id}/write-off`, {
+      accountId: s.cash.id,
+      categoryId: byName('Gifts'),
+    })
+    wrongType.assertStatus(422)
+    assert.equal(await personBalance(s, riya.id), -40_000) // nothing half-saved
+
+    const response = await s.post(`/api/v1/people/${riya.id}/write-off`, {
+      accountId: s.cash.id,
+      categoryId: byName('Pocket Money / Family'),
+    })
+    response.assertStatus(201)
+    response.assertBodyContains({
+      data: {
+        settlement: { type: 'REPAY', amount: 40_000 },
+        writeOff: {
+          type: 'INCOME',
+          category: { name: 'Pocket Money / Family' },
+          note: 'Written off: you owed Riya',
+        },
+      },
+    })
+    assert.equal(await personBalance(s, riya.id), 0)
+    assert.equal(await s.balanceOf(s.cash.id), cashBefore)
+    assert.equal(await dashboardIncome(s), 40_000)
+    assert.deepEqual(await findBalanceDrift(s.userId), [])
+
+    const other = await registerUser(client, 'Someone else')
+    const notYours = await client
+      .post(`/api/v1/people/${riya.id}/write-off`)
+      .bearerToken(other.token)
+      .json({ accountId: s.cash.id })
+    notYours.assertStatus(404)
   })
 
   test('editing and deleting entries keep balances right', async ({ client, assert }) => {

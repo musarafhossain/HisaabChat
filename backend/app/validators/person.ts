@@ -30,6 +30,20 @@ export const listPeopleValidator = vine.create({
   includeArchived: vine.boolean().optional(),
 })
 
+export const writeOffPersonValidator = vine.create({
+  /** The account both halves of the write-off go through (its balance doesn't change). */
+  accountId: vine.string().uuid(),
+  amount: vine.number().withoutDecimals().min(1).optional(),
+  /** Expense category when they owe you, income category when you owe them. */
+  categoryId: vine.string().uuid().optional(),
+  date: vine
+    .string()
+    .use(isoDateRule())
+    .transform((value) => DateTime.fromISO(value, { setZone: true }).toUTC().startOf('second'))
+    .optional(),
+  note: note().optional(),
+})
+
 export const settlePersonValidator = vine.create({
   /** Client-generated transaction id (idempotent retries). */
   id: vine.string().uuid().optional(),

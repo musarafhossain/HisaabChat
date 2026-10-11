@@ -1000,6 +1000,38 @@ class FakePeopleRepository implements PeopleRepository {
     });
     return saved.txn;
   }
+
+  int writeOffCalls = 0;
+
+  @override
+  Future<({Txn settlement, Txn writeOff})> writeOff(
+    String id, {
+    required String accountId,
+    int? amount,
+    String? categoryId,
+  }) async {
+    writeOffCalls++;
+    final balance = balanceOf(id);
+    final value = amount ?? balance.abs();
+    final date = DateTime.now().toUtc().toIso8601String();
+    final settlement = await txns.create({
+      'type': balance > 0 ? 'COLLECT' : 'REPAY',
+      'amount': value,
+      'accountId': accountId,
+      'personId': id,
+      'note': 'Written off',
+      'date': date,
+    });
+    final writeOff = await txns.create({
+      'type': balance > 0 ? 'EXPENSE' : 'INCOME',
+      'amount': value,
+      'accountId': accountId,
+      'categoryId': categoryId,
+      'note': 'Written off',
+      'date': date,
+    });
+    return (settlement: settlement.txn, writeOff: writeOff.txn);
+  }
 }
 
 /// In-memory `/recurring`: rules are stored as created; [upcomingValue] is

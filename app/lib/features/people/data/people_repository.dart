@@ -35,6 +35,24 @@ class PeopleRepository {
       body: {'id': txnId, 'accountId': accountId, 'amount': ?amount},
     ),
   );
+
+  /// "Forget it": clears [amount] (default: all of it) without money moving.
+  /// Returns the COLLECT/REPAY and the EXPENSE/INCOME it's recorded as.
+  Future<({Txn settlement, Txn writeOff})> writeOff(
+    String id, {
+    required String accountId,
+    int? amount,
+    String? categoryId,
+  }) async {
+    final data = await _api.post<Map<String, dynamic>>(
+      '/people/$id/write-off',
+      body: {'accountId': accountId, 'amount': ?amount, 'categoryId': ?categoryId},
+    );
+    return (
+      settlement: Txn.fromJson(data['settlement'] as Map<String, dynamic>),
+      writeOff: Txn.fromJson(data['writeOff'] as Map<String, dynamic>),
+    );
+  }
 }
 
 final peopleRepositoryProvider = Provider<PeopleRepository>((ref) => PeopleRepository(ref.watch(apiClientProvider)));
