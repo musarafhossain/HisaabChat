@@ -3,14 +3,61 @@ import 'package:hisaabchat/app/theme/app_colors.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/motion/motion.dart';
 
-/// Rounded grey search field shown above lists (WhatsApp style).
-class SearchPill extends StatelessWidget {
-  const SearchPill({required this.hint, super.key, this.onChanged, this.controller, this.enabled = true});
+/// Rounded grey search field shown above lists (WhatsApp style), with a
+/// clear (✕) button once something is typed.
+class SearchPill extends StatefulWidget {
+  const SearchPill({
+    required this.hint,
+    super.key,
+    this.onChanged,
+    this.controller,
+    this.enabled = true,
+    this.autofocus = false,
+  });
 
   final String hint;
   final ValueChanged<String>? onChanged;
   final TextEditingController? controller;
   final bool enabled;
+  final bool autofocus;
+
+  @override
+  State<SearchPill> createState() => _SearchPillState();
+}
+
+class _SearchPillState extends State<SearchPill> {
+  TextEditingController? _own;
+
+  TextEditingController get _controller => widget.controller ?? (_own ??= TextEditingController());
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_rebuild);
+  }
+
+  @override
+  void didUpdateWidget(SearchPill oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      (oldWidget.controller ?? _own)?.removeListener(_rebuild);
+      _controller.addListener(_rebuild);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_rebuild);
+    _own?.dispose();
+    super.dispose();
+  }
+
+  void _rebuild() => setState(() {});
+
+  void _clear() {
+    _controller.clear();
+    widget.onChanged?.call('');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,13 +67,22 @@ class SearchPill extends StatelessWidget {
       child: SizedBox(
         height: 44,
         child: TextField(
-          controller: controller,
-          enabled: enabled,
-          onChanged: onChanged,
+          controller: _controller,
+          enabled: widget.enabled,
+          autofocus: widget.autofocus,
+          onChanged: widget.onChanged,
+          textInputAction: TextInputAction.search,
           textAlignVertical: TextAlignVertical.center,
           decoration: InputDecoration(
-            hintText: hint,
+            hintText: widget.hint,
             prefixIcon: Icon(AppIcons.search, color: colors.textSecondary),
+            suffixIcon: _controller.text.isEmpty
+                ? null
+                : IconButton(
+                    tooltip: 'Clear search',
+                    icon: Icon(AppIcons.close, size: 20, color: colors.textSecondary),
+                    onPressed: _clear,
+                  ),
             contentPadding: EdgeInsets.zero,
             focusedBorder: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(24)),

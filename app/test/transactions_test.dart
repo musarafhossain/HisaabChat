@@ -237,7 +237,7 @@ void main() {
     expect(find.byType(TransactionTile), findsNWidgets(2));
     expect(find.textContaining('TODAY · −₹660'), findsOneWidget);
 
-    await tester.enterText(find.widgetWithText(TextField, 'Search notes and categories'), 'bazaar');
+    await tester.enterText(find.widgetWithText(TextField, 'Search transactions'), 'bazaar');
     await tester.pump(const Duration(milliseconds: 400));
     await tester.pumpAndSettle();
     expect(find.byType(TransactionTile), findsOneWidget);

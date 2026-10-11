@@ -9,6 +9,7 @@ import 'package:hisaabchat/features/auth/auth_controller.dart';
 import 'package:hisaabchat/features/budgets/budgets_controller.dart';
 import 'package:hisaabchat/features/people/people_controller.dart';
 import 'package:hisaabchat/features/recurring/recurring_controller.dart';
+import 'package:hisaabchat/features/search/search_controller.dart';
 import 'package:hisaabchat/features/transactions/data/transactions_repository.dart';
 import 'package:hisaabchat/features/transactions/data/txn.dart';
 import 'package:uuid/uuid.dart';
@@ -124,7 +125,8 @@ class TxnMutations {
       ..invalidate(accountThreadProvider)
       ..invalidate(personThreadProvider)
       ..invalidate(transactionsListProvider)
-      ..invalidate(upcomingProvider);
+      ..invalidate(upcomingProvider)
+      ..invalidate(searchTxnsProvider);
     invalidateBudgets(_ref);
     await Future.wait([
       _ref.read(accountsProvider.notifier).refresh(),

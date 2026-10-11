@@ -158,7 +158,7 @@ class _TransactionsSectionState extends ConsumerState<TransactionsSection> {
 
     final header = <Widget>[
       const SizedBox(height: 4),
-      SearchPill(hint: 'Search notes and categories', onChanged: _search),
+      SearchPill(hint: 'Search transactions', onChanged: _search),
       FilterChipsRow(
         labels: const ['All', 'Expense', 'Income', 'Transfer'],
         selected: _typeIndex,

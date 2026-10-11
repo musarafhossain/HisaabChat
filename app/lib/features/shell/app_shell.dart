@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,6 +40,7 @@ class AppShell extends ConsumerWidget {
     final shortcuts = <ShortcutActivator, VoidCallback>{
       for (final (i, d) in Destination.railTop.indexed)
         SingleActivator(LogicalKeyboardKey(0x31 + i), control: true): () => _go(d),
+      const SingleActivator(LogicalKeyboardKey.keyF, control: true): () => openSearch(context),
     };
 
     final content = switch (context.windowClass) {
@@ -94,7 +97,7 @@ class _CompactShell extends ConsumerWidget {
           IconButton(
             tooltip: 'Search',
             icon: const Icon(AppIcons.search),
-            onPressed: () => _comingSoon(context, 'Search arrives with transactions in Phase 3.'),
+            onPressed: () => openSearch(context),
           ),
           _OverflowMenu(onSelect: onSelect),
         ],
@@ -169,7 +172,13 @@ class _RailShell extends ConsumerWidget {
                 // The 'new' action lives in the rail (like WhatsApp Desktop's new-chat
                 // button) so it never covers a thread's Send button.
                 _Fab(current: current, small: true),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
+                IconButton(
+                  tooltip: 'Search (Ctrl+F)',
+                  icon: Icon(AppIcons.search, color: colors.textSecondary),
+                  onPressed: () => openSearch(context),
+                ),
+                const SizedBox(height: 4),
                 for (final d in Destination.railTop) railButton(d),
                 const Spacer(),
                 railButton(Destination.settings),
@@ -270,7 +279,8 @@ class _Fab extends StatelessWidget {
   }
 }
 
-void _comingSoon(BuildContext context, String message) => AppToast.show(context, message);
+/// Search everything (search icon, rail button, Ctrl+F).
+void openSearch(BuildContext context) => unawaited(context.push('/search'));
 
 /// Keeps every section alive (like IndexedStack) and fades the newly
 /// selected one in: the "fade-through" tab transition from the motion spec.

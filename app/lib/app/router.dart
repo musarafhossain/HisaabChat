@@ -22,6 +22,7 @@ import 'package:hisaabchat/features/people/presentation/person_thread.dart';
 import 'package:hisaabchat/features/recurring/presentation/recurring_screen.dart';
 import 'package:hisaabchat/features/reports/presentation/category_transactions.dart';
 import 'package:hisaabchat/features/reports/presentation/reports_section.dart';
+import 'package:hisaabchat/features/search/search_screen.dart';
 import 'package:hisaabchat/features/settings/appearance_screen.dart';
 import 'package:hisaabchat/features/settings/profile_screen.dart';
 import 'package:hisaabchat/features/settings/settings_screen.dart';
@@ -96,6 +97,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       fullScreen('/login', const LoginScreen()),
       fullScreen('/register', const RegisterScreen()),
+      fullScreen('/search', const SearchScreen()),
       GoRoute(
         path: '/onboarding',
         pageBuilder: (context, state) => fadeThroughPage(key: state.pageKey, child: const OnboardingScreen()),

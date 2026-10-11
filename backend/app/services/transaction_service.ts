@@ -49,6 +49,14 @@ const fieldError = (field: string, message: string, rule = 'invalid') =>
 
 const notFound = () => new Exception('Transaction not found', { status: 404, code: 'E_NOT_FOUND' })
 
+/** "120", "1,250.50" or "₹450" typed into search → paise; null for anything else. */
+function searchAmount(q: string): number | null {
+  const text = q.replace(/[₹,\s]/g, '')
+  if (!/^\d+(\.\d{1,2})?$/.test(text)) return null
+  const paise = Math.round(Number(text) * 100)
+  return Number.isSafeInteger(paise) && paise > 0 ? paise : null
+}
+
 const RELATIONS = ['account', 'toAccount', 'category', 'person'] as const
 
 export default class TransactionService {
@@ -301,14 +309,18 @@ export default class TransactionService {
     }
     if (filters.q) {
       const like = `%${filters.q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`
-      query.where((q) =>
-        q
-          .whereILike('note', like)
-          .orWhereIn(
-            'categoryId',
-            db.from('categories').select('id').where('user_id', user.id).whereILike('name', like)
-          )
-      )
+      const named = (table: string) =>
+        db.from(table).select('id').where('user_id', user.id).whereILike('name', like)
+      const amount = searchAmount(filters.q)
+      // Note, category, account (either side of a transfer), person, or the amount.
+      query.where((q) => {
+        q.whereILike('note', like)
+          .orWhereIn('categoryId', named('categories'))
+          .orWhereIn('accountId', named('accounts'))
+          .orWhereIn('toAccountId', named('accounts'))
+          .orWhereIn('personId', named('people'))
+        if (amount !== null) q.orWhere('amount', amount)
+      })
     }
     return query
   }

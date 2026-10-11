@@ -9,6 +9,7 @@ import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/adaptive_sheet.dart';
 import 'package:hisaabchat/core/widgets/chat_tile.dart';
 import 'package:hisaabchat/core/widgets/color_palette.dart';
+import 'package:hisaabchat/core/widgets/search_pill.dart';
 import 'package:hisaabchat/core/widgets/settings_tile.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart' show toHexColor;
 import 'package:hisaabchat/features/auth/presentation/auth_scaffold.dart';
@@ -54,16 +55,27 @@ class CategoriesScreen extends ConsumerWidget {
   }
 }
 
-class _CategoryList extends ConsumerWidget {
+class _CategoryList extends ConsumerStatefulWidget {
   const _CategoryList({required this.type});
 
   final CategoryType type;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_CategoryList> createState() => _CategoryListState();
+}
+
+class _CategoryListState extends ConsumerState<_CategoryList> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final type = widget.type;
     final colors = context.colors;
     final categories = ref.watch(categoriesProvider);
-    final all = (categories.value ?? const <TxnCategory>[]).where((c) => c.type == type).toList();
+    final q = _query.toLowerCase();
+    final all = (categories.value ?? const <TxnCategory>[])
+        .where((c) => c.type == type && (q.isEmpty || c.name.toLowerCase().contains(q)))
+        .toList();
     if (categories.value == null) return Center(child: CircularProgressIndicator(color: colors.primary));
 
     final active = all.where((c) => !c.archived).toList();
@@ -88,6 +100,17 @@ class _CategoryList extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.only(bottom: 96),
           children: [
+            const SizedBox(height: 8),
+            SearchPill(hint: 'Search categories', onChanged: (v) => setState(() => _query = v.trim())),
+            if (all.isEmpty && q.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  'No categories match',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: colors.textSecondary),
+                ),
+              ),
             for (final (i, category) in active.indexed) tile(category, i),
             if (archived.isNotEmpty) ...[
               const SectionLabel('Archived'),

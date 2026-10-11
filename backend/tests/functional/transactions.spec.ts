@@ -353,6 +353,15 @@ test.group('transactions / listing', (group) => {
     assert.equal(byNote.data.length, 1)
     const byCategoryName = json(await get('?q=groceries'))
     assert.equal(byCategoryName.data.length, 2)
+    // Account names match either side of a transfer: the salary into Bank and the transfer out of it.
+    const byAccount = json(await get(`?q=${encodeURIComponent(s.bank.name)}`))
+    assert.equal(byAccount.data.length, 2)
+    // Amounts as typed: 30 rupees is the 3,000-paise expense.
+    const byAmount = json(await get('?q=30'))
+    assert.equal(byAmount.data.length, 1)
+    assert.equal(byAmount.data[0].amount, 3_000)
+    const byRupeeAmount = json(await get(`?q=${encodeURIComponent('₹500')}`))
+    assert.equal(byRupeeAmount.data[0].amount, 50_000)
 
     const range = json(await get('?from=2026-10-02T00:00:00Z&to=2026-10-04T00:00:00Z'))
     assert.equal(range.data.length, 2)

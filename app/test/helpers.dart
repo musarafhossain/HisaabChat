@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hisaabchat/app/app.dart';
+import 'package:hisaabchat/core/money/money.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/storage/preferences.dart';
 import 'package:hisaabchat/core/storage/token_store.dart';
@@ -428,6 +429,18 @@ class FakeTransactionsRepository implements TransactionsRepository {
     }
   }
 
+  /// Same rules as the server: note, category, account (either side), person or amount.
+  static bool _searchMatches(Txn t, String q) {
+    bool has(String? text) => (text ?? '').toLowerCase().contains(q);
+    final amount = Money.tryParse(q.replaceAll('₹', ''));
+    return has(t.note) ||
+        has(t.category?.name) ||
+        has(t.account.name) ||
+        has(t.toAccount?.name) ||
+        has(t.person?.name) ||
+        (amount != null && amount == t.amount);
+  }
+
   @override
   Future<TxnPage> list(TxnQuery query, {String? cursor, int limit = 30}) async {
     final q = query.q?.toLowerCase() ?? '';
@@ -441,9 +454,7 @@ class FakeTransactionsRepository implements TransactionsRepository {
                   (query.personId == null || t.person?.id == query.personId) &&
                   (query.from == null || !t.date.isBefore(query.from!)) &&
                   (query.to == null || t.date.isBefore(query.to!)) &&
-                  (q.isEmpty ||
-                      (t.note ?? '').toLowerCase().contains(q) ||
-                      (t.category?.name ?? '').toLowerCase().contains(q)),
+                  (q.isEmpty || _searchMatches(t, q)),
             )
             .toList()
           ..sort((a, b) => b.date.compareTo(a.date));

@@ -13,6 +13,7 @@ import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/chat_tile.dart';
 import 'package:hisaabchat/core/widgets/empty_state.dart';
 import 'package:hisaabchat/core/widgets/list_detail_layout.dart';
+import 'package:hisaabchat/core/widgets/search_pill.dart';
 import 'package:hisaabchat/core/widgets/settings_tile.dart';
 import 'package:hisaabchat/core/widgets/window_class.dart';
 import 'package:hisaabchat/features/budgets/budgets_controller.dart';
@@ -56,8 +57,23 @@ class BudgetsSection extends ConsumerWidget {
   }
 }
 
-class _BudgetList extends ConsumerWidget {
+class _BudgetList extends ConsumerStatefulWidget {
   const _BudgetList();
+
+  @override
+  ConsumerState<_BudgetList> createState() => _BudgetListState();
+}
+
+class _BudgetListState extends ConsumerState<_BudgetList> {
+  String _query = '';
+
+  /// Name or any of its categories ("petrol" finds "Bike EMI + Petrol").
+  bool _matches(BudgetStatus budget) {
+    final q = _query.toLowerCase();
+    return q.isEmpty ||
+        budget.name.toLowerCase().contains(q) ||
+        budget.categories.any((c) => c.name.toLowerCase().contains(q));
+  }
 
   void _open(BuildContext context, WidgetRef ref, BudgetStatus budget) {
     if (context.windowClass == WindowClass.expanded) {
@@ -69,7 +85,7 @@ class _BudgetList extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final colors = context.colors;
     final month = ref.watch(budgetMonthProvider);
     final overview = ref.watch(budgetsOverviewProvider(month));
@@ -103,7 +119,17 @@ class _BudgetList extends ConsumerWidget {
             const _Templates()
           else ...[
             _Summary(overview: value, current: current),
-            for (final (i, budget) in value.budgets.indexed)
+            SearchPill(hint: 'Search budgets', onChanged: (v) => setState(() => _query = v.trim())),
+            if (!value.budgets.any(_matches))
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  'No budgets match',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: colors.textSecondary),
+                ),
+              ),
+            for (final (i, budget) in value.budgets.where(_matches).indexed)
               FadeSlideIn(
                 key: ValueKey(budget.id),
                 index: i,
@@ -113,20 +139,22 @@ class _BudgetList extends ConsumerWidget {
                   onTap: () => _open(context, ref, budget),
                 ),
               ),
-            ChatTile(
-              leading: IconAvatar(icon: AppIcons.byKey('more_horiz'), color: colors.textSecondary),
-              title: 'Not in any budget',
-              subtitle: 'Spending in categories without a budget',
-              trailing: Text(
-                Money.format(value.unbudgeted),
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: colors.textPrimary,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+            if (_query.isEmpty) ...[
+              ChatTile(
+                leading: IconAvatar(icon: AppIcons.byKey('more_horiz'), color: colors.textSecondary),
+                title: 'Not in any budget',
+                subtitle: 'Spending in categories without a budget',
+                trailing: Text(
+                  Money.format(value.unbudgeted),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
                 ),
               ),
-            ),
-            const _Templates(compact: true),
+              const _Templates(compact: true),
+            ],
           ],
         ],
       ),
