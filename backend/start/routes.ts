@@ -103,6 +103,16 @@ router
           .as('categories')
           .where('id', router.matchers.uuid())
 
+        router
+          .group(() => {
+            router
+              .get('transactions.csv', [controllers.Exports, 'transactionsCsv'])
+              .as('transactionsCsv')
+            router.get('all.json', [controllers.Exports, 'allJson']).as('allJson')
+          })
+          .prefix('export')
+          .as('export')
+
         router.get('dashboard', [controllers.Reports, 'dashboard']).as('dashboard')
         router
           .group(() => {

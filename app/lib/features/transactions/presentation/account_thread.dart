@@ -16,6 +16,7 @@ import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/features/accounts/accounts_controller.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_form.dart';
+import 'package:hisaabchat/features/export/export_actions.dart';
 import 'package:hisaabchat/features/transactions/data/txn.dart';
 import 'package:hisaabchat/features/transactions/presentation/doodle_wallpaper.dart';
 import 'package:hisaabchat/features/transactions/presentation/quick_composer.dart';
@@ -381,12 +382,14 @@ class _AccountThreadState extends ConsumerState<AccountThread> {
         'info' => widget.onOpenInfo(),
         'reconcile' => showReconcileDialog(context, account),
         'edit' => showAccountForm(context, existing: account),
+        'export' => exportCsvFor(context, ref, accountId: account.id),
         _ => null,
       },
       itemBuilder: (context) => const [
         PopupMenuItem(value: 'info', child: Text('Account info')),
         PopupMenuItem(value: 'reconcile', child: Text('Reconcile balance')),
         PopupMenuItem(value: 'edit', child: Text('Edit account')),
+        PopupMenuItem(value: 'export', child: Text('Export CSV')),
       ],
     );
   }

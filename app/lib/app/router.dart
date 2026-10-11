@@ -15,6 +15,7 @@ import 'package:hisaabchat/features/budgets/presentation/budget_info.dart';
 import 'package:hisaabchat/features/budgets/presentation/budget_summary.dart';
 import 'package:hisaabchat/features/budgets/presentation/budgets_section.dart';
 import 'package:hisaabchat/features/categories/presentation/categories_screen.dart';
+import 'package:hisaabchat/features/export/presentation/export_screen.dart';
 import 'package:hisaabchat/features/health/connection_check_screen.dart';
 import 'package:hisaabchat/features/home/home_screen.dart';
 import 'package:hisaabchat/features/onboarding/onboarding_screen.dart';
@@ -220,6 +221,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                   fullScreen('categories', const CategoriesScreen()),
                   fullScreen('recurring', const RecurringScreen()),
                   fullScreen('connection', const ConnectionCheckScreen()),
+                  fullScreen('data', const ExportScreen()),
                 ],
               ),
             ],

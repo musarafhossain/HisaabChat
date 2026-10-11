@@ -451,6 +451,30 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/categories_controller').default['unarchive']>>>
     }
   }
+  'export.transactionsCsv': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/export/transactions.csv'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/export').exportCsvValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/exports_controller').default['transactionsCsv']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/exports_controller').default['transactionsCsv']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'export.allJson': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/export/all.json'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/exports_controller').default['allJson']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/exports_controller').default['allJson']>>>
+    }
+  }
   'dashboard': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/dashboard'

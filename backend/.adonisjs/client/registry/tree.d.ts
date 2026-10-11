@@ -51,6 +51,10 @@ export interface ApiDefinition {
     archive: typeof routes['categories.archive']
     unarchive: typeof routes['categories.unarchive']
   }
+  export: {
+    transactionsCsv: typeof routes['export.transactionsCsv']
+    allJson: typeof routes['export.allJson']
+  }
   dashboard: typeof routes['dashboard']
   reports: {
     byCategory: typeof routes['reports.byCategory']

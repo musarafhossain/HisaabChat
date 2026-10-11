@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hisaabchat/core/config/env.dart';
@@ -57,6 +59,20 @@ class ApiClient {
       final response = await _dio.get<Object?>(path, queryParameters: query);
       final body = response.data! as Map<String, dynamic>;
       return (data: body['data'] as T, meta: (body['meta'] as Map<String, dynamic>?) ?? const {});
+    } on DioException catch (error) {
+      throw ApiException.fromDio(error);
+    }
+  }
+
+  /// The raw bytes of a download (CSV/JSON exports).
+  Future<Uint8List> getBytes(String path, {Map<String, dynamic>? query}) async {
+    try {
+      final response = await _dio.get<List<int>>(
+        path,
+        queryParameters: query,
+        options: Options(responseType: ResponseType.bytes, receiveTimeout: const Duration(minutes: 2)),
+      );
+      return Uint8List.fromList(response.data!);
     } on DioException catch (error) {
       throw ApiException.fromDio(error);
     }

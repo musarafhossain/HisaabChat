@@ -13,6 +13,7 @@ import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/features/accounts/accounts_controller.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_form.dart';
+import 'package:hisaabchat/features/export/export_actions.dart';
 import 'package:hisaabchat/features/transactions/presentation/reconcile_dialog.dart';
 
 /// Full-screen account info (phones; pushed from the accounts list).
@@ -180,6 +181,12 @@ class AccountInfoView extends ConsumerWidget {
           icon: AppIcons.edit,
           title: 'Edit account',
           onTap: () => showAccountForm(context, existing: account),
+        ),
+        SettingsTile(
+          icon: AppIcons.download,
+          title: 'Export CSV',
+          subtitle: 'Every transaction in this account',
+          onTap: () => exportCsvFor(context, ref, accountId: account.id),
         ),
         SettingsTile(
           icon: AppIcons.archive,

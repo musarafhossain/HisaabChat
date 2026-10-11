@@ -41,6 +41,8 @@ export type ScannedRoutes = {
     'categories.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'export.transactionsCsv': { paramsTuple?: []; params?: {} }
+    'export.allJson': { paramsTuple?: []; params?: {} }
     'dashboard': { paramsTuple?: []; params?: {} }
     'reports.byCategory': { paramsTuple?: []; params?: {} }
     'reports.trend': { paramsTuple?: []; params?: {} }
@@ -68,6 +70,8 @@ export type ScannedRoutes = {
     'people.index': { paramsTuple?: []; params?: {} }
     'people.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.index': { paramsTuple?: []; params?: {} }
+    'export.transactionsCsv': { paramsTuple?: []; params?: {} }
+    'export.allJson': { paramsTuple?: []; params?: {} }
     'dashboard': { paramsTuple?: []; params?: {} }
     'reports.byCategory': { paramsTuple?: []; params?: {} }
     'reports.trend': { paramsTuple?: []; params?: {} }
@@ -87,6 +91,8 @@ export type ScannedRoutes = {
     'people.index': { paramsTuple?: []; params?: {} }
     'people.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'categories.index': { paramsTuple?: []; params?: {} }
+    'export.transactionsCsv': { paramsTuple?: []; params?: {} }
+    'export.allJson': { paramsTuple?: []; params?: {} }
     'dashboard': { paramsTuple?: []; params?: {} }
     'reports.byCategory': { paramsTuple?: []; params?: {} }
     'reports.trend': { paramsTuple?: []; params?: {} }

@@ -41,7 +41,7 @@ App (authenticated)
     ├── /settings/categories       Manage categories (with search)
     ├── /settings/recurring        Recurring rules
     ├── /settings/connection       Server status
-    └── /settings/data             Export (Phase 7, not built yet)
+    └── /settings/data             Export data (CSV / JSON backup)
 ```
 
 **Primary navigation**: WhatsApp-style, chosen by window width, so it applies to Android, Windows and Web alike.
@@ -191,7 +191,7 @@ flowchart TD
 - Month switcher, then chips **Spending** | **Income**: donut chart by category + ranked list (category, share bar, amount, %).
 - Tap a category → that category's transactions for the month, paged, with the full count and total at the top.
 - **Money in vs out · last 6 months**: grouped bars (two columns on desktop).
-- *Planned (Phase 7):* **Export CSV** (web download, Windows Save As, Android share sheet) and a 12-month trend.
+- *Planned:* a 12-month trend. (CSV export lives in Settings → Export data.)
 
 ### 3.11 Settings (WhatsApp-style: profile header + icon rows)
 - **Profile header**: initials avatar, name, email → tap to edit name.
@@ -200,7 +200,7 @@ flowchart TD
 - **Recurring**: rules list (edit, pause, delete).
 - **Appearance**: theme (System/Light/Dark), **color** (10 accents, Teal by default, saved to the account), Reduce motion. *Planned: thread wallpaper, font size.*
 - **Connection**: whether the app can reach the server and database.
-- *Planned (Phase 7)* **Data**: export all (CSV/JSON).
+- **Export data**: transactions as CSV for This month / Last month / This year / All time / Custom dates (months follow the month start day), or a full JSON backup. Web downloads the file, Windows opens Save As, Android opens the share sheet. Each account (⋮ menu and Account info) and each person (⋮ menu) also has **Export CSV** for just their transactions.
 - **Log out** / **Log out of all devices**.
 - **Delete account** (red): a dialog asks you to type DELETE and your password. The server erases everything in one transaction; the app then signs out, returns to Welcome and shows "Your account and all its data were deleted". A wrong password shows under the field and nothing is deleted.
 

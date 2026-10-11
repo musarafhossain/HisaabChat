@@ -8,6 +8,7 @@ export const controllers = {
   Auth: () => import('#controllers/auth_controller'),
   Budgets: () => import('#controllers/budgets_controller'),
   Categories: () => import('#controllers/categories_controller'),
+  Exports: () => import('#controllers/exports_controller'),
   Health: () => import('#controllers/health_controller'),
   Me: () => import('#controllers/me_controller'),
   People: () => import('#controllers/people_controller'),

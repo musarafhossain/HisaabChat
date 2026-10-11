@@ -14,6 +14,7 @@ import 'package:hisaabchat/core/widgets/load_more.dart';
 import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/features/accounts/accounts_controller.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart';
+import 'package:hisaabchat/features/export/export_actions.dart';
 import 'package:hisaabchat/features/people/data/person.dart';
 import 'package:hisaabchat/features/people/people_controller.dart';
 import 'package:hisaabchat/features/people/presentation/people_widgets.dart';
@@ -264,6 +265,7 @@ class _PersonMenu extends ConsumerWidget {
         'edit' => unawaited(showPersonForm(context, existing: person)),
         'archive' => unawaited(archive(archived: true)),
         'unarchive' => unawaited(archive(archived: false)),
+        'export' => unawaited(exportCsvFor(context, ref, personId: person.id)),
         _ => null,
       },
       itemBuilder: (context) => [
@@ -273,6 +275,7 @@ class _PersonMenu extends ConsumerWidget {
           const PopupMenuItem(value: 'unarchive', child: Text('Unarchive'))
         else
           const PopupMenuItem(value: 'archive', child: Text('Archive')),
+        const PopupMenuItem(value: 'export', child: Text('Export CSV')),
       ],
     );
   }

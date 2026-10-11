@@ -119,6 +119,12 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => context.go('/settings/appearance'),
             ),
             SettingsTile(
+              icon: AppIcons.data,
+              title: 'Export data',
+              subtitle: 'Transactions as CSV, or a full backup',
+              onTap: () => context.go('/settings/data'),
+            ),
+            SettingsTile(
               icon: AppIcons.online,
               title: 'Connection',
               subtitle: 'Server status',

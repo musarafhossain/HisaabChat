@@ -228,6 +228,18 @@ const routes = {
     tokens: [{"old":"/api/v1/categories/:id/unarchive","type":0,"val":"api","end":""},{"old":"/api/v1/categories/:id/unarchive","type":0,"val":"v1","end":""},{"old":"/api/v1/categories/:id/unarchive","type":0,"val":"categories","end":""},{"old":"/api/v1/categories/:id/unarchive","type":1,"val":"id","end":""},{"old":"/api/v1/categories/:id/unarchive","type":0,"val":"unarchive","end":""}],
     types: placeholder as Registry['categories.unarchive']['types'],
   },
+  'export.transactionsCsv': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/export/transactions.csv',
+    tokens: [{"old":"/api/v1/export/transactions.csv","type":0,"val":"api","end":""},{"old":"/api/v1/export/transactions.csv","type":0,"val":"v1","end":""},{"old":"/api/v1/export/transactions.csv","type":0,"val":"export","end":""},{"old":"/api/v1/export/transactions.csv","type":0,"val":"transactions.csv","end":""}],
+    types: placeholder as Registry['export.transactionsCsv']['types'],
+  },
+  'export.allJson': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/export/all.json',
+    tokens: [{"old":"/api/v1/export/all.json","type":0,"val":"api","end":""},{"old":"/api/v1/export/all.json","type":0,"val":"v1","end":""},{"old":"/api/v1/export/all.json","type":0,"val":"export","end":""},{"old":"/api/v1/export/all.json","type":0,"val":"all.json","end":""}],
+    types: placeholder as Registry['export.allJson']['types'],
+  },
   'dashboard': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/dashboard',

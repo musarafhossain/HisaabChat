@@ -464,7 +464,7 @@ The custom-category icon picker offers about 80 curated symbols in groups (Home,
 - **Bubble content:** category icon + name (small, in the category color), amount (17 semibold, `+`/`−` sign), optional note, then time and status (🕒 sending / ✓ saved / ⚠ failed, tap to retry). Budget-alert effects show as a small chip under the bubble: `Food & Groceries · 85% used`.
 - **Tap a bubble** → edit form. **Long-press** → selection (delete, duplicate, copy amount).
 - **Scrolling:** opens at the newest entry (bottom) and loads older entries when scrolling up (reversed list). A "↓" jump button with a count appears when scrolled up, like WhatsApp's unread jump.
-- The ⋮ menu has Account info, Reconcile balance and Edit account. *Planned: Search in account, Export, Wallpaper.*
+- The ⋮ menu has Account info, Reconcile balance, Edit account and Export CSV. *Planned: Search in account, Wallpaper.*
 
 #### Quick-add composer
 - **[− / +] toggle:** expense (−, default) or income (+). Tap to flip. The toggle color follows the `expense`/`income` color.
