@@ -7,6 +7,8 @@ export type ScannedRoutes = {
     'health': { paramsTuple?: []; params?: {} }
     'auth.register': { paramsTuple?: []; params?: {} }
     'auth.login': { paramsTuple?: []; params?: {} }
+    'auth.forgotPassword': { paramsTuple?: []; params?: {} }
+    'auth.resetPassword': { paramsTuple?: []; params?: {} }
     'auth.logout': { paramsTuple?: []; params?: {} }
     'auth.logoutAll': { paramsTuple?: []; params?: {} }
     'me.show': { paramsTuple?: []; params?: {} }
@@ -106,6 +108,8 @@ export type ScannedRoutes = {
   POST: {
     'auth.register': { paramsTuple?: []; params?: {} }
     'auth.login': { paramsTuple?: []; params?: {} }
+    'auth.forgotPassword': { paramsTuple?: []; params?: {} }
+    'auth.resetPassword': { paramsTuple?: []; params?: {} }
     'auth.logout': { paramsTuple?: []; params?: {} }
     'auth.logoutAll': { paramsTuple?: []; params?: {} }
     'me.completeOnboarding': { paramsTuple?: []; params?: {} }

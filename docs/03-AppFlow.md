@@ -16,7 +16,7 @@ Public
 ├── /welcome       Welcome screen (Get started / I already have an account)
 ├── /login
 ├── /signup
-└── /forgot-password
+└── /forgot-password  Email → 6-digit code by email → new password → signed in (Login has a "Forgot password?" link)
 
 Onboarding (first login only)
 └── /onboarding    Step 1 Month start → Step 2 Accounts → Step 3 Budgets → Done

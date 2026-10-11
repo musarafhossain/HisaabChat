@@ -7,6 +7,7 @@ import 'package:hisaabchat/core/navigation/back_navigation.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_info.dart';
 import 'package:hisaabchat/features/accounts/presentation/accounts_section.dart';
 import 'package:hisaabchat/features/auth/auth_controller.dart';
+import 'package:hisaabchat/features/auth/presentation/forgot_password_screen.dart';
 import 'package:hisaabchat/features/auth/presentation/login_screen.dart';
 import 'package:hisaabchat/features/auth/presentation/register_screen.dart';
 import 'package:hisaabchat/features/auth/presentation/splash_screen.dart';
@@ -35,7 +36,7 @@ import 'package:hisaabchat/features/transactions/presentation/transactions_secti
 
 final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
-const _publicPaths = {'/welcome', '/login', '/register'};
+const _publicPaths = {'/welcome', '/login', '/register', '/forgot-password'};
 
 /// Routes from docs/03-AppFlow.md. Signed-out users only see the public
 /// screens; signed-in users never see them.
@@ -99,6 +100,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       fullScreen('/login', const LoginScreen()),
       fullScreen('/register', const RegisterScreen()),
+      GoRoute(
+        path: '/forgot-password',
+        pageBuilder: (context, state) => fadeThroughPage(
+          key: state.pageKey,
+          child: ForgotPasswordScreen(initialEmail: state.uri.queryParameters['email'] ?? ''),
+        ),
+      ),
       fullScreen('/search', const SearchScreen()),
       GoRoute(
         path: '/onboarding',

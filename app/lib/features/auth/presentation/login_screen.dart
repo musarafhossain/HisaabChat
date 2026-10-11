@@ -88,10 +88,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 onSubmitted: (_) => _submit(),
                 validator: (value) => (value == null || value.isEmpty) ? 'Enter your password' : null,
               ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => context.push(
+                    Uri(path: '/forgot-password', queryParameters: {'email': _email.text.trim()}).toString(),
+                  ),
+                  child: const Text('Forgot password?'),
+                ),
+              ),
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 8),
         if (_error != null) ...[
           Shake(trigger: _shake, child: FormErrorBanner(_error!)),
           const SizedBox(height: 16),

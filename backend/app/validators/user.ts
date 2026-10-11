@@ -43,6 +43,22 @@ export const loginValidator = vine.create({
   deviceName: deviceName(),
 })
 
+/** "Forgot password": where to email the code. */
+export const forgotPasswordValidator = vine.create({
+  email: email(),
+})
+
+/** Set a new password with the emailed 6-digit code. */
+export const resetPasswordValidator = vine.create({
+  email: email(),
+  code: vine
+    .string()
+    .trim()
+    .regex(/^\d{6}$/),
+  password: password(),
+  passwordConfirmation: password().sameAs('password'),
+})
+
 /**
  * Profile & preferences (PATCH /me). Every field is optional.
  */

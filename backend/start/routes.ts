@@ -10,7 +10,7 @@
 import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
 import { controllers } from '#generated/controllers'
-import { authThrottle } from '#start/limiter'
+import { authThrottle, forgotPasswordThrottle, resetPasswordThrottle } from '#start/limiter'
 
 router.get('/', () => {
   return { name: 'HisaabChat API', docs: '/api/v1/health' }
@@ -27,6 +27,14 @@ router
       .group(() => {
         router.post('register', [controllers.Auth, 'register']).as('register')
         router.post('login', [controllers.Auth, 'login']).as('login')
+        router
+          .post('forgot-password', [controllers.Auth, 'forgotPassword'])
+          .as('forgotPassword')
+          .use(forgotPasswordThrottle)
+        router
+          .post('reset-password', [controllers.Auth, 'resetPassword'])
+          .as('resetPassword')
+          .use(resetPasswordThrottle)
       })
       .prefix('auth')
       .as('auth')

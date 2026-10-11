@@ -39,6 +39,16 @@ class AuthRepository {
     return _session(data);
   }
 
+  /// Emails a 6-digit code (same answer whether or not the account exists).
+  Future<void> forgotPassword(String email) => _api.post<Object?>('/auth/forgot-password', body: {'email': email});
+
+  /// Sets a new password with the emailed code; signs out every device.
+  Future<void> resetPassword({required String email, required String code, required String password}) =>
+      _api.post<Object?>(
+        '/auth/reset-password',
+        body: {'email': email, 'code': code, 'password': password, 'passwordConfirmation': password},
+      );
+
   Future<AppUser> me() async => AppUser.fromJson(await _api.get<Map<String, dynamic>>('/me'));
 
   Future<AppUser> updateProfile(Map<String, Object?> changes) async =>

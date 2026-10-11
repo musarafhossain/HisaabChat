@@ -3,7 +3,13 @@ import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import UserTransformer from '#transformers/user_transformer'
 import UserDefaultsService from '#services/user_defaults_service'
-import { loginValidator, registerValidator } from '#validators/user'
+import PasswordResetService, { CODE_MINUTES } from '#services/password_reset_service'
+import {
+  forgotPasswordValidator,
+  loginValidator,
+  registerValidator,
+  resetPasswordValidator,
+} from '#validators/user'
 
 export default class AuthController {
   /**
@@ -43,6 +49,31 @@ export default class AuthController {
       user: UserTransformer.transform(user),
       token: token.value!.release(),
     })
+  }
+
+  /**
+   * POST /auth/forgot-password: emails a 6-digit code if the account exists.
+   * Always the same answer, so it doesn't reveal who has an account.
+   */
+  async forgotPassword({ request }: HttpContext) {
+    const { email } = await request.validateUsing(forgotPasswordValidator)
+    await PasswordResetService.request(email)
+    return {
+      data: {
+        message: `If ${email} has an account, a code is on its way. It works for ${CODE_MINUTES} minutes.`,
+        minutes: CODE_MINUTES,
+      },
+    }
+  }
+
+  /**
+   * POST /auth/reset-password: new password with the emailed code. Signs
+   * out every device; the app then signs in with the new password.
+   */
+  async resetPassword({ request }: HttpContext) {
+    const input = await request.validateUsing(resetPasswordValidator)
+    await PasswordResetService.reset(input)
+    return { data: { message: 'Password changed. Sign in with your new password.' } }
   }
 
   /**

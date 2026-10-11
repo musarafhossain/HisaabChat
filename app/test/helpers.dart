@@ -64,11 +64,16 @@ class FakeAuthRepository implements AuthRepository {
   int logoutCalls = 0;
   Map<String, Object?>? lastProfileUpdate;
 
-  static const _password = 'secret-password';
+  /// The account's password (changed by [resetPassword]).
+  String password = 'secret-password';
+
+  /// The code "emailed" by [forgotPassword].
+  static const resetCode = '123456';
+  final List<String> forgotPasswordEmails = [];
 
   @override
   Future<AuthSession> login({required String email, required String password, required String deviceName}) async {
-    if (email != testUser.email || password != _password) {
+    if (email != testUser.email || password != this.password) {
       throw const ApiException(message: 'Invalid user credentials', statusCode: 400);
     }
     return (user: user, token: 'oat_test');
@@ -115,6 +120,21 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> forgotPassword(String email) async => forgotPasswordEmails.add(email);
+
+  @override
+  Future<void> resetPassword({required String email, required String code, required String password}) async {
+    if (email != testUser.email || code != resetCode) {
+      throw const ApiException(
+        message: 'That code is wrong or has expired',
+        statusCode: 422,
+        fieldErrors: {'code': 'That code is wrong or has expired'},
+      );
+    }
+    this.password = password;
+  }
+
+  @override
   Future<AppUser> me() async {
     if (meError != null) throw meError!;
     return user;
@@ -148,7 +168,7 @@ class FakeAuthRepository implements AuthRepository {
 
   @override
   Future<void> deleteAccount(String password) async {
-    if (password != _password) {
+    if (password != this.password) {
       throw const ApiException(
         message: 'That password isn’t right',
         statusCode: 422,

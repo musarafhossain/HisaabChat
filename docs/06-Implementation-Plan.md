@@ -64,7 +64,7 @@
 - [x] `POST /auth/register` (VineJS; unique email; optional device time zone) → creates the user + **`UserDefaultsService.seed`** (default categories) in one DB transaction → returns a token.
 - [x] `POST /auth/login`, `/auth/logout`, `/auth/logout-all`; `GET/PATCH /me`; `POST /me/onboarding/complete`.
 - [x] Rate limits on register and login (`@adonisjs/limiter`, database store: 10/min per IP, then a 5-minute block).
-- [ ] Forgot/reset password with `@adonisjs/mail` → **deferred to Phase 7**.
+- [x] Forgot/reset password with `@adonisjs/mail` (done in Phase 7).
 - [x] Functional tests (42 total): register + 22 seeded categories, validation, login, logout vs logout-all, profile updates and validation, onboarding.
 
 **Flutter**
@@ -173,7 +173,7 @@
 - [ ] Keyboard & mouse, rest: Ctrl+N, ↑/↓ in lists, Del, focus order, hover states, right-click context menus, visible scrollbars.
 - [x] **Exports:** `GET /export/transactions.csv` (local-day range, account/person filters, BOM, formula-safe cells) and `GET /export/all.json`; Settings → Export data, plus Export CSV on accounts and people. Web → browser download; Windows → Save As; Android → share sheet.
 - [x] **Delete account:** `DELETE /me` with the password (`AccountDeletionService`, ordered deletes in one transaction; tests check every table is empty for that user and another user is untouched). Settings → Delete account dialog (type DELETE + password).
-- [ ] Forgot/reset password (needs SMTP).
+- [x] **Forgot password:** `@adonisjs/mail` over SMTP (Gmail app password, settings only in `.env`), `POST /auth/forgot-password` emails a 6-digit code (hashed, 15 min, per-email limits), `POST /auth/reset-password` sets the password and signs out everywhere. App: Login → Forgot password? → code + new password → signed in.
 - [x] **Write off** a person's remaining balance (PPL-7): `POST /people/:id/write-off` saves COLLECT+EXPENSE or REPAY+INCOME together (no money moves; the loss or gift shows in reports and budgets). Person ⋮ → Write off dialog (amount, category, account).
 - [x] **App identity:** teal bubble + ₹ icons from `tool/branding/generate_branding.py` (Android legacy/adaptive/themed, Windows .ico, web favicon + maskable); Android launch screens (pre-12 and 12+, light and dark); Windows window shown on the first frame (no white flash).
 - [ ] **Android:** release signing config, `flutter build apk --split-per-abi` / `appbundle`, minSdk 24, edge-to-edge (predictive back stays off; see above). *Blocked locally: the dev network can't reach `storage.googleapis.com`.*

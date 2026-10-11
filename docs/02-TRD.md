@@ -191,7 +191,8 @@ Write SQL that runs on both databases:
 | `POST /auth/login` | `{email, password}` → token |
 | `POST /auth/logout` | Revoke current token |
 | `POST /auth/logout-all` | Revoke all tokens |
-| `POST /auth/forgot-password` / `POST /auth/reset-password` | Email reset flow *(Phase 7, not built yet)* |
+| `POST /auth/forgot-password` | `{email}` → emails a 6-digit code (valid 15 min; a new request replaces the old code). Same 200 answer whether or not the account exists; 503 if the server has no SMTP or the email couldn't be sent. Limits: 10/min per IP, 3 per 15 min per email |
+| `POST /auth/reset-password` | `{email, code, password, passwordConfirmation}` → new password, code marked used, every session signed out. Wrong/expired/used code → 422 on `code`. Limit: 5 tries per 15 min per email. Only `sha256(userId:code)` is stored |
 | `GET /me` · `PATCH /me` | Profile & preferences (currency, timezone, monthStartDay, theme, accentColor) |
 | `POST /me/onboarding/complete` | Sets `onboardedAt` |
 | `DELETE /me` | Delete account and all data. Body `{password}`; wrong password → 422 on `password`; success → 204 and every token is revoked |
@@ -374,7 +375,8 @@ DB_USER=expense
 DB_PASSWORD=...
 DB_DATABASE=hisaabchat
 CORS_ORIGINS=http://localhost:5000,https://app.example.com
-SMTP_HOST=... SMTP_PORT=... SMTP_USERNAME=... SMTP_PASSWORD=...
+# Mail (optional; without SMTP_HOST password reset answers 503). Gmail: an app password, port 587 (STARTTLS)
+MAIL_FROM_NAME=HisaabChat MAIL_FROM_ADDRESS=... SMTP_HOST=smtp.gmail.com SMTP_PORT=587 SMTP_USERNAME=... SMTP_PASSWORD=...
 APP_WEB_URL=https://app.example.com
 ```
 
