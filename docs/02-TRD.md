@@ -180,7 +180,7 @@ Write SQL that runs on both databases:
 - Success: `{ "data": …, "meta": { … } }` (meta only for paginated lists).
 - Validation error: `422 { "errors": [{ "field": "amount", "rule": "positive", "message": "…" }] }` (VineJS default).
 - Other errors: `400/401/403/404/409/429 { "errors": [{ "message": "…", "code": "E_…" }] }`.
-- Pagination: cursor-based. `?limit=30&cursor=<opaque>`, with `meta.nextCursor` returned.
+- Pagination: cursor-based keyset on (date, id). `?limit=40&cursor=<opaque>` (max 100), with `meta.nextCursor` (null on the last page) and `meta.totals {income, expense, count}` for **every** match, not just the page.
 - Every query is scoped to `auth.user.id`. Accessing another user's resource returns **404**.
 
 ### 4.2 Endpoints
@@ -191,10 +191,10 @@ Write SQL that runs on both databases:
 | `POST /auth/login` | `{email, password}` → token |
 | `POST /auth/logout` | Revoke current token |
 | `POST /auth/logout-all` | Revoke all tokens |
-| `POST /auth/forgot-password` / `POST /auth/reset-password` | Email reset flow |
-| `GET /me` · `PATCH /me` | Profile & preferences (currency, timezone, monthStartDay, theme) |
+| `POST /auth/forgot-password` / `POST /auth/reset-password` | Email reset flow *(Phase 7, not built yet)* |
+| `GET /me` · `PATCH /me` | Profile & preferences (currency, timezone, monthStartDay, theme, accentColor) |
 | `POST /me/onboarding/complete` | Sets `onboardedAt` |
-| `DELETE /me` | Delete account and all data (requires password) |
+| `DELETE /me` | Delete account and all data (requires password) *(Phase 7, not built yet)* |
 | **Accounts** | |
 | `GET /accounts?includeArchived=` | List + `meta.netWorth` |
 | `POST /accounts` · `GET/PATCH/DELETE /accounts/:id` | DELETE → 409 if it has transactions |
@@ -205,32 +205,31 @@ Write SQL that runs on both databases:
 | `PATCH /categories/:id` · `POST /categories/:id/archive` | |
 | `PUT /categories/order` | `{ids: [...]}` |
 | **Transactions** | |
-| `GET /transactions` | `from, to, type, accountId, categoryId, q, cursor, limit` → list + `meta.totals` |
+| `GET /transactions` | `from, to, type, accountId, categoryId, personId, budgetId, q, cursor, limit` → page + `meta.nextCursor` + `meta.totals`. `budgetId` = expenses counted by that budget (its categories and their sub-categories). `q` matches the note, category, account (either side of a transfer), person, or an amount typed like `120`, `1,250.50` or `₹450` |
 | `POST /transactions` | Idempotent by client-supplied `id`; response includes `budgetAlerts[]` |
 | `GET/PATCH/DELETE /transactions/:id` | |
 | **Budgets** | |
 | `GET /budgets?month=YYYY-MM` | Status for every active budget + summary + unbudgeted spending |
-| `POST /budgets` · `PATCH /budgets/:id` | Body includes `categoryIds[]`; 409 if a category is taken |
-| `GET /budgets/:id?month=` | Detail, contributing transactions, 6-month history |
+| `POST /budgets` · `PATCH /budgets/:id` | Body includes `categoryIds[]` and `rollover`; **422 on `categoryIds`** if a category is taken |
+| `GET /budgets/:id?month=` | Status, 6-month history, and the period's exact UTC bounds `from`/`to`; its expenses are paged with `GET /transactions?budgetId=…&from=…&to=…` |
 | `POST /budgets/:id/archive` | |
 | `PUT /budgets/:id/overrides/:month` · `DELETE …` | One-month amount override |
 | **Recurring** | |
-| `GET/POST /recurring` · `PATCH/DELETE /recurring/:id` | |
-| `GET /recurring/upcoming?days=7` | |
-| `GET /recurring/occurrences?status=PENDING` | |
+| `GET/POST /recurring` · `PATCH/DELETE /recurring/:id` | Rules; POST accepts `linkTransactionId` (the form's "Repeat": that transaction becomes the first occurrence); PATCH `isActive` pauses/resumes |
+| `GET /recurring/upcoming?days=7` | `{today, pending[] (waiting for Confirm/Skip), upcoming[] (next dates), dues[] (lend/borrow due dates still owed)}`; also catches up due rules |
 | `POST /recurring/occurrences/:id/confirm` | Optional body to adjust amount/date |
 | `POST /recurring/occurrences/:id/skip` | |
 | **People: lend & borrow (v1.0)** | |
-| `GET /people` · `POST /people` | List with `balance` (positive = they owe you) + `meta.totals {toReceive, toPay}` |
-| `GET/PATCH /people/:id` · `POST /people/:id/archive` | |
+| `GET /people?includeArchived=` · `POST /people` | List with `balance` (positive = they owe you) + `meta {youGet, youOwe}` |
+| `GET/PATCH /people/:id` · `POST /people/:id/archive` · `/unarchive` | Archive needs a settled balance (422 otherwise) |
 | `GET /transactions?personId=` | The person's thread |
-| `POST /people/:id/settle` | Creates the COLLECT/REPAY that brings the balance to zero |
-| `POST /people/:id/write-off` | Forgive: turns the remaining balance into an EXPENSE (they owed you) or INCOME (you owed them) |
+| `POST /people/:id/settle` | `{accountId, amount?}` → the COLLECT/REPAY for all (or part) of the balance |
+| `POST /people/:id/write-off` | Forgive: turns the remaining balance into an EXPENSE (they owed you) or INCOME (you owed them) *(Phase 7, not built yet)* |
 | **Dashboard & reports** | |
-| `GET /dashboard?month=` | Net worth, month totals, top budgets, upcoming, pending, recent |
-| `GET /reports/by-category?from&to&type` | Totals and % per category |
+| `GET /dashboard?month=` | Net worth, account count, month income/expense/net, budget statuses, latest 8 transactions (upcoming and pending come from `/recurring/upcoming`) |
+| `GET /reports/categories?month=&type=EXPENSE\|INCOME` | Totals and % per category, plus the period's UTC `from`/`to` for drill-down |
 | `GET /reports/trend?months=6` | Monthly income, expense, net |
-| `GET /export/transactions.csv?from&to` · `GET /export/all.json` | Downloads |
+| `GET /export/transactions.csv?from&to` · `GET /export/all.json` | Downloads *(Phase 7, not built yet)* |
 | `GET /health` | Liveness + DB check |
 
 ### 4.3 Example: create a transaction
@@ -291,7 +290,7 @@ The UI follows a **WhatsApp-inspired** layout (see the [Design Brief](04-UI-UX-D
 
 | Window class (width) | Navigation | Full transaction form | Lists & details |
 |---|---|---|---|
-| **Compact** < 600 dp (phones) | App bar (🔍 ⋮) + bottom `NavigationBar` (Home, Transactions, Budgets, Accounts) + green FAB | Full-screen page | Single pane; threads and info pages push |
+| **Compact** < 600 dp (phones) | App bar (🔍 ⋮) + bottom `NavigationBar` (Home, Transactions, Budgets, Accounts) + accent-colored FAB | Full-screen page | Single pane; threads and info pages push |
 | **Medium** 600–839 dp | 64 dp icon rail | Dialog (520 dp) | Single pane |
 | **Expanded** ≥ 840 dp (desktop, web) | Icon rail (WhatsApp Desktop style) | Slide-in over the list panel | **Three columns:** rail + list panel (360–420 dp) + detail pane (thread / info / form) |
 
@@ -302,9 +301,9 @@ A single `AppShell` widget picks the layout with `LayoutBuilder`/`MediaQuery.siz
 ### 5.4 Platform specifics
 | Platform | Details |
 |---|---|
-| **Android** | minSdk 24 (Android 7.0); edge-to-edge; predictive back; haptic feedback on save; swipe-to-delete rows; share sheet for exports |
-| **Windows** | Windows 10/11 x64; `window_manager` minimum size 400×640; keyboard shortcuts (Ctrl+N new, Ctrl+F search, Esc close, Enter save); hover states; right-click context menu on rows; visible scrollbars; MSIX package |
-| **Web** | Chrome/Edge/Firefox/Safari (last 2 versions); path URLs; page titles per route; CSV download via browser; loading splash in `index.html` while the engine starts |
+| **Android** | minSdk 24 (Android 7.0); edge-to-edge; haptic feedback on save; share sheet for exports. **Predictive back is off** (`enableOnBackInvokedCallback="false"`) so every Back goes through the router: close the top screen, else go to Home, else leave the app |
+| **Windows** | Windows 10/11 x64; `window_manager` minimum size 400×640; keyboard: Ctrl+1…6 sections, Ctrl+F search, Esc and the mouse back button = Back; hover states; MSIX package. *Planned: Ctrl+N, right-click menus* |
+| **Web** | Chrome/Edge/Firefox/Safari (last 2 versions); path URLs; loading splash in `index.html` while the engine starts. Forms, sheets and dialogs get their own browser-history entry, so browser Back closes them instead of changing the page; Esc works as Back. `<meta name="theme-color">` follows the accent color |
 
 ### 5.5 Networking
 - `dio` base URL comes from `--dart-define=API_BASE_URL=…`.
@@ -411,11 +410,15 @@ Environments: `local` → `staging` (optional) → `production`.
 | Android | `flutter build appbundle` / `flutter build apk --split-per-abi` | Signed APK (sideload) for personal use; AAB for Play Store later |
 | Windows | `flutter build windows` + `dart run msix:create` | MSIX installer (self-signed for personal use) or a zip of the `Release` folder |
 
+**Chosen hosting (the owner's VPS):** the VPS already runs **MySQL and nginx**, so instead of Docker Compose the API runs as a systemd service on `127.0.0.1:3333`, and nginx serves **everything on one port, 2222, over HTTPS**: the web build at `/` (SPA fallback) and `/api/` proxied to the API. Apps are built with `--dart-define=API_BASE_URL=https://<domain>:2222/api/v1`; the API's `APP_URL` and `CORS_ORIGIN` use the same origin. HTTPS is required: the web app's token storage only works in a secure context, and Android release builds refuse plain HTTP.
+
+**Behind a reverse proxy:** `config/app.ts` sets `trustProxy: proxyAddr.compile('loopback')`, so `request.ip()` is the visitor's address (from `X-Forwarded-For`, trusted only from nginx on the same machine). Login rate limits depend on it.
+
 Cron (on the host or in an `api` sidecar):
 ```
-0 * * * *   docker compose exec -T api node ace recurring:run
-30 2 * * *  docker compose exec -T api node ace balances:check
-0 3 * * *   /opt/hisaabchat/backup.sh
+0 * * * *   cd …/backend/build && node ace recurring:run      # also caught up on every read
+30 2 * * *  node ace balances:check                            # not built yet (drift is tested in CI)
+0 3 * * *   mysqldump … | gzip > backups/hisaabchat-$(date +%F).sql.gz
 ```
 
 ## 11. Risks & Mitigations

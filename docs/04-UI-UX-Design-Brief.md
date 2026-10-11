@@ -11,10 +11,10 @@
 The app should feel instantly familiar to anyone who uses WhatsApp, so there's nothing new to learn. We borrow WhatsApp's **layout patterns, interaction model, color mood and density**. Money accounts work like chats, and logging an expense works like sending a message.
 
 **What we borrow**
-- Top app bar with the app name in green, search and ⋮ menu
+- Top app bar with the app name in the accent color (teal by default), search and ⋮ menu
 - Search pill + filter chips above lists
 - List tiles with a **circular avatar**, a bold title, a grey preview line and time/amount on the right
-- Green **FAB** at the bottom-right
+- Accent-colored **FAB** at the bottom-right
 - **Chat thread** screens: wallpaper, date chips, left/right bubbles and a composer bar at the bottom
 - A **status ring** around avatars, unread-style **count badges** and ✓ ticks
 - A "contact info" style detail page and a WhatsApp-style Settings page
@@ -24,7 +24,7 @@ The app should feel instantly familiar to anyone who uses WhatsApp, so there's n
 **What we don't copy** (this is our own product)
 - The WhatsApp name, logo, app icon, wallpaper artwork or illustrations. We draw our **own money-themed doodle wallpaper** and our own icon.
 - The app name is our own: **HisaabChat**. *Hisaab* means "keeping accounts", and *Chat* reflects the WhatsApp-style interaction.
-- If it's ever published to the Play Store or Microsoft Store, shift the green slightly and review the look for trademark distance.
+- If it's ever published to the Play Store or Microsoft Store, review the look for trademark distance. The default accent is Teal, not WhatsApp's green; the Green accent stays optional.
 
 ### 1.1 The metaphor
 
@@ -32,7 +32,7 @@ The app should feel instantly familiar to anyone who uses WhatsApp, so there's n
 |---|---|
 | Chats list | **Accounts** list (Cash, SBI, UPI…) with the last transaction as the preview line |
 | A chat conversation | **Account thread**: that account's transactions as bubbles |
-| Sent message (right, green bubble) | **Money out**: expense, transfer out |
+| Sent message (right, accent-tinted bubble) | **Money out**: expense, transfer out |
 | Received message (left, white/grey bubble) | **Money in**: income, transfer in |
 | Date chip ("Today") | Day separators with the day's net total |
 | System message (centered chip) | Balance adjustments, "Account created with ₹2,300" |
@@ -54,28 +54,48 @@ Implemented as a Material 3 `ColorScheme` (seed overridden with the values below
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `primary` | `#1DAA61` | `#21C063` | App title, FAB, selected nav, buttons, send button, links |
+| `primary` | **accent** (Teal `#00897B`) | **accent** (Teal `#26A69A`) | App title, FAB, selected nav, buttons, send button, links. See §2.1.1 |
 | `onPrimary` | `#FFFFFF` | `#0B141A` | Icon/text on primary |
-| `navIndicator` | `#D8FDD2` | `#103629` | Selected bottom-nav/rail pill |
+| `navIndicator` | accent at 16% on white | accent at 24% on `panel` | Selected bottom-nav/rail pill |
 | `background` | `#FFFFFF` | `#0B141A` | Lists, app bar |
 | `panel` | `#FFFFFF` | `#111B21` | Desktop list panel, sheets, dialogs |
 | `inputFill` | `#F0F2F5` | `#202C33` | Search pill, composer, chips (unselected) |
-| `chipSelected` | `#D8FDD2` / text `#15603E` | `#103629` / text `#D9FDD3` | Selected filter chip |
+| `chipSelected` | same tint as `navIndicator` / text: accent darkened | same tint / text: accent lightened | Selected filter chip |
 | `divider` | `#E9EDEF` | `#222D34` | Hairline dividers (inset from the avatar) |
 | `textPrimary` | `#111B21` | `#E9EDEF` | Titles |
 | `textSecondary` | `#667781` | `#8696A0` | Preview lines, times, captions |
 | `threadBackground` | `#EFEAE2` | `#0B141A` | Account thread wallpaper base |
 | `doodle` | `#000000` @ 6% | `#FFFFFF` @ 4% | Our money-themed wallpaper pattern |
-| `bubbleOut` (money out) | `#D9FDD3` | `#005C4B` | Expense / transfer-out bubbles |
+| `bubbleOut` (money out) | accent at 18% on white | deep accent (62% on `#0B141A`) | Expense / transfer-out bubbles |
 | `bubbleIn` (money in) | `#FFFFFF` | `#202C33` | Income / transfer-in bubbles |
 | `dateChip` | `#FFFFFF` (shadow) | `#182229` | Day separators, system messages |
-| `badge` | `#25D366` | `#21C063` | Count badges |
+| `badge` | accent | accent | Count badges |
 | `tick` | `#53BDEB` | `#53BDEB` | ✓ saved indicator |
 | `income` | `#1DAA61` | `#21C063` | `+₹` amounts |
 | `expense` | `#E53935` | `#F15C6D` | `−₹` amounts |
 | `transfer` | `#027EB5` | `#53BDEB` | ⇄ amounts |
 | `warning` | `#E69500` | `#FFBC2D` | Budget ≥ alert % |
 | `danger` | `#E53935` | `#F15C6D` | Budget over 100%, destructive actions |
+
+#### 2.1.1 Accent colors
+The user picks the app's accent in **Settings → Appearance → Color**. It is saved on the profile (`users.accent_color`, default **TEAL**) and follows them to every device; the web build also sets `<meta name="theme-color">` to it so the browser's own top bar matches.
+
+| Accent | Light | Dark |
+|---|---|---|
+| Green | `#1DAA61` | `#21C063` |
+| **Teal** (default) | `#00897B` | `#26A69A` |
+| Blue | `#1E6FD9` | `#4C9AFF` |
+| Indigo | `#4F46E5` | `#818CF8` |
+| Purple | `#7C3AED` | `#A78BFA` |
+| Pink | `#D6336C` | `#F06595` |
+| Orange | `#E8590C` | `#FF922B` |
+| Amber | `#B7791F` | `#F6C350` |
+| Cyan | `#0891B2` | `#22D3EE` |
+| Slate | `#475569` | `#94A3B8` |
+
+- It drives `primary`, `appBarTitle` (light mode), `navIndicator`, `chipSelected`, `bubbleOut`, `badge` and the toast's action link.
+- **Money colors never change with it:** `income`, `expense`, `transfer`, `warning`, `danger` keep their meaning. Red is deliberately not offered as an accent.
+- Contrast is tested: white text on every light shade ≥ 3:1, near-black text on every dark shade ≥ 4.5:1.
 
 - **Category palette:** 12 colors (indigo, emerald, orange, violet, amber, slate, sky, cyan, teal, pink, rose, lime). Used for avatar backgrounds and chart slices, and as the small "sender name" color inside bubbles, like group-chat names in WhatsApp.
 - **Never color-only:** bubble side (left/right), the `+`/`−` sign, and text labels on budget states always accompany color.
@@ -223,9 +243,9 @@ The custom-category icon picker offers about 80 curated symbols in groups (Home,
 #### Navigation & pages
 | Interaction | Animation | Duration / curve |
 |---|---|---|
-| Switch bottom tab / rail section | Content **fade-through**. The selected icon's `fill` animates 0 → 1 (`TweenAnimationBuilder` on fill) and the green indicator pill grows from the center | 250 ms, emphasized |
+| Switch bottom tab / rail section | Content **fade-through**. The selected icon's `fill` animates 0 → 1 (`TweenAnimationBuilder` on fill) and the accent indicator pill grows from the center | 250 ms, emphasized |
 | Open account → thread (compact) | **Shared-axis X** slide. The account **avatar is a `Hero`** that flies into the thread header | 350 ms |
-| Back (Android) | **Predictive back**: the page scales and follows the gesture | Gesture-driven |
+| Back (Android) | Closes the top screen with its normal exit transition. Predictive back is **off**, so the system never closes the app while a form is open | Page transition |
 | FAB → full transaction form | **Container transform** (`OpenContainer`): the FAB morphs into the form page and morphs back on close | 400 ms |
 | Select item in the desktop list → detail pane | Detail content **fade-through**. The selected tile's background tints | 200 ms |
 | Desktop slide-in form | Slides over the list panel from the left with a scrim fade | 300 ms, emphasized decelerate |
@@ -237,10 +257,10 @@ The custom-category icon picker offers about 80 curated symbols in groups (Home,
 #### App bar, search & filters
 | Interaction | Animation |
 |---|---|
-| Tap 🔍 (`search`) | The app bar **morphs** into the search field, WhatsApp-style: the title fades out, the field expands from the icon's position, the keyboard opens. Reversed on back. 250 ms |
+| Tap 🔍 (`search`), the rail's 🔍 or Ctrl+F | Opens **Search everything** (shared-axis page) with the field focused: accounts, people and budgets by name, transactions by note, category, account, person or amount, paged as you scroll. Back returns to the results. *(A WhatsApp-style in-place app-bar morph is a possible polish later.)* |
 | Scroll a list | The FAB shrinks and fades out while scrolling down and pops back in while scrolling up (scale 0.8 ↔ 1, 200 ms). The app bar gets a subtle tonal elevation tween |
 | Select a filter chip | Background and label color tween (150 ms) + a check icon slides in. The list **crossfades** to the new results, with the first ~8 items staggering in (fade + 8 dp slide-up, 30 ms apart) |
-| Long-press → selection mode | The app bar **cross-switches** to the selection bar (fade + slide, 200 ms). The tile tints (120 ms). A green `check_circle` **pops** onto the avatar's corner (scale 0 → 1, `easeOutBack`, 200 ms). The count number rolls when it changes |
+| Long-press → selection mode | The app bar **cross-switches** to the selection bar (fade + slide, 200 ms). The tile tints (120 ms). An accent `check_circle` **pops** onto the avatar's corner (scale 0 → 1, `easeOutBack`, 200 ms). The count number rolls when it changes |
 
 #### Lists
 | Interaction | Animation |
@@ -321,8 +341,8 @@ The custom-category icon picker offers about 80 curated symbols in groups (Home,
 ### 3.2 Compact shell (Android / phone browser)
 ```
 ┌─────────────────────────────────┐
-│ HisaabChat               🔍  ⋮  │  ← title in green; ⋮ = Reports, Categories,
-│ ┌─────────────────────────────┐ │     Recurring, Settings
+│ HisaabChat               🔍  ⋮  │  ← title in the accent color; ⋮ = People, Reports,
+│ ┌─────────────────────────────┐ │     Settings
 │ │ 🔍  Search                   │ │  ← search pill
 │ └─────────────────────────────┘ │
 │ (All)(Expense)(Income)(Transfer)│  ← filter chips
@@ -330,10 +350,10 @@ The custom-category icon picker offers about 80 curated symbols in groups (Home,
 │  ( list tiles … )               │
 │                                 │
 │                          ╭───╮  │
-│                          │ + │  │  ← green FAB → Add transaction
+│                          │ + │  │  ← accent FAB → Add transaction
 │                          ╰───╯  │
 ├─────────────────────────────────┤
-│   🏠       ≡        ◔       🏦   │  ← NavigationBar, green pill on selected
+│   🏠       ≡        ◔       🏦   │  ← NavigationBar, accent pill on selected
 │  Home  Transactions Budgets Accounts│
 └─────────────────────────────────┘
 ```
@@ -382,7 +402,7 @@ The custom-category icon picker offers about 80 curated symbols in groups (Home,
 │  ◯     ◯     ◯     ◯     ＋      │  ← budget rings row (like the status row)
 │ Rent  Food  Bike  Edu   New     │     ring fill = % spent, colored by status
 │ 100%  85%⚠  78%   40%           │
-│ Upcoming                    (2) │  ← green count badge
+│ Due soon                    (2) │  ← accent count badge
 │ (🔁) Bike EMI          ₹3,200   │
 │      Due in 2 days     Confirm  │
 │ Recent                          │
@@ -396,7 +416,7 @@ The custom-category icon picker offers about 80 curated symbols in groups (Home,
 ```
 
 ### 4.2 Transactions tab (chat-list style)
-- Search pill, then filter chips: **All · Expense · Income · Transfer · This month ▾**.
+- Search pill ("Search transactions": note, category, account, person or amount), then filter chips: **All · Expense · Income · Transfer**. *A month picker chip is planned.*
 - Small grey uppercase section headers: `TODAY · −₹740`, `YESTERDAY · −₹1,200`.
 - Tile: category avatar | **Category** (title) and `Account · note` (preview) | **amount** (colored) over the time. Recurring items show a small 🔁 next to the time.
 - **Long-press** → selection mode: the app bar turns into `← 3  🗑  ⧉  ⋮`. Tap more tiles to add them, then delete or duplicate.
@@ -424,7 +444,7 @@ The custom-category icon picker offers about 80 curated symbols in groups (Home,
 │ │          6:00 PM ✓│            │
 │ ╰──────────────────╯            │
 │            ╭───────────────────╮│
-│            │ 🛒 Groceries       ││  ← money out: right bubble (green tint)
+│            │ 🛒 Groceries       ││  ← money out: right bubble (accent tint)
 │            │ −₹540              ││     category name in its color,
 │            │ Big Bazaar weekly  ││     like a group-chat sender name
 │            │          7:45 PM ✓ ││
@@ -444,7 +464,7 @@ The custom-category icon picker offers about 80 curated symbols in groups (Home,
 - **Bubble content:** category icon + name (small, in the category color), amount (17 semibold, `+`/`−` sign), optional note, then time and status (🕒 sending / ✓ saved / ⚠ failed, tap to retry). Budget-alert effects show as a small chip under the bubble: `Food & Groceries · 85% used`.
 - **Tap a bubble** → edit form. **Long-press** → selection (delete, duplicate, copy amount).
 - **Scrolling:** opens at the newest entry (bottom) and loads older entries when scrolling up (reversed list). A "↓" jump button with a count appears when scrolled up, like WhatsApp's unread jump.
-- The ⋮ menu has Account info, Search in account, Reconcile balance, Export, and Wallpaper.
+- The ⋮ menu has Account info, Reconcile balance and Edit account. *Planned: Search in account, Export, Wallpaper.*
 
 #### Quick-add composer
 - **[− / +] toggle:** expense (−, default) or income (+). Tap to flip. The toggle color follows the `expense`/`income` color.
@@ -467,7 +487,7 @@ Opened from the FAB, 📎 or editing a bubble. It works like WhatsApp's "New cha
 │ (📝) Note         Big Bazaar    │
 │ (🔁) Repeat       Never       › │
 │                                 │
-│ [          Save            ]    │  ← full-width green pill button
+│ [          Save            ]    │  ← full-width accent pill button
 │      Save & add another         │  ← text button
 └─────────────────────────────────┘
 ```
@@ -525,14 +545,14 @@ Account info has the same pattern: balance, type, "include in total", month in/o
 │ (⎋) Log out                     │
 └─────────────────────────────────┘
 ```
-Appearance: Theme (System / Light / Dark), Thread wallpaper (Doodle / Plain color / None), Font size (Small / Medium / Large), **Reduce motion** (on/off).
+Appearance: Theme (System / Light / Dark), **Color** (the 10 accents in §2.1.1, as a row of circles), **Reduce motion** (on/off). *Planned: Thread wallpaper (Doodle / Plain color / None), Font size.*
 
 ### 4.9 Reports (⋮ → Reports; rail on desktop)
 Segmented tabs **Spending · Income · Trend**. A donut chart with the total in the center, then chat-list-style tiles per category (avatar, name, % bar as the preview line, amount trailing). The Trend tab shows bars plus a net line. Export is in the ⋮ menu.
 
 ### 4.10 Welcome, Auth & Onboarding
-- **Welcome:** our own centered illustration, "Welcome to HisaabChat", the line "Track every rupee across cash, bank and UPI", and a full-width green pill button **Get started**, with "I already have an account" below. This follows WhatsApp's welcome screen layout.
-- **Login / Sign up:** a simple centered form, green pill button, max 420 dp wide on large screens.
+- **Welcome:** our own centered illustration, "Welcome to HisaabChat", the line "Track every rupee across cash, bank and UPI", and a full-width accent pill button **Get started**, with "I already have an account" below. This follows WhatsApp's welcome screen layout.
+- **Login / Sign up:** a simple centered form, accent pill button, max 420 dp wide on large screens.
 - **Onboarding:** step pages with a top progress bar. Account and budget suggestions appear as list tiles with a toggle and an inline amount field.
 
 ## 5. Widget Inventory
@@ -540,12 +560,12 @@ Segmented tabs **Spending · Income · Trend**. A donut chart with the total in 
 | Widget | Notes |
 |---|---|
 | `AppShell` | Compact: app bar + `NavigationBar` + FAB. Medium: rail + pane. Expanded: rail + list panel + detail pane |
-| `HomeAppBar` / `SelectionAppBar` | Green title + 🔍 ⋮ / selection count + actions |
+| `HomeAppBar` / `SelectionAppBar` | Accent title + 🔍 ⋮ / selection count + actions |
 | `SearchPill`, `FilterChipsRow` | |
 | `ChatTile` | Avatar, title, preview, trailing amount/time, optional badge/pin/🔁 |
 | `CategoryAvatar`, `AccountAvatar`, `RingAvatar` | The ring shows budget % with status color |
 | `BudgetRingsRow` | Horizontal "status row" on Home |
-| `CountBadge` | Green rounded badge |
+| `CountBadge` | Accent rounded badge |
 | `ThreadView` | Wallpaper + reversed `ListView` + jump-to-latest button |
 | `DateChip`, `SystemChip` | Centered pills |
 | `TxnBubble` | In/out side, tail on group start, category label, amount, note, time + status tick |
@@ -571,14 +591,14 @@ Segmented tabs **Spending · Income · Trend**. A donut chart with the total in 
 | | Android | Windows | Web |
 |---|---|---|---|
 | Layout | WhatsApp Android | WhatsApp Desktop (3 columns) | WhatsApp Web (3 columns; compact on phones) |
-| Back | System / predictive back | Esc closes the thread or dialog | Browser back |
+| Back | System Back: closes the top screen (form, sheet, dialog, chat); on a section other than Home, goes to Home; on Home, leaves the app | **Esc** or the mouse **back button**, same rules (never closes the app) | **Browser Back** closes an open form, sheet or dialog first (each gets its own history entry), then changes page |
 | Entry | Composer + numeric keyboard; FAB | Composer focused with Ctrl+N; Enter sends | Same as Windows |
 | Select | Long-press | Click the hover chevron / right-click; Shift-click ranges | Same as Windows |
 | Delete | Swipe or selection | Del key on the selected item | Same as Windows |
 | Scrollbars | Overlay | Thin, visible on hover | Thin, visible on hover |
 | Export | Share sheet | Save As dialog | Browser download |
 
-**Keyboard (Windows/Web):** Ctrl+N new transaction · Ctrl+F search · Ctrl+1…5 switch rail section · ↑/↓ move through the list · Enter open/send · Esc back/close · Del delete selected.
+**Keyboard (Windows/Web):** Ctrl+1…6 switch rail section · Ctrl+F search everything · Esc back/close · Enter send. *Planned (Phase 7): Ctrl+N new transaction, ↑/↓ move through the list, Del delete selected.*
 
 ## 8. Accessibility
 - Contrast ≥ 4.5:1 for text in both themes. Bubble colors are checked against their text colors.

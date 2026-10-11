@@ -56,6 +56,8 @@ CREATE TABLE users (
   timezone         VARCHAR(64)   NOT NULL DEFAULT 'Asia/Kolkata',
   month_start_day  TINYINT       NOT NULL DEFAULT 1,
   theme            ENUM('SYSTEM','LIGHT','DARK') NOT NULL DEFAULT 'SYSTEM',
+  accent_color     ENUM('GREEN','TEAL','BLUE','INDIGO','PURPLE','PINK','ORANGE','AMBER','CYAN','SLATE')
+                   NOT NULL DEFAULT 'TEAL',        -- app accent (Settings → Appearance → Color)
   onboarded_at     DATETIME(3)   NULL,
   created_at       DATETIME(3)   NOT NULL,
   updated_at       DATETIME(3)   NOT NULL,
@@ -542,35 +544,54 @@ Seeded by `UserDefaultsService.seed(user, trx)` during registration. Icon keys r
 { "id": "…", "name": "Bike EMI + Petrol", "kind": "VARIABLE", "color": "#8B5CF6", "icon": "two_wheeler",
   "categories": [ { "id": "…", "name": "Bike EMI", "icon": "two_wheeler" },
                   { "id": "…", "name": "Petrol", "icon": "local_gas_station" } ],
-  "budgeted": 500000, "rolloverIn": 0, "spent": 390000, "remaining": 110000,
-  "percent": 78, "status": "OK", "safeToSpendPerDay": 4782,
-  "periodStart": "2026-10-01", "periodEnd": "2026-10-31" }
+  "amount": 500000, "budgeted": 500000, "hasOverride": false, "rollover": false, "rolloverIn": 0,
+  "spent": 390000, "remaining": 110000, "percent": 78, "status": "OK", "alertPercent": 80,
+  "daysLeft": 23, "safeToSpendPerDay": 4782 }
+
+// Budget detail (GET /budgets/:id?month=2026-10): the status above plus
+{ "history": [ { "month": "2026-05", "budgeted": null, "spent": 0 }, … ],
+  "periodStart": "2026-10-01", "periodEnd": "2026-10-31",
+  "from": "2026-09-30T18:30:00.000Z", "to": "2026-10-31T18:30:00.000Z" }
+// Its expenses: GET /transactions?budgetId=…&from=…&to=… (paged)
+
+// TransactionDTO
+{ "id": "…", "type": "LEND", "amount": 200000, "date": "2026-10-08T14:10:00.000Z", "note": "Goa trip",
+  "adjustmentDirection": null,
+  "account": { "id": "…", "name": "Cash", "icon": "payments", "color": "#16A34A" },
+  "toAccount": null, "category": null,
+  "person": { "id": "…", "name": "Amit", "color": "#1DAA61" }, "dueDate": "2026-10-15",
+  "isRecurring": false, "recurringRuleId": null, "createdAt": "…" }
+
+// A page of GET /transactions
+{ "data": [ /* TransactionDTO … */ ],
+  "meta": { "nextCursor": "eyJkIjoi…", "totals": { "income": 0, "expense": 1500000, "count": 120 } } }
+
+// PersonDTO (GET /people → meta: { "youGet": 150000, "youOwe": 30000 })
+{ "id": "…", "name": "Amit", "phone": null, "note": null, "color": "#1DAA61", "archived": false,
+  "balance": 150000, "lastActivity": "2026-10-08T14:10:00.000Z" }   // balance > 0: they owe you
+
+// UserDTO (GET /me)
+{ "id": "…", "fullName": "Asha Rao", "email": "…", "initials": "AR", "currency": "INR", "locale": "en-IN",
+  "timezone": "Asia/Kolkata", "monthStartDay": 1, "theme": "SYSTEM", "accentColor": "TEAL",
+  "onboardedAt": "…", "createdAt": "…", "updatedAt": "…" }
 ```
 
+Flutter models are small hand-written immutable classes with `fromJson` (no code generation), e.g.
+`app/lib/features/transactions/data/txn.dart`:
+
 ```dart
-// app/lib/features/transactions/data/transaction_model.dart
-import 'package:freezed_annotation/freezed_annotation.dart';
+enum TxnType { expense, income, transfer, adjustment, lend, borrow, collect, repay }
 
-part 'transaction_model.freezed.dart';
-part 'transaction_model.g.dart';
+@immutable
+class Txn {
+  const Txn({required this.id, required this.type, required this.amount, required this.date,
+      required this.account, this.note, this.toAccount, this.category, this.adjustmentIncrease,
+      this.person, this.dueDate, this.isRecurring = false, this.recurringRuleId});
 
-enum TxnType { INCOME, EXPENSE, TRANSFER, ADJUSTMENT }
+  factory Txn.fromJson(Map<String, dynamic> json) => …;
 
-@freezed
-abstract class TransactionModel with _$TransactionModel {
-  const factory TransactionModel({
-    required String id,
-    required TxnType type,
-    required int amount,            // paise
-    required DateTime date,         // UTC from API; display with .toLocal()
-    String? note,
-    required AccountRef account,
-    AccountRef? toAccount,
-    CategoryRef? category,
-    @Default(false) bool isRecurring,
-  }) = _TransactionModel;
-
-  factory TransactionModel.fromJson(Map<String, dynamic> json) =>
-      _$TransactionModelFromJson(json);
+  final int amount;          // paise
+  final DateTime date;       // UTC from the API; shown with .toLocal()
+  // …
 }
 ```

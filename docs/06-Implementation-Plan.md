@@ -147,10 +147,20 @@
 - [x] Ace command `recurring:run` (idempotent via unique rule + date; day-of-month clamping; catch-up of missed dates; advances `next_run_at`); the API also catches up a user's rules on read, so no cron is needed in development. Schedule maths in `schedule.ts` with unit tests.
 - [x] Budget rollover (≤ 12-month look-back, unspent and overspent both carry) + tests; `rollover` toggle on create/update.
 - [x] `GET /reports/trend` (built in Phase 5).
-- [x] **Flutter:** "Repeat" field in the transaction form (auto-add or remind me); Settings → Recurring; Dashboard "Upcoming" and "Pending" cards (Confirm opens a prefilled form; Skip); trend chart *(done in Phase 5: Reports → money in vs out, 6 months)*; rollover shown on budget cards.
-- [x] **Lend & borrow (People):** migration (`people`, `transactions.person_id`/`due_date`, new types + CHECK), balance effects for LEND/BORROW/COLLECT/REPAY + tests, `/people` API (list with balances, settle up, write-off), People list + **person thread** with Lent/Borrowed composer toggle, Home "You'll get / You owe" card, due dates in Upcoming.
+- [x] **Flutter:** "Repeat" field in the transaction form (auto-add or remind me); Settings → Recurring; Home "Due soon" card (pending reminders with Confirm, which lets you change the amount, and Skip; the next 7 days; lend/borrow due dates); trend chart *(done in Phase 5: Reports → money in vs out, 6 months)*; rollover shown on budget cards.
+- [x] **Lend & borrow (People):** migration (`people`, `transactions.person_id`/`due_date`, new types + CHECK), balance effects for LEND/BORROW/COLLECT/REPAY + tests, `/people` API (list with balances, settle up, archive; write-off moved to Phase 7), People list + **person thread** with Lent/Borrowed composer toggle, Home "You'll get / You owe" card, due dates in Upcoming.
 - [x] Tests: 109 backend (people, recurring, rollover, schedule), 70 app (people chat + settle up, Home "Due soon" confirm/skip, Repeat, Settings → Recurring).
 - *Write-off (PPL-7) moves to Phase 7; deleting a user must remove recurring rules before accounts (see the delete-account flow there).*
+
+### After Phase 6 — fixes and extras (done)
+- [x] **Back on every platform:** Android Back, browser Back, Esc and the mouse back button close the top screen first, then go to Home, then leave the app. Android predictive back is switched off so the system can't close the app with a form open; on web, open forms, sheets and dialogs get their own browser-history entry.
+- [x] **Search everything:** `/search` (🔍, the rail's 🔍, Ctrl+F) over accounts, people, budgets and transactions; transaction search also matches account, person and amounts (`120`, `1,250.50`, `₹450`); search boxes on Budgets and Categories; ✕ to clear every search box.
+- [x] **Accent colors:** 10 colors (Teal by default) in Settings → Appearance, saved as `users.accent_color` and synced; money colors stay fixed; contrast tested for all.
+- [x] **Pagination everywhere it can grow:** person chats, Reports → category, budget expenses (`GET /transactions?budgetId=`) and search results page as you scroll, with counts and totals from the server; day headers only show a total once the whole day is loaded.
+- [x] Smaller fixes: People's + button on phones, a quieter Home greeting, a one-line chat placeholder, a scrolling rail in short windows, the design preview removed from Settings → Connection.
+- [x] `trustProxy` for running behind nginx (Phase 8 prep).
+- [ ] *In progress:* the browser's own top bar (`<meta name="theme-color">`) follows the accent on web.
+- [x] Tests: 110 backend, 96 app (back button, search, accent, pagination).
 
 ### Phase 7 — Platform Polish & Packaging
 - [ ] **Dark mode** check of every screen (WhatsApp dark palette: bubbles, wallpaper, chips); golden tests at 3 sizes × 2 themes.
@@ -158,21 +168,25 @@
 - [ ] **Jank check:** profile mode on a mid-range Android phone + Windows + Chrome; ≥ 99% of frames < 16 ms; fix with `RepaintBoundary`, shader warm-up, fewer stagger items.
 - [ ] **Icon audit:** no `Icons.*` or emoji left in the UI; every icon button has a tooltip and semantics label.
 - [ ] Our own **doodle wallpaper** SVG (light/dark tints) + Appearance setting (Doodle / Plain / None).
-- [ ] **Keyboard & mouse** (Windows/Web): `Shortcuts`/`Actions` (Ctrl+N, Ctrl+F, Esc, Enter), focus order, hover states, context menus, visible scrollbars.
+- [x] **Keyboard & mouse** (Windows/Web), first part: Ctrl+1…6 sections, Ctrl+F search, Esc and the mouse back button as Back.
+- [ ] Keyboard & mouse, rest: Ctrl+N, ↑/↓ in lists, Del, focus order, hover states, right-click context menus, visible scrollbars.
 - [ ] **Exports:** CSV and JSON. Web → browser download; Windows → Save dialog; Android → share sheet.
-- [ ] Delete account flow; forgot/reset password if deferred.
+- [ ] Delete account flow (`DELETE /me`; delete recurring rules before accounts); forgot/reset password (needs SMTP).
+- [ ] **Write off** a person's remaining balance (PPL-7).
 - [ ] **App identity:** `flutter_launcher_icons` (Android adaptive, Windows .ico, web favicons/manifest) and `flutter_native_splash`.
-- [ ] **Android:** release signing config, `flutter build apk --split-per-abi` / `appbundle`, minSdk 24, edge-to-edge, predictive back.
+- [ ] **Android:** release signing config, `flutter build apk --split-per-abi` / `appbundle`, minSdk 24, edge-to-edge (predictive back stays off; see above). *Blocked locally: the dev network can't reach `storage.googleapis.com`.*
 - [ ] **Windows:** `msix` config (name, publisher, logo, self-signed cert) → `dart run msix:create`.
 - [ ] **Web:** `flutter build web --release` (try `--wasm`), loading splash in `index.html`, correct base href.
 - [ ] Accessibility pass: `Semantics` labels, text scale 200%, contrast, TalkBack/Narrator spot checks.
 - [ ] Performance: seed 10k transactions; verify API p95 and smooth list scrolling.
 
 ### Phase 8 — Production Deploy & Hardening → **v1.0**
-- [ ] VPS setup: Docker + Compose, firewall (22/80/443), non-root user, automatic security updates.
-- [ ] `deploy/docker-compose.prod.yml`: `mariadb:11.4` (volume, strong passwords, not publicly exposed), `api` (built image), `caddy` (TLS for `api.<domain>` and `app.<domain>`, serves the Flutter web build, HSTS + CSP headers).
-- [ ] Deploy script: build image → `node ace migration:run --force` → restart.
-- [ ] Cron: `recurring:run` hourly, `balances:check` nightly, `mariadb-dump` backup nightly → object storage; **test a restore**.
+**Chosen setup:** the owner's VPS already runs **MySQL and nginx**, so instead of Docker + Caddy: the API runs as a systemd service on `127.0.0.1:3333`, and nginx serves **everything on port 2222 over HTTPS** (web build at `/`, `/api/` proxied). See [TRD §10](02-TRD.md).
+- [x] `trustProxy` (loopback) so rate limits see the real visitor IP behind nginx.
+- [x] Production rehearsal on the dev PC: `node ace build` → `npm ci --omit=dev` → `migration:run --force` on an empty database → server up, health OK, sign-up OK, CORS for the web origin, `recurring:run` OK.
+- [ ] Written guide + `deploy/` files: nginx site on 2222 (certbot certificate), systemd service, `deploy.sh` (pull → build → migrate → restart), backup script.
+- [ ] On the VPS: database and user, `.env` outside the build folder, firewall (open 2222), first deploy.
+- [ ] Cron: `recurring:run` hourly, `mysqldump` backup nightly (copy off the server); **test a restore**. (`balances:check` is not built yet.)
 - [ ] Security review: every service filters by `user_id`; rate limits; CORS limited to the web origin; token expiry; no secrets in the Flutter build.
 - [ ] Production builds of the APK (pointing to the prod API) and MSIX; install on your phone and PC.
 - [ ] Tag `v1.0.0`; GitHub Release with the APK and MSIX attached.

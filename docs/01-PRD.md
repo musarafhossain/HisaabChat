@@ -84,12 +84,14 @@ Priority: **P0** = MVP must-have, **P1** = should-have for v1, **P2** = later.
 | TXN-3 | Add **Transfer** between own accounts (e.g. Bank → Cash ATM withdrawal); doesn't count as income or expense | P0 |
 | TXN-4 | Edit / delete any transaction; balances update automatically | P0 |
 | TXN-5 | Transaction list grouped by day, with daily totals and infinite scroll | P0 |
-| TXN-6 | Filter by date range, type, account, category; search by note | P0 |
+| TXN-6 | Filter by date range, type, account, category; search by note, category, account, person or amount (e.g. `120`) | P0 |
 | TXN-7 | Optional tags (e.g. `#trip-goa`) | P2 |
 | TXN-8 | Optional receipt photo attachment | P2 |
 | TXN-9 | Smart defaults: remember the last-used account; date defaults to now | P1 |
 | TXN-10 | **Quick-add composer** in an account thread (WhatsApp-style): type `120 petrol`; the amount and category are detected; send saves it to that account | P0 |
 | TXN-11 | Multi-select (long-press) to delete or duplicate several transactions | P1 |
+| TXN-12 | **Search everything** from one place (search icon, Ctrl+F): accounts, people, budgets and transactions; plus a search box on each list | P1 |
+| TXN-13 | Long lists load page by page as you scroll; counts and totals always cover every match, not just what's loaded | P0 |
 
 ### 5.4 Categories
 | ID | Requirement | Priority |
@@ -146,6 +148,7 @@ Priority: **P0** = MVP must-have, **P1** = should-have for v1, **P2** = later.
 | SET-2 | Import transactions from CSV | P2 |
 | SET-3 | Delete account and all data | P1 |
 | SET-4 | Light/dark theme (System / Light / Dark) | P1 |
+| SET-8 | **Accent color**: choose from 10 colors (Teal by default); saved to the account and used on every device; money colors (income green, expense red) never change | P1 |
 | SET-5 | **WhatsApp-inspired look & feel** across all platforms (see the [Design Brief](04-UI-UX-Design-Brief.md)): own name, logo and wallpaper | P0 |
 | SET-6 | **Smooth animations** throughout (page transitions, bubbles, rings, counters) with a *Reduce motion* option | P0 |
 | SET-7 | **One consistent icon set** (Material Symbols Rounded) for navigation, categories, accounts and actions; no emoji in the UI | P0 |
@@ -159,6 +162,7 @@ Priority: **P0** = MVP must-have, **P1** = should-have for v1, **P2** = later.
 | PLT-4 | Responsive layout: phone (bottom nav), tablet/narrow window (navigation rail), desktop (sidebar + two-pane views) | P0 |
 | PLT-5 | Same login on all devices; data always comes from the server | P0 |
 | PLT-6 | Keyboard shortcuts and mouse affordances (hover, right-click) on Windows and Web | P1 |
+| PLT-8 | **Back** behaves the same everywhere: it closes the open form, sheet, dialog or chat first, then returns to Home, and only then leaves the app (Android Back, browser Back, Esc, mouse back button) | P0 |
 | PLT-7 | Sign out of all devices | P1 |
 
 ### 5.10 People: Lend & Borrow (v1.0)
