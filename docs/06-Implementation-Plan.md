@@ -164,7 +164,7 @@
 - [x] Tests: 110 backend, 96 app (back button, search, accent, pagination).
 
 ### Phase 7 — Platform Polish & Packaging
-- [ ] **Dark mode** check of every screen (WhatsApp dark palette: bubbles, wallpaper, chips); golden tests at 3 sizes × 2 themes.
+- [x] **Dark mode** check of every screen (reviewed renders at phone and desktop sizes: bubbles, wallpaper, chips, rings, dialogs). Fixed: theme text styles now carry the platform font, Account info and the Categories tabs keep a readable width on wide windows, Settings → Account's month dropdown no longer overflows on phones. `test/screens_layout_test.dart` opens every main screen in light and dark at 3 sizes (360×740, 412×915, 1280×800) and fails on any overflow (instead of pixel goldens, which differ between machines).
 - [ ] **Motion polish pass** against the brief's §2.5 table (tab fill animation, Hero avatars, FAB container transform, bubble send/tick/shake, ring sweep + alert pulse, count-ups, search morph, selection mode). Verify Reduce motion turns them off.
 - [ ] **Jank check:** profile mode on a mid-range Android phone + Windows + Chrome; ≥ 99% of frames < 16 ms; fix with `RepaintBoundary`, shader warm-up, fewer stagger items.
 - [ ] **Icon audit:** no `Icons.*` or emoji left in the UI; every icon button has a tooltip and semantics label.

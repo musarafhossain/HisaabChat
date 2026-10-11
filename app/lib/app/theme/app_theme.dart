@@ -32,6 +32,9 @@ abstract final class AppTheme {
 
     final base = ThemeData(colorScheme: scheme, useMaterial3: true, brightness: brightness);
     const tabular = [FontFeature.tabularFigures()];
+    // The platform's font (Roboto, Segoe UI…). Component styles below set it
+    // too, so none of them fall back to the engine default.
+    final font = base.textTheme.bodyMedium?.fontFamily;
 
     return base.copyWith(
       scaffoldBackgroundColor: background,
@@ -49,7 +52,7 @@ abstract final class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0.5,
         centerTitle: false,
-        titleTextStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: c.appBarTitle),
+        titleTextStyle: TextStyle(fontFamily: font, fontSize: 22, fontWeight: FontWeight.w700, color: c.appBarTitle),
         iconTheme: IconThemeData(color: c.textPrimary),
       ),
       navigationBarTheme: NavigationBarThemeData(
@@ -59,6 +62,7 @@ abstract final class AppTheme {
         height: 72,
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => TextStyle(
+            fontFamily: font,
             fontSize: 12.5,
             fontWeight: states.contains(WidgetState.selected) ? FontWeight.w600 : FontWeight.w500,
             color: c.textPrimary,
@@ -84,7 +88,7 @@ abstract final class AppTheme {
           foregroundColor: scheme.onPrimary,
           minimumSize: const Size(64, 48),
           shape: const StadiumBorder(),
-          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+          textStyle: TextStyle(fontFamily: font, fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
       textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: c.primary)),
@@ -94,14 +98,14 @@ abstract final class AppTheme {
         checkmarkColor: c.onChipSelected,
         side: BorderSide.none,
         shape: const StadiumBorder(),
-        labelStyle: TextStyle(color: c.textSecondary, fontWeight: FontWeight.w500),
-        secondaryLabelStyle: TextStyle(color: c.onChipSelected, fontWeight: FontWeight.w600),
+        labelStyle: TextStyle(fontFamily: font, color: c.textSecondary, fontWeight: FontWeight.w500),
+        secondaryLabelStyle: TextStyle(fontFamily: font, color: c.onChipSelected, fontWeight: FontWeight.w600),
         padding: const EdgeInsets.symmetric(horizontal: 4),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: c.inputFill,
-        hintStyle: TextStyle(color: c.textSecondary),
+        hintStyle: TextStyle(fontFamily: font, color: c.textSecondary),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         border: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(24)),
@@ -119,8 +123,8 @@ abstract final class AppTheme {
       listTileTheme: ListTileThemeData(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
         minVerticalPadding: 12,
-        titleTextStyle: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w500, color: c.textPrimary),
-        subtitleTextStyle: TextStyle(fontSize: 14, color: c.textSecondary),
+        titleTextStyle: TextStyle(fontFamily: font, fontSize: 16.5, fontWeight: FontWeight.w500, color: c.textPrimary),
+        subtitleTextStyle: TextStyle(fontFamily: font, fontSize: 14, color: c.textSecondary),
         iconColor: c.textSecondary,
       ),
       cardTheme: CardThemeData(
@@ -137,7 +141,7 @@ abstract final class AppTheme {
       snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
       tooltipTheme: TooltipThemeData(
         waitDuration: const Duration(milliseconds: 500),
-        textStyle: TextStyle(color: background),
+        textStyle: TextStyle(fontFamily: font, color: background),
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {

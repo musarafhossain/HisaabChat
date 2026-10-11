@@ -124,7 +124,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     for (final zone in zones)
                       DropdownMenuItem(
                         value: zone,
-                        child: Text(zone == _deviceTimezone ? '$zone  (this device)' : zone),
+                        child: Text(
+                          zone == _deviceTimezone ? '$zone  (this device)' : zone,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                   ],
                   onChanged: (zone) => setState(() => _timezone = zone ?? _timezone),
@@ -139,6 +142,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SectionLabel('Month starts on'),
                 DropdownButtonFormField<int>(
                   initialValue: _monthStartDay,
+                  isExpanded: true,
                   decoration: const InputDecoration(prefixIcon: Icon(AppIcons.monthStart)),
                   items: [
                     for (var day = 1; day <= 28; day++)

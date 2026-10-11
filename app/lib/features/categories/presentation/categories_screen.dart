@@ -28,11 +28,20 @@ class CategoriesScreen extends ConsumerWidget {
         builder: (context) => Scaffold(
           appBar: AppBar(
             title: const Text('Categories', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500)),
-            bottom: const TabBar(
-              tabs: [
-                Tab(text: 'Expense'),
-                Tab(text: 'Income'),
-              ],
+            // Same width as the list below on wide windows.
+            bottom: const PreferredSize(
+              preferredSize: Size.fromHeight(kTextTabBarHeight),
+              child: Align(
+                child: SizedBox(
+                  width: 720,
+                  child: TabBar(
+                    tabs: [
+                      Tab(text: 'Expense'),
+                      Tab(text: 'Income'),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
           floatingActionButton: FloatingActionButton(

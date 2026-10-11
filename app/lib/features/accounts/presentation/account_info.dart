@@ -26,7 +26,14 @@ class AccountInfoScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(),
-      body: AccountInfoView(accountId: accountId, onDeleted: () => Navigator.of(context).maybePop()),
+      // Full screen on a wide window (e.g. a direct link): keep it readable.
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: AccountInfoView(accountId: accountId, onDeleted: () => Navigator.of(context).maybePop()),
+        ),
+      ),
     );
   }
 }
