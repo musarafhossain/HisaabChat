@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hisaabchat/app/theme/accent.dart';
 
 /// WhatsApp-inspired color tokens (docs/04-UI-UX-Design-Brief.md §2.1) that
 /// don't fit Material's ColorScheme: bubbles, thread wallpaper, finance colors.
@@ -36,69 +37,84 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.toastWarning,
   });
 
-  static const light = AppColors(
-    primary: Color(0xFF1DAA61),
-    appBarTitle: Color(0xFF1DAA61),
-    navIndicator: Color(0xFFD8FDD2),
-    panel: Color(0xFFFFFFFF),
-    inputFill: Color(0xFFF0F2F5),
-    chipSelected: Color(0xFFD8FDD2),
-    onChipSelected: Color(0xFF15603E),
-    divider: Color(0xFFE9EDEF),
-    textPrimary: Color(0xFF111B21),
-    textSecondary: Color(0xFF667781),
-    threadBackground: Color(0xFFEFEAE2),
-    doodle: Color(0x0F000000),
-    bubbleOut: Color(0xFFD9FDD3),
-    bubbleIn: Color(0xFFFFFFFF),
-    dateChip: Color(0xFFFFFFFF),
-    badge: Color(0xFF25D366),
-    tick: Color(0xFF53BDEB),
-    income: Color(0xFF1DAA61),
-    expense: Color(0xFFE53935),
-    transfer: Color(0xFF027EB5),
-    warning: Color(0xFFE69500),
-    danger: Color(0xFFE53935),
-    toastBackground: Color(0xFF233138),
-    onToast: Color(0xFFF0F2F5),
-    toastAction: Color(0xFF25D366),
-    toastSuccess: Color(0xFF25D366),
-    toastError: Color(0xFFF15C6D),
-    toastInfo: Color(0xFF53BDEB),
-    toastWarning: Color(0xFFFFBC2D),
-  );
+  /// Light palette in the given accent.
+  factory AppColors.lightFor(AccentColor accent) {
+    const white = Color(0xFFFFFFFF);
+    final a = accent.light;
+    final tint = Color.lerp(white, a, 0.16)!;
+    return AppColors(
+      primary: a,
+      appBarTitle: a,
+      navIndicator: tint,
+      panel: white,
+      inputFill: const Color(0xFFF0F2F5),
+      chipSelected: tint,
+      onChipSelected: Color.lerp(a, const Color(0xFF000000), 0.45)!,
+      divider: const Color(0xFFE9EDEF),
+      textPrimary: const Color(0xFF111B21),
+      textSecondary: const Color(0xFF667781),
+      threadBackground: const Color(0xFFEFEAE2),
+      doodle: const Color(0x0F000000),
+      bubbleOut: Color.lerp(white, a, 0.18)!,
+      bubbleIn: white,
+      dateChip: white,
+      badge: a,
+      tick: const Color(0xFF53BDEB),
+      income: const Color(0xFF1DAA61),
+      expense: const Color(0xFFE53935),
+      transfer: const Color(0xFF027EB5),
+      warning: const Color(0xFFE69500),
+      danger: const Color(0xFFE53935),
+      toastBackground: const Color(0xFF233138),
+      onToast: const Color(0xFFF0F2F5),
+      // The toast is dark in light mode, so its action uses the bright shade.
+      toastAction: accent.dark,
+      toastSuccess: const Color(0xFF25D366),
+      toastError: const Color(0xFFF15C6D),
+      toastInfo: const Color(0xFF53BDEB),
+      toastWarning: const Color(0xFFFFBC2D),
+    );
+  }
 
-  static const dark = AppColors(
-    primary: Color(0xFF21C063),
-    appBarTitle: Color(0xFFE9EDEF),
-    navIndicator: Color(0xFF103629),
-    panel: Color(0xFF111B21),
-    inputFill: Color(0xFF202C33),
-    chipSelected: Color(0xFF103629),
-    onChipSelected: Color(0xFFD9FDD3),
-    divider: Color(0xFF222D34),
-    textPrimary: Color(0xFFE9EDEF),
-    textSecondary: Color(0xFF8696A0),
-    threadBackground: Color(0xFF0B141A),
-    doodle: Color(0x0AFFFFFF),
-    bubbleOut: Color(0xFF005C4B),
-    bubbleIn: Color(0xFF202C33),
-    dateChip: Color(0xFF182229),
-    badge: Color(0xFF21C063),
-    tick: Color(0xFF53BDEB),
-    income: Color(0xFF21C063),
-    expense: Color(0xFFF15C6D),
-    transfer: Color(0xFF53BDEB),
-    warning: Color(0xFFFFBC2D),
-    danger: Color(0xFFF15C6D),
-    toastBackground: Color(0xFFE9EDEF),
-    onToast: Color(0xFF111B21),
-    toastAction: Color(0xFF008069),
-    toastSuccess: Color(0xFF1DAA61),
-    toastError: Color(0xFFDC2626),
-    toastInfo: Color(0xFF0284C7),
-    toastWarning: Color(0xFFD97706),
-  );
+  /// Dark palette in the given accent.
+  factory AppColors.darkFor(AccentColor accent) {
+    const panel = Color(0xFF111B21);
+    const background = Color(0xFF0B141A);
+    final a = accent.dark;
+    final tint = Color.lerp(panel, a, 0.24)!;
+    return AppColors(
+      primary: a,
+      appBarTitle: const Color(0xFFE9EDEF),
+      navIndicator: tint,
+      panel: panel,
+      inputFill: const Color(0xFF202C33),
+      chipSelected: tint,
+      onChipSelected: Color.lerp(a, const Color(0xFFFFFFFF), 0.7)!,
+      divider: const Color(0xFF222D34),
+      textPrimary: const Color(0xFFE9EDEF),
+      textSecondary: const Color(0xFF8696A0),
+      threadBackground: background,
+      doodle: const Color(0x0AFFFFFF),
+      // A deep version of the accent, like WhatsApp's dark green bubble.
+      bubbleOut: Color.lerp(background, accent.light, 0.62)!,
+      bubbleIn: const Color(0xFF202C33),
+      dateChip: const Color(0xFF182229),
+      badge: a,
+      tick: const Color(0xFF53BDEB),
+      income: const Color(0xFF21C063),
+      expense: const Color(0xFFF15C6D),
+      transfer: const Color(0xFF53BDEB),
+      warning: const Color(0xFFFFBC2D),
+      danger: const Color(0xFFF15C6D),
+      toastBackground: const Color(0xFFE9EDEF),
+      onToast: const Color(0xFF111B21),
+      toastAction: accent.light,
+      toastSuccess: const Color(0xFF1DAA61),
+      toastError: const Color(0xFFDC2626),
+      toastInfo: const Color(0xFF0284C7),
+      toastWarning: const Color(0xFFD97706),
+    );
+  }
 
   final Color primary;
   final Color appBarTitle;

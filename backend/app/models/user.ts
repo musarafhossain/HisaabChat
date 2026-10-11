@@ -14,6 +14,21 @@ import { assignUuid } from '#models/helpers'
 
 export type Theme = 'SYSTEM' | 'LIGHT' | 'DARK'
 
+/** App accent colors (Settings → Appearance); TEAL by default. */
+export const ACCENT_COLORS = [
+  'GREEN',
+  'TEAL',
+  'BLUE',
+  'INDIGO',
+  'PURPLE',
+  'PINK',
+  'ORANGE',
+  'AMBER',
+  'CYAN',
+  'SLATE',
+] as const
+export type AccentColor = (typeof ACCENT_COLORS)[number]
+
 export default class User extends compose(UserSchema, withAuthFinder(hash)) {
   static selfAssignPrimaryKey = true
 
@@ -24,6 +39,7 @@ export default class User extends compose(UserSchema, withAuthFinder(hash)) {
 
   declare currentAccessToken?: AccessToken
   declare theme: Theme
+  declare accentColor: AccentColor
 
   @hasMany(() => Account)
   declare accounts: HasMany<typeof Account>

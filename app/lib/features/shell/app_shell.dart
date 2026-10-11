@@ -166,43 +166,54 @@ class _RailShell extends ConsumerWidget {
           Container(
             width: 64,
             color: colors.panel,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Column(
-              children: [
-                // The 'new' action lives in the rail (like WhatsApp Desktop's new-chat
-                // button) so it never covers a thread's Send button.
-                _Fab(current: current, small: true),
-                const SizedBox(height: 8),
-                IconButton(
-                  tooltip: 'Search (Ctrl+F)',
-                  icon: Icon(AppIcons.search, color: colors.textSecondary),
-                  onPressed: () => openSearch(context),
-                ),
-                const SizedBox(height: 4),
-                for (final d in Destination.railTop) railButton(d),
-                const Spacer(),
-                railButton(Destination.settings),
-                const SizedBox(height: 8),
-                Tooltip(
-                  message: user?.fullName ?? 'Profile',
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: () => onSelect(Destination.settings),
-                    child: CircleAvatar(
-                      radius: 18,
-                      backgroundColor: colors.primary,
-                      child: Text(
-                        user?.initials ?? '',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Theme.of(context).colorScheme.onPrimary,
+            // Scrolls instead of overflowing in short windows (a small browser
+            // window or a landscape tablet).
+            child: LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight - 24),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      children: [
+                        // The 'new' action lives in the rail (like WhatsApp Desktop's new-chat
+                        // button) so it never covers a thread's Send button.
+                        _Fab(current: current, small: true),
+                        const SizedBox(height: 8),
+                        IconButton(
+                          tooltip: 'Search (Ctrl+F)',
+                          icon: Icon(AppIcons.search, color: colors.textSecondary),
+                          onPressed: () => openSearch(context),
                         ),
-                      ),
+                        const SizedBox(height: 4),
+                        for (final d in Destination.railTop) railButton(d),
+                        const Spacer(),
+                        railButton(Destination.settings),
+                        const SizedBox(height: 8),
+                        Tooltip(
+                          message: user?.fullName ?? 'Profile',
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: () => onSelect(Destination.settings),
+                            child: CircleAvatar(
+                              radius: 18,
+                              backgroundColor: colors.primary,
+                              child: Text(
+                                user?.initials ?? '',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: Theme.of(context).colorScheme.onPrimary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ],
+              ),
             ),
           ),
           VerticalDivider(width: 1, color: colors.divider),

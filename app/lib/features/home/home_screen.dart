@@ -10,6 +10,7 @@ import 'package:hisaabchat/core/motion/entrance.dart';
 import 'package:hisaabchat/core/widgets/chat_tile.dart';
 import 'package:hisaabchat/core/widgets/offline_banner.dart';
 import 'package:hisaabchat/core/widgets/skeleton.dart';
+import 'package:hisaabchat/core/widgets/window_class.dart';
 import 'package:hisaabchat/features/accounts/accounts_controller.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_form.dart';
 import 'package:hisaabchat/features/auth/auth_controller.dart';
@@ -47,16 +48,24 @@ class HomeScreen extends ConsumerWidget {
 
     final header = FadeSlideIn(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // On phones the green "HisaabChat" app bar is the title, so the
+            // greeting stays a quiet line under it; on desktop (no app bar) it
+            // is the page heading.
             Text(
               '${greeting(DateTime.now())}, ${user?.firstName ?? ''}',
-              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
+              style: context.windowClass == WindowClass.compact
+                  ? TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: colors.textPrimary)
+                  : theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
             ),
             if (data != null)
-              Text(periodLabel(data.periodStart, data.periodEnd), style: TextStyle(color: colors.textSecondary)),
+              Text(
+                periodLabel(data.periodStart, data.periodEnd),
+                style: TextStyle(fontSize: 13.5, color: colors.textSecondary),
+              ),
           ],
         ),
       ),

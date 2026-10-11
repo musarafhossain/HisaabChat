@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hisaabchat/app/theme/accent.dart';
 
 /// The signed-in user and their preferences (`GET /me`).
 @immutable
@@ -11,6 +12,7 @@ class AppUser {
     required this.timezone,
     required this.monthStartDay,
     required this.theme,
+    this.accent = AccentColor.fallback,
     this.fullName,
     this.onboardedAt,
   });
@@ -24,6 +26,7 @@ class AppUser {
     timezone: json['timezone'] as String? ?? 'Asia/Kolkata',
     monthStartDay: (json['monthStartDay'] as num?)?.toInt() ?? 1,
     theme: themeModeFromApi(json['theme'] as String?),
+    accent: AccentColor.fromApi(json['accentColor'] as String?),
     onboardedAt: json['onboardedAt'] == null ? null : DateTime.parse(json['onboardedAt'] as String),
   );
 
@@ -35,6 +38,7 @@ class AppUser {
   final String timezone;
   final int monthStartDay;
   final ThemeMode theme;
+  final AccentColor accent;
   final DateTime? onboardedAt;
 
   /// "Musaraf" from "Musaraf Hossain", falling back to the email name.

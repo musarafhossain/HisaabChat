@@ -1,4 +1,5 @@
 import vine from '@vinejs/vine'
+import { ACCENT_COLORS } from '#models/user'
 import { DateTime } from 'luxon'
 
 /**
@@ -55,4 +56,5 @@ export const updateProfileValidator = vine.create({
   timezone: vine.string().use(timezoneRule()).optional(),
   monthStartDay: vine.number().withoutDecimals().range([1, 28]).optional(),
   theme: vine.enum(['SYSTEM', 'LIGHT', 'DARK'] as const).optional(),
+  accentColor: vine.enum(ACCENT_COLORS).optional(),
 })

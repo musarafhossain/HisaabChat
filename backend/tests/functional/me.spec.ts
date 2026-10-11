@@ -26,12 +26,17 @@ test.group('me', (group) => {
   test('updates preferences', async ({ client }) => {
     const token = await registerAndGetToken(client)
 
+    // New accounts start with the teal accent.
+    const me = await client.get('/api/v1/me').bearerToken(token)
+    me.assertBodyContains({ data: { theme: 'SYSTEM', accentColor: 'TEAL' } })
+
     const response = await client.patch('/api/v1/me').bearerToken(token).json({
       fullName: 'Asha R.',
       currency: 'usd',
       timezone: 'Europe/London',
       monthStartDay: 25,
       theme: 'DARK',
+      accentColor: 'PURPLE',
     })
 
     response.assertStatus(200)
@@ -42,6 +47,7 @@ test.group('me', (group) => {
         timezone: 'Europe/London',
         monthStartDay: 25,
         theme: 'DARK',
+        accentColor: 'PURPLE',
       },
     })
   })
@@ -53,6 +59,7 @@ test.group('me', (group) => {
       { monthStartDay: 29 },
       { monthStartDay: 1.5 },
       { theme: 'NEON' },
+      { accentColor: 'RED' },
       { currency: 'RUPEES' },
       { timezone: 'Nowhere/City' },
     ]) {

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:hisaabchat/app/theme/accent.dart';
 import 'package:hisaabchat/app/theme/app_colors.dart';
 
 /// Material 3 themes tuned to the WhatsApp-inspired design brief.
 /// Fonts are the platform defaults (Roboto on Android/Web, Segoe UI on Windows).
 abstract final class AppTheme {
-  static ThemeData light() => _build(Brightness.light, AppColors.light, background: Colors.white);
+  static ThemeData light([AccentColor accent = AccentColor.fallback]) =>
+      _build(Brightness.light, AppColors.lightFor(accent), background: Colors.white);
 
-  static ThemeData dark() => _build(Brightness.dark, AppColors.dark, background: const Color(0xFF0B141A));
+  static ThemeData dark([AccentColor accent = AccentColor.fallback]) =>
+      _build(Brightness.dark, AppColors.darkFor(accent), background: const Color(0xFF0B141A));
 
   static ThemeData _build(Brightness brightness, AppColors c, {required Color background}) {
     final scheme = ColorScheme.fromSeed(seedColor: c.primary, brightness: brightness).copyWith(

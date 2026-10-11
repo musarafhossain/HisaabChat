@@ -287,8 +287,10 @@ export class TransactionSchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['createdAt', 'currency', 'email', 'fullName', 'id', 'locale', 'monthStartDay', 'onboardedAt', 'password', 'theme', 'timezone', 'updatedAt'] as const
+  static $columns = ['accentColor', 'createdAt', 'currency', 'email', 'fullName', 'id', 'locale', 'monthStartDay', 'onboardedAt', 'password', 'theme', 'timezone', 'updatedAt'] as const
   $columns = UserSchema.$columns
+  @column()
+  declare accentColor: string
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column()

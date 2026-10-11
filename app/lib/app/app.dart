@@ -18,8 +18,8 @@ class HisaabChatApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'HisaabChat',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      theme: AppTheme.light(appearance.accent),
+      darkTheme: AppTheme.dark(appearance.accent),
       themeMode: appearance.themeMode,
       themeAnimationDuration: const Duration(milliseconds: 300),
       themeAnimationCurve: Easing.standard,

@@ -13,6 +13,7 @@ export default class UserTransformer extends BaseTransformer<User> {
       'timezone',
       'monthStartDay',
       'theme',
+      'accentColor',
       'onboardedAt',
       'createdAt',
       'updatedAt',

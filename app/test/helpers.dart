@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hisaabchat/app/app.dart';
+import 'package:hisaabchat/app/theme/accent.dart';
 import 'package:hisaabchat/core/money/money.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/storage/preferences.dart';
@@ -37,7 +38,7 @@ const testUser = AppUser(
 );
 
 /// [user] with some fields replaced (the fakes' stand-in for PATCH /me).
-AppUser copyUser(AppUser user, {int? monthStartDay, DateTime? onboardedAt}) => AppUser(
+AppUser copyUser(AppUser user, {int? monthStartDay, DateTime? onboardedAt, AccentColor? accent}) => AppUser(
   id: user.id,
   email: user.email,
   fullName: user.fullName,
@@ -46,6 +47,7 @@ AppUser copyUser(AppUser user, {int? monthStartDay, DateTime? onboardedAt}) => A
   timezone: user.timezone,
   monthStartDay: monthStartDay ?? user.monthStartDay,
   theme: user.theme,
+  accent: accent ?? user.accent,
   onboardedAt: onboardedAt ?? user.onboardedAt,
 );
 
@@ -121,7 +123,11 @@ class FakeAuthRepository implements AuthRepository {
   @override
   Future<AppUser> updateProfile(Map<String, Object?> changes) async {
     lastProfileUpdate = changes;
-    return user = copyUser(user, monthStartDay: changes['monthStartDay'] as int?);
+    return user = copyUser(
+      user,
+      monthStartDay: changes['monthStartDay'] as int?,
+      accent: changes['accentColor'] == null ? null : AccentColor.fromApi(changes['accentColor']! as String),
+    );
   }
 
   int onboardingCompletions = 0;
