@@ -218,7 +218,8 @@ The custom-category icon picker offers about 80 curated symbols in groups (Home,
 - All icons go through an `AppIcons` registry (`Map<String, IconData>` of `Symbols.*` constants). The DB stores string keys such as `two_wheeler`, so the font can still be tree-shaken.
 - Never use `Icons.*` (old Material Icons) or emoji in the UI.
 - Every icon-only button has a `tooltip` (Windows/Web hover) and a `Semantics` label.
-- The **app icon** is our own design: a rounded-square green background with a white **chat bubble holding a ₹ sign** (the HisaabChat mark). It's exported for Android (adaptive + monochrome themed icon), Windows (`.ico` 16–256) and Web (favicon, 192/512, maskable).
+- The **app icon** is our own design: a rounded-square **teal** (#00897B, the default accent) background with a white **chat bubble holding a ₹ sign** (the HisaabChat mark). `tool/branding/generate_branding.py` exports it for Android (legacy, adaptive + monochrome themed icon), Windows (`.ico` 16–256) and Web (favicon, 192/512, maskable).
+- **Launch screens** match the in-app splash: the logo on the app background (white, or #0B141A in dark mode). Android 12+ shows the bubble on a teal circle. Windows shows the window only once Flutter has drawn its first frame. Launch screens always use teal: the chosen accent isn't known until the app starts.
 
 ### 2.5 Motion & Animation
 

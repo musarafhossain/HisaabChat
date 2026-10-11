@@ -15,6 +15,9 @@ Future<void> main() async {
 
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
     await windowManager.ensureInitialized();
+    // Size and place the window while it's still hidden. It isn't shown here:
+    // the runner (windows/runner/flutter_window.cpp) shows it on Flutter's
+    // first frame, so it never appears as an empty white box.
     await windowManager.waitUntilReadyToShow(
       const WindowOptions(
         title: 'HisaabChat',
@@ -22,10 +25,6 @@ Future<void> main() async {
         minimumSize: Size(400, 640),
         center: true,
       ),
-      () async {
-        await windowManager.show();
-        await windowManager.focus();
-      },
     );
   }
 

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Teal, the default accent (AccentColor.teal). -->
+    <color name="ic_launcher_background">#00897B</color>
+    <!-- Same as the app's light background, so launch → first frame has no flash. -->
+    <color name="splash_background">#FFFFFF</color>
+</resources>
