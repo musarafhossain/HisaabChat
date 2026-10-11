@@ -194,7 +194,7 @@ Write SQL that runs on both databases:
 | `POST /auth/forgot-password` / `POST /auth/reset-password` | Email reset flow *(Phase 7, not built yet)* |
 | `GET /me` · `PATCH /me` | Profile & preferences (currency, timezone, monthStartDay, theme, accentColor) |
 | `POST /me/onboarding/complete` | Sets `onboardedAt` |
-| `DELETE /me` | Delete account and all data (requires password) *(Phase 7, not built yet)* |
+| `DELETE /me` | Delete account and all data. Body `{password}`; wrong password → 422 on `password`; success → 204 and every token is revoked |
 | **Accounts** | |
 | `GET /accounts?includeArchived=` | List + `meta.netWorth` |
 | `POST /accounts` · `GET/PATCH/DELETE /accounts/:id` | DELETE → 409 if it has transactions |

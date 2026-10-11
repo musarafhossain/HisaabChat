@@ -91,6 +91,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/me_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'me.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/me'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/user').deleteAccountValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/user').deleteAccountValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/me_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/me_controller').default['destroy']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'me.completeOnboarding': {
     methods: ["POST"]
     pattern: '/api/v1/me/onboarding/complete'

@@ -11,6 +11,7 @@ export type ScannedRoutes = {
     'auth.logoutAll': { paramsTuple?: []; params?: {} }
     'me.show': { paramsTuple?: []; params?: {} }
     'me.update': { paramsTuple?: []; params?: {} }
+    'me.destroy': { paramsTuple?: []; params?: {} }
     'me.completeOnboarding': { paramsTuple?: []; params?: {} }
     'accounts.index': { paramsTuple?: []; params?: {} }
     'accounts.store': { paramsTuple?: []; params?: {} }
@@ -129,6 +130,7 @@ export type ScannedRoutes = {
     'transactions.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   DELETE: {
+    'me.destroy': { paramsTuple?: []; params?: {} }
     'accounts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'recurring.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'budgets.deleteOverride': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'month': ParamValue} }

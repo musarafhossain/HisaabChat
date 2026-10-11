@@ -172,7 +172,8 @@
 - [x] **Keyboard & mouse** (Windows/Web), first part: Ctrl+1…6 sections, Ctrl+F search, Esc and the mouse back button as Back.
 - [ ] Keyboard & mouse, rest: Ctrl+N, ↑/↓ in lists, Del, focus order, hover states, right-click context menus, visible scrollbars.
 - [ ] **Exports:** CSV and JSON. Web → browser download; Windows → Save dialog; Android → share sheet.
-- [ ] Delete account flow (`DELETE /me`; delete recurring rules before accounts); forgot/reset password (needs SMTP).
+- [x] **Delete account:** `DELETE /me` with the password (`AccountDeletionService`, ordered deletes in one transaction; tests check every table is empty for that user and another user is untouched). Settings → Delete account dialog (type DELETE + password).
+- [ ] Forgot/reset password (needs SMTP).
 - [ ] **Write off** a person's remaining balance (PPL-7).
 - [ ] **App identity:** `flutter_launcher_icons` (Android adaptive, Windows .ico, web favicons/manifest) and `flutter_native_splash`.
 - [ ] **Android:** release signing config, `flutter build apk --split-per-abi` / `appbundle`, minSdk 24, edge-to-edge (predictive back stays off; see above). *Blocked locally: the dev network can't reach `storage.googleapis.com`.*

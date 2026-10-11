@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon'
 import type { HttpContext } from '@adonisjs/core/http'
 import UserTransformer from '#transformers/user_transformer'
-import { updateProfileValidator } from '#validators/user'
+import AccountDeletionService from '#services/account_deletion_service'
+import { deleteAccountValidator, updateProfileValidator } from '#validators/user'
 
 export default class MeController {
   async show({ auth, serialize }: HttpContext) {
@@ -15,6 +16,15 @@ export default class MeController {
     user.merge(changes)
     await user.save()
     return serialize(UserTransformer.transform(user))
+  }
+
+  /**
+   * DELETE /me: deletes the account and all its data (password required).
+   */
+  async destroy({ auth, request, response }: HttpContext) {
+    const { password } = await request.validateUsing(deleteAccountValidator)
+    await AccountDeletionService.delete(auth.getUserOrFail(), password)
+    response.status(204)
   }
 
   /**

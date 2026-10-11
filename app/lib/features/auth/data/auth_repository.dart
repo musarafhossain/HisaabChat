@@ -51,6 +51,9 @@ class AuthRepository {
 
   Future<void> logoutAll() => _api.post<Object?>('/auth/logout-all');
 
+  /// Permanently deletes the account and all its data (needs the password).
+  Future<void> deleteAccount(String password) => _api.delete<Object?>('/me', body: {'password': password});
+
   AuthSession _session(Map<String, dynamic> data) => (
     user: AppUser.fromJson(data['user'] as Map<String, dynamic>),
     token: data['token'] as String,

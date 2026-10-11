@@ -41,7 +41,7 @@ App (authenticated)
     ├── /settings/categories       Manage categories (with search)
     ├── /settings/recurring        Recurring rules
     ├── /settings/connection       Server status
-    └── /settings/data             Export / delete account (Phase 7, not built yet)
+    └── /settings/data             Export (Phase 7, not built yet)
 ```
 
 **Primary navigation**: WhatsApp-style, chosen by window width, so it applies to Android, Windows and Web alike.
@@ -200,8 +200,9 @@ flowchart TD
 - **Recurring**: rules list (edit, pause, delete).
 - **Appearance**: theme (System/Light/Dark), **color** (10 accents, Teal by default, saved to the account), Reduce motion. *Planned: thread wallpaper, font size.*
 - **Connection**: whether the app can reach the server and database.
-- *Planned (Phase 7)* **Data**: export all (CSV/JSON), delete account (type "DELETE" to confirm).
+- *Planned (Phase 7)* **Data**: export all (CSV/JSON).
 - **Log out** / **Log out of all devices**.
+- **Delete account** (red): a dialog asks you to type DELETE and your password. The server erases everything in one transaction; the app then signs out, returns to Welcome and shows "Your account and all its data were deleted". A wrong password shows under the field and nothing is deleted.
 
 ### 3.12 Lend & Borrow with People (v1.0)
 ```mermaid

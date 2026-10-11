@@ -12,6 +12,7 @@ export interface ApiDefinition {
   me: {
     show: typeof routes['me.show']
     update: typeof routes['me.update']
+    destroy: typeof routes['me.destroy']
     completeOnboarding: typeof routes['me.completeOnboarding']
   }
   accounts: {

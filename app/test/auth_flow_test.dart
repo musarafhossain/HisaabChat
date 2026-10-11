@@ -134,4 +134,67 @@ void main() {
     expect(app.repo.logoutCalls, 1);
     expect(app.tokens.token, isNull);
   });
+
+  testWidgets('delete account needs DELETE and the password, then signs out', (tester) async {
+    final app = await pumpApp(tester, savedToken: 'oat_saved');
+    await tester.tap(find.byTooltip('More options'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Settings').last);
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(find.text('Delete account'), 200, scrollable: find.byType(Scrollable).last);
+    await tester.tap(find.text('Delete account'));
+    await tester.pumpAndSettle();
+    expect(find.text('Delete your account?'), findsOneWidget);
+
+    Finder deleteButton() => find.widgetWithText(TextButton, 'Delete account');
+    bool enabled() => tester.widget<TextButton>(deleteButton()).onPressed != null;
+    expect(enabled(), isFalse);
+
+    await tester.enterText(find.byKey(const ValueKey('delete-confirm')), 'DELETE');
+    await tester.pump();
+    expect(enabled(), isFalse); // still needs the password
+
+    await tester.enterText(
+      find.descendant(of: find.byKey(const ValueKey('delete-password')), matching: find.byType(EditableText)),
+      'wrong',
+    );
+    await tester.pump();
+    expect(enabled(), isTrue);
+    await tester.tap(deleteButton());
+    await tester.pumpAndSettle();
+    expect(find.text('That password isn’t right'), findsOneWidget);
+    expect(app.repo.deleteCalls, 0);
+    expect(app.tokens.token, 'oat_saved');
+
+    await tester.enterText(
+      find.descendant(of: find.byKey(const ValueKey('delete-password')), matching: find.byType(EditableText)),
+      'secret-password',
+    );
+    await tester.pump();
+    await tester.tap(deleteButton());
+    await tester.pumpAndSettle();
+
+    expect(app.repo.deleteCalls, 1);
+    expect(app.tokens.token, isNull);
+    expect(find.text('Delete your account?'), findsNothing);
+    expect(find.text('Welcome to HisaabChat'), findsOneWidget);
+    expect(find.text('Your account and all its data were deleted'), findsOneWidget);
+  });
+
+  testWidgets('cancelling delete account keeps everything', (tester) async {
+    final app = await pumpApp(tester, savedToken: 'oat_saved');
+    await tester.tap(find.byTooltip('More options'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Settings').last);
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Delete account'), 200, scrollable: find.byType(Scrollable).last);
+    await tester.tap(find.text('Delete account'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.text('Delete your account?'), findsNothing);
+    expect(app.repo.deleteCalls, 0);
+    expect(app.tokens.token, 'oat_saved');
+  });
 }

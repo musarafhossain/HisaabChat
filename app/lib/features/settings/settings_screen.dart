@@ -8,6 +8,7 @@ import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/settings_tile.dart';
 import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/features/auth/auth_controller.dart';
+import 'package:hisaabchat/features/settings/delete_account_dialog.dart';
 
 /// WhatsApp-style settings: profile header, then icon rows.
 class SettingsScreen extends ConsumerWidget {
@@ -134,6 +135,13 @@ class SettingsScreen extends ConsumerWidget {
               title: 'Log out of all devices',
               destructive: true,
               onTap: () => _confirmLogoutAll(context, ref),
+            ),
+            SettingsTile(
+              icon: AppIcons.delete,
+              title: 'Delete account',
+              subtitle: 'Erase your account and all your data',
+              destructive: true,
+              onTap: () => showDeleteAccountDialog(context),
             ),
             const SizedBox(height: 24),
             Center(

@@ -42,6 +42,7 @@ router
 
         router.get('me', [controllers.Me, 'show']).as('me.show')
         router.patch('me', [controllers.Me, 'update']).as('me.update')
+        router.delete('me', [controllers.Me, 'destroy']).as('me.destroy')
         router
           .post('me/onboarding/complete', [controllers.Me, 'completeOnboarding'])
           .as('me.completeOnboarding')

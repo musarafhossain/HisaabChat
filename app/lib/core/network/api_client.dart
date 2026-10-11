@@ -78,7 +78,7 @@ class ApiClient {
     }
   }
 
-  Future<T> delete<T>(String path) => _send(() => _dio.delete<Object?>(path));
+  Future<T> delete<T>(String path, {Object? body}) => _send(() => _dio.delete<Object?>(path, data: body));
 
   Future<T> _send<T>(Future<Response<Object?>> Function() request) async {
     try {

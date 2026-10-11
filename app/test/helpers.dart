@@ -143,6 +143,20 @@ class FakeAuthRepository implements AuthRepository {
 
   @override
   Future<void> logoutAll() async => logoutCalls++;
+
+  int deleteCalls = 0;
+
+  @override
+  Future<void> deleteAccount(String password) async {
+    if (password != _password) {
+      throw const ApiException(
+        message: 'That password isn’t right',
+        statusCode: 422,
+        fieldErrors: {'password': 'That password isn’t right'},
+      );
+    }
+    deleteCalls++;
+  }
 }
 
 /// In-memory /accounts API with the same rules as the server.

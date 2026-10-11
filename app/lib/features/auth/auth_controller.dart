@@ -79,6 +79,13 @@ class AuthController extends AsyncNotifier<AppUser?> {
     await _signOutLocally();
   }
 
+  /// Deletes the account on the server, then signs out here. Throws (e.g. a
+  /// wrong password) without signing out.
+  Future<void> deleteAccount(String password) async {
+    await _repo.deleteAccount(password);
+    await _signOutLocally();
+  }
+
   /// Retry after a startup failure (e.g. the API was offline).
   Future<void> retry() async {
     ref.invalidateSelf();

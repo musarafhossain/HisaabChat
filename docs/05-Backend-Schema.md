@@ -258,7 +258,7 @@ CREATE TABLE recurring_occurrences (
 - `categories.budget_id` may only be set on EXPENSE categories owned by the same user.
 - `transactions.category_id` must have a matching type (INCOME↔INCOME, EXPENSE↔EXPENSE).
 - Referenced accounts and categories must belong to the same `user_id` and not be archived (at write time).
-- Deleting a user (`DELETE /me`) deletes rows in this order inside one DB transaction: recurring_occurrences → transactions → recurring_rules → categories → budget_period_overrides → budgets → accounts → tokens → user.
+- Deleting a user (`DELETE /me`) deletes rows in this order inside one DB transaction: recurring_occurrences → transactions → recurring_rules → categories (parent/budget links cleared first) → budget_period_overrides → budgets → people → accounts → password reset tokens → access tokens → user (`AccountDeletionService`).
 
 ### 3.1 People: Lend & Borrow (v1.0, Phase 6 migration)
 

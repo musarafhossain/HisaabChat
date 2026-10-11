@@ -58,3 +58,8 @@ export const updateProfileValidator = vine.create({
   theme: vine.enum(['SYSTEM', 'LIGHT', 'DARK'] as const).optional(),
   accentColor: vine.enum(ACCENT_COLORS).optional(),
 })
+
+/** DELETE /me: the current password confirms it's really you. */
+export const deleteAccountValidator = vine.create({
+  password: vine.string().minLength(1).maxLength(200),
+})
