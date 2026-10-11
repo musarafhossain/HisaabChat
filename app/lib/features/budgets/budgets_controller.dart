@@ -21,7 +21,15 @@ final FutureProviderFamily<BudgetDetail, BudgetDetailKey> budgetDetailProvider =
       retry: (retryCount, error) => null,
     );
 
-/// Month shown on the Budgets tab ("YYYY-MM"; null = current period).
+/// The summary's month-by-month totals: six months ending with the given one.
+final FutureProviderFamily<List<BudgetMonthTotals>, String?> budgetHistoryProvider =
+    FutureProvider.family<List<BudgetMonthTotals>, String?>((ref, month) async {
+      ref.watch(authControllerProvider.select((auth) => auth.value?.id));
+      return ref.watch(budgetsRepositoryProvider).history(month: month);
+    }, retry: (retryCount, error) => null);
+
+/// Month shown in the Budget summary ("YYYY-MM"; null = current period).
+/// The Budgets tab itself always shows the current month.
 class BudgetMonth extends Notifier<String?> {
   @override
   String? build() {
@@ -34,7 +42,11 @@ class BudgetMonth extends Notifier<String?> {
 
 final budgetMonthProvider = NotifierProvider<BudgetMonth, String?>(BudgetMonth.new);
 
-/// Budget open in the desktop detail pane.
+/// [selectedBudgetProvider] value that shows the Budget summary in the
+/// desktop detail pane instead of one budget.
+const budgetSummaryKey = 'summary';
+
+/// Budget open in the desktop detail pane (or [budgetSummaryKey]).
 class SelectedBudget extends Notifier<String?> {
   @override
   String? build() {
@@ -92,7 +104,8 @@ void invalidateBudgets(Ref ref) {
   invalidateReports(ref);
   ref
     ..invalidate(budgetsOverviewProvider)
-    ..invalidate(budgetDetailProvider);
+    ..invalidate(budgetDetailProvider)
+    ..invalidate(budgetHistoryProvider);
 }
 
 final budgetMutationsProvider = Provider<BudgetMutations>(BudgetMutations.new);

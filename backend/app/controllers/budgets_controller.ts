@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import BudgetService from '#services/budget_service'
 import {
+  budgetHistoryValidator,
   createBudgetValidator,
   monthQueryValidator,
   overrideParamsValidator,
@@ -15,6 +16,16 @@ export default class BudgetsController {
   async index({ auth, request }: HttpContext) {
     const { month } = await request.validateUsing(monthQueryValidator, { data: request.qs() })
     return { data: await BudgetService.overview(auth.getUserOrFail(), month) }
+  }
+
+  /**
+   * GET /budgets/history?months=6&month=YYYY-MM: totals per month, oldest first.
+   */
+  async history({ auth, request }: HttpContext) {
+    const { month, months } = await request.validateUsing(budgetHistoryValidator, {
+      data: request.qs(),
+    })
+    return { data: await BudgetService.history(auth.getUserOrFail(), months ?? 6, month) }
   }
 
   async show({ auth, params, request }: HttpContext) {

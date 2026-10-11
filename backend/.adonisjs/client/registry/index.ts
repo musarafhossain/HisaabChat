@@ -246,6 +246,12 @@ const routes = {
     tokens: [{"old":"/api/v1/budgets","type":0,"val":"api","end":""},{"old":"/api/v1/budgets","type":0,"val":"v1","end":""},{"old":"/api/v1/budgets","type":0,"val":"budgets","end":""}],
     types: placeholder as Registry['budgets.index']['types'],
   },
+  'budgets.history': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/budgets/history',
+    tokens: [{"old":"/api/v1/budgets/history","type":0,"val":"api","end":""},{"old":"/api/v1/budgets/history","type":0,"val":"v1","end":""},{"old":"/api/v1/budgets/history","type":0,"val":"budgets","end":""},{"old":"/api/v1/budgets/history","type":0,"val":"history","end":""}],
+    types: placeholder as Registry['budgets.history']['types'],
+  },
   'budgets.store': {
     methods: ["POST"],
     pattern: '/api/v1/budgets',

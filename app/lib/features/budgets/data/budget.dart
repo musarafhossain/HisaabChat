@@ -121,6 +121,8 @@ class BudgetsOverview {
     required this.budgeted,
     required this.spent,
     required this.unbudgeted,
+    this.monthly = 0,
+    this.carried = 0,
   });
 
   factory BudgetsOverview.fromJson(Map<String, dynamic> json) {
@@ -132,6 +134,8 @@ class BudgetsOverview {
       daysLeft: (json['daysLeft'] as num).toInt(),
       budgets: [for (final b in (json['budgets'] as List).cast<Map<String, dynamic>>()) BudgetStatus.fromJson(b)],
       budgeted: (totals['budgeted'] as num).toInt(),
+      monthly: (totals['monthly'] as num?)?.toInt() ?? (totals['budgeted'] as num).toInt(),
+      carried: (totals['carried'] as num?)?.toInt() ?? 0,
       spent: (totals['spent'] as num).toInt(),
       unbudgeted: (json['unbudgeted'] as num).toInt(),
     );
@@ -143,7 +147,15 @@ class BudgetsOverview {
   final DateTime periodEnd;
   final int daysLeft;
   final List<BudgetStatus> budgets;
+
+  /// What can be spent this period: [monthly] + [carried].
   final int budgeted;
+
+  /// This period's amounts (one-month changes included).
+  final int monthly;
+
+  /// Carried in from earlier months by budgets with "carry over" on (+ or −).
+  final int carried;
   final int spent;
 
   /// Expenses in categories that belong to no budget.
@@ -151,6 +163,45 @@ class BudgetsOverview {
 
   int get remaining => budgeted - spent;
   double get progress => budgeted > 0 ? spent / budgeted : 0;
+}
+
+/// One month of `GET /budgets/history` (the summary's month-by-month table).
+@immutable
+class BudgetMonthTotals {
+  const BudgetMonthTotals({
+    required this.month,
+    required this.periodStart,
+    required this.periodEnd,
+    required this.budgetsCount,
+    required this.monthly,
+    required this.carried,
+    required this.budgeted,
+    required this.spent,
+  });
+
+  factory BudgetMonthTotals.fromJson(Map<String, dynamic> json) => BudgetMonthTotals(
+    month: json['month'] as String,
+    periodStart: DateTime.parse(json['periodStart'] as String),
+    periodEnd: DateTime.parse(json['periodEnd'] as String),
+    budgetsCount: (json['budgetsCount'] as num).toInt(),
+    monthly: (json['monthly'] as num).toInt(),
+    carried: (json['carried'] as num).toInt(),
+    budgeted: (json['budgeted'] as num).toInt(),
+    spent: (json['spent'] as num).toInt(),
+  );
+
+  final String month;
+  final DateTime periodStart;
+  final DateTime periodEnd;
+
+  /// 0 for months before any budget existed.
+  final int budgetsCount;
+  final int monthly;
+  final int carried;
+  final int budgeted;
+  final int spent;
+
+  int get remaining => budgeted - spent;
 }
 
 @immutable

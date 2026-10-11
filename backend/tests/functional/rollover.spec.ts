@@ -76,6 +76,56 @@ test.group('budget rollover', (group) => {
       status: 'OK',
     })
     assert.equal(data.totals.budgeted, 800_000)
+    assert.equal(data.totals.monthly, 500_000)
+    assert.equal(data.totals.carried, 300_000)
+  })
+
+  test('history gives month-by-month totals, oldest first', async ({ client, assert }) => {
+    const s = await setup(client, true)
+    await s.spend(400_000, 3)
+    await s.spend(600_000, 2)
+    await s.spend(200_000, 1)
+    await s.spend(100_000, 0)
+
+    const response = await client.get('/api/v1/budgets/history?months=5').bearerToken(s.token)
+    response.assertStatus(200)
+    const rows = json(response).data
+    assert.lengthOf(rows, 5)
+    assert.equal(rows[4].month, monthAgo(0).toFormat('yyyy-MM'))
+
+    // Before the budget existed: nothing.
+    assert.containsSubset(rows[0], {
+      budgetsCount: 0,
+      monthly: 0,
+      carried: 0,
+      budgeted: 0,
+      spent: 0,
+    })
+    // First month: 5,000 budgeted, 4,000 spent, 1,000 left.
+    assert.containsSubset(rows[1], {
+      budgetsCount: 1,
+      monthly: 500_000,
+      carried: 0,
+      spent: 400_000,
+      remaining: 100_000,
+    })
+    // Then 1,000 carried in, 6,000 spent → 0 left.
+    assert.containsSubset(rows[2], {
+      monthly: 500_000,
+      carried: 100_000,
+      budgeted: 600_000,
+      remaining: 0,
+    })
+    // This month equals the overview.
+    assert.containsSubset(rows[4], {
+      monthly: 500_000,
+      carried: 300_000,
+      budgeted: 800_000,
+      spent: 100_000,
+    })
+
+    const bad = await client.get('/api/v1/budgets/history?months=99').bearerToken(s.token)
+    bad.assertStatus(422)
   })
 
   test('is off by default and can be switched on later', async ({ client, assert }) => {

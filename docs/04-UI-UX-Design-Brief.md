@@ -494,7 +494,13 @@ Opened from the FAB, 📎 or editing a bubble. It works like WhatsApp's "New cha
 Transfer replaces Category with **From** and **To** rows.
 
 ### 4.6 Budgets tab
-- A summary card: `₹13,300 of ₹19,000 spent · 12 days left`, with a thin overall bar.
+- Always **this month** (no month arrows). At the top, one tappable line: `October · 21 days left` / **`₹2,700 left of ₹11,500 ›`** with a thin overall bar, plus "Includes ₹X carried over" when carry-over applies. Tapping it opens the **Budget summary** (a page on phones, the detail pane on desktop):
+  - ‹ month › switcher (the only place to look at other months);
+  - totals: Monthly amounts, + Carried from earlier months, = Total this month, Spent, Left;
+  - each budget's maths (`₹2,500 + ₹200 carried = ₹2,700` · `₹700 left` / `₹2,000 spent`);
+  - "Not in any budget";
+  - **Month by month** (last 6 months: budget, spent, left; tap a row to view it);
+  - a note saying whether carry over is on and what it does.
 - A tile per budget:
   `(◯ ring avatar) Food & Groceries ……………… 85%` (pill: amber)
   `                ₹3,400 of ₹4,000 · ₹50/day left`

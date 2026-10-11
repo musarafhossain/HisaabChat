@@ -553,6 +553,9 @@ class FakeBudget {
   Color color;
   String icon;
   final Map<String, int> overrides = {};
+
+  /// Pretend "carry over" result for every month (+ unspent, − overspent).
+  int carried = 0;
 }
 
 /// In-memory `/budgets` for the current calendar month, computed from the
@@ -588,8 +591,9 @@ class FakeBudgetsRepository implements BudgetsRepository {
 
   BudgetStatus _status(FakeBudget b, String month) {
     final budgeted = b.overrides[month] ?? b.amount;
+    final available = budgeted + b.carried;
     final spent = _spent(b.id, month);
-    final percent = budgeted > 0 ? (spent * 100 / budgeted).round() : 0;
+    final percent = available > 0 ? (spent * 100 / available).round() : 0;
     final now = DateTime.now();
     final daysLeft = DateTime(now.year, now.month + 1, 0).day - now.day + 1;
     return BudgetStatus(
@@ -607,15 +611,17 @@ class FakeBudgetsRepository implements BudgetsRepository {
       budgeted: budgeted,
       hasOverride: b.overrides.containsKey(month),
       spent: spent,
-      remaining: budgeted - spent,
+      remaining: available - spent,
       percent: percent,
-      state: spent > budgeted
+      rollover: b.carried != 0,
+      rolloverIn: b.carried,
+      state: spent > available
           ? BudgetState.exceeded
           : percent >= b.alertPercent
           ? BudgetState.warning
           : BudgetState.ok,
       daysLeft: daysLeft,
-      safeToSpendPerDay: b.kind == BudgetKind.variable ? ((budgeted - spent).clamp(0, 1 << 52) ~/ daysLeft) : null,
+      safeToSpendPerDay: b.kind == BudgetKind.variable ? ((available - spent).clamp(0, 1 << 52) ~/ daysLeft) : null,
     );
   }
 
@@ -663,10 +669,36 @@ class FakeBudgetsRepository implements BudgetsRepository {
       periodEnd: DateTime(parts[0], parts[1] + 1, 0),
       daysLeft: statuses.isEmpty ? 1 : statuses.first.daysLeft,
       budgets: statuses,
-      budgeted: statuses.fold(0, (sum, s) => sum + s.budgeted),
+      monthly: statuses.fold(0, (sum, s) => sum + s.budgeted),
+      carried: statuses.fold(0, (sum, s) => sum + s.rolloverIn),
+      budgeted: statuses.fold(0, (sum, s) => sum + s.available),
       spent: statuses.fold(0, (sum, s) => sum + s.spent),
       unbudgeted: unbudgeted,
     );
+  }
+
+  /// Months in the past have no budgets (they "started" this month).
+  @override
+  Future<List<BudgetMonthTotals>> history({String? month, int months = 6}) async {
+    final last = month ?? currentMonth;
+    return [
+      for (var i = months - 1; i >= 0; i--)
+        await () async {
+          final m = _shift(last, -i);
+          final o = await overview(month: m);
+          final active = m.compareTo(currentMonth) >= 0;
+          return BudgetMonthTotals(
+            month: m,
+            periodStart: o.periodStart,
+            periodEnd: o.periodEnd,
+            budgetsCount: active ? o.budgets.length : 0,
+            monthly: active ? o.monthly : 0,
+            carried: active ? o.carried : 0,
+            budgeted: active ? o.budgeted : 0,
+            spent: active ? o.spent : 0,
+          );
+        }(),
+    ];
   }
 
   @override

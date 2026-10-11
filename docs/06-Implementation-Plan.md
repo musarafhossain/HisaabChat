@@ -159,6 +159,7 @@
 - [x] **Pagination everywhere it can grow:** person chats, Reports → category, budget expenses (`GET /transactions?budgetId=`) and search results page as you scroll, with counts and totals from the server; day headers only show a total once the whole day is loaded.
 - [x] Smaller fixes: People's + button on phones, a quieter Home greeting, a one-line chat placeholder, a scrolling rail in short windows, the design preview removed from Settings → Connection.
 - [x] `trustProxy` for running behind nginx (Phase 8 prep).
+- [x] **Budgets tab shows this month only**; a new **Budget summary** (tap the month line) explains monthly amounts + carried money, each budget's maths and month-by-month totals (`GET /budgets/history`). No database change.
 - [ ] *In progress:* the browser's own top bar (`<meta name="theme-color">`) follows the accent on web.
 - [x] Tests: 110 backend, 96 app (back button, search, accent, pagination).
 

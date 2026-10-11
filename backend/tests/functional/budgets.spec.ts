@@ -76,7 +76,13 @@ test.group('budgets', (group) => {
       status: 'OK',
     })
     assert.lengthOf(bike.categories, 2)
-    assert.deepEqual(overview.totals, { budgeted: 500_000, spent: 340_000, remaining: 160_000 })
+    assert.deepEqual(overview.totals, {
+      monthly: 500_000,
+      carried: 0,
+      budgeted: 500_000,
+      spent: 340_000,
+      remaining: 160_000,
+    })
     assert.equal(overview.unbudgeted, 54_000)
   })
 

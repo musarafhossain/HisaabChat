@@ -209,7 +209,8 @@ Write SQL that runs on both databases:
 | `POST /transactions` | Idempotent by client-supplied `id`; response includes `budgetAlerts[]` |
 | `GET/PATCH/DELETE /transactions/:id` | |
 | **Budgets** | |
-| `GET /budgets?month=YYYY-MM` | Status for every active budget + summary + unbudgeted spending |
+| `GET /budgets?month=YYYY-MM` | Status for every active budget + `totals {monthly, carried, budgeted, spent, remaining}` + unbudgeted spending |
+| `GET /budgets/history?months=6&month=` | Month-by-month totals (oldest first, read-only) for the Budget summary |
 | `POST /budgets` · `PATCH /budgets/:id` | Body includes `categoryIds[]` and `rollover`; **422 on `categoryIds`** if a category is taken |
 | `GET /budgets/:id?month=` | Status, 6-month history, and the period's exact UTC bounds `from`/`to`; its expenses are paged with `GET /transactions?budgetId=…&from=…&to=…` |
 | `POST /budgets/:id/archive` | |

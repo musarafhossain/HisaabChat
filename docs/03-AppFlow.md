@@ -161,11 +161,12 @@ Same sheet with the **Income** tab selected. The category list shows income cate
 ### 3.8 Budgets
 ```mermaid
 flowchart TD
-    A[/budgets/] --> B[Month selector + summary:<br/>Budgeted ₹X · Spent ₹Y · Left ₹Z]
+    A[/budgets/ — always this month] --> B["This month line:<br/>'₹2,700 left of ₹11,500 ›'"]
+    B --> S[Tap → Budget summary:<br/>monthly amounts + carried = total, spent, left;<br/>each budget's maths; month by month; ‹ › to any month]
     B --> C[Budget tiles with progress-ring avatars]
     C --> D[Tap tile or Home ring → Budget info]
     D --> D1[Spent / Remaining / Safe to spend per day]
-    D --> D2[Transactions counted this month]
+    D --> D2[Expenses counted this month, paged]
     D --> D3[Last 6 months bar chart]
     D --> D4[Edit · Change this month only · Archive]
     B --> E[+ New budget]

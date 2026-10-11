@@ -12,6 +12,12 @@ class BudgetsRepository {
     await _api.get<Map<String, dynamic>>('/budgets', query: {'month': ?month}),
   );
 
+  /// Totals for the [months] months ending with [month] (null = now), oldest first.
+  Future<List<BudgetMonthTotals>> history({String? month, int months = 6}) async {
+    final data = await _api.get<List<dynamic>>('/budgets/history', query: {'months': months, 'month': ?month});
+    return [for (final m in data.cast<Map<String, dynamic>>()) BudgetMonthTotals.fromJson(m)];
+  }
+
   Future<BudgetDetail> detail(String id, {String? month}) async => BudgetDetail.fromJson(
     await _api.get<Map<String, dynamic>>('/budgets/$id', query: {'month': ?month}),
   );

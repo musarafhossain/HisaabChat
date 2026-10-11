@@ -114,6 +114,7 @@ router
         router
           .group(() => {
             router.get('/', [controllers.Budgets, 'index']).as('index')
+            router.get('history', [controllers.Budgets, 'history']).as('history')
             router.post('/', [controllers.Budgets, 'store']).as('store')
             router.get(':id', [controllers.Budgets, 'show']).as('show')
             router.patch(':id', [controllers.Budgets, 'update']).as('update')

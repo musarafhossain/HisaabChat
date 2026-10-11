@@ -12,6 +12,7 @@ import 'package:hisaabchat/features/auth/presentation/register_screen.dart';
 import 'package:hisaabchat/features/auth/presentation/splash_screen.dart';
 import 'package:hisaabchat/features/auth/presentation/welcome_screen.dart';
 import 'package:hisaabchat/features/budgets/presentation/budget_info.dart';
+import 'package:hisaabchat/features/budgets/presentation/budget_summary.dart';
 import 'package:hisaabchat/features/budgets/presentation/budgets_section.dart';
 import 'package:hisaabchat/features/categories/presentation/categories_screen.dart';
 import 'package:hisaabchat/features/health/connection_check_screen.dart';
@@ -114,6 +115,12 @@ final routerProvider = Provider<GoRouter>((ref) {
                 Destination.budgets,
                 const BudgetsSection(),
                 routes: [
+                  GoRoute(
+                    path: 'summary',
+                    parentNavigatorKey: rootNavigatorKey,
+                    pageBuilder: (context, state) =>
+                        sharedAxisPage(key: state.pageKey, child: const BudgetSummaryScreen()),
+                  ),
                   GoRoute(
                     path: ':id',
                     parentNavigatorKey: rootNavigatorKey,

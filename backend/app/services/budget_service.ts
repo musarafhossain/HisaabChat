@@ -72,7 +72,10 @@ export default class BudgetService {
         settings
       )
     )
-    const budgeted = statuses.reduce((sum, s) => sum + s.budgeted + s.rolloverIn, 0)
+    // This month's amounts (one-month changes included) plus anything carried in.
+    const monthly = statuses.reduce((sum, s) => sum + s.budgeted, 0)
+    const carriedIn = statuses.reduce((sum, s) => sum + s.rolloverIn, 0)
+    const budgeted = monthly + carriedIn
     const spentInBudgets = statuses.reduce((sum, s) => sum + s.spent, 0)
 
     return {
@@ -81,9 +84,37 @@ export default class BudgetService {
       periodEnd: period.periodEnd,
       daysLeft: daysLeft(period, settings),
       budgets: statuses,
-      totals: { budgeted, spent: spentInBudgets, remaining: budgeted - spentInBudgets },
+      totals: {
+        monthly,
+        carried: carriedIn,
+        budgeted,
+        spent: spentInBudgets,
+        remaining: budgeted - spentInBudgets,
+      },
       unbudgeted: spent.get(null) ?? 0,
     }
+  }
+
+  /**
+   * Totals for the last [months] periods ending with [month] (default: now),
+   * oldest first: the Budget summary's month-by-month table. Read-only.
+   */
+  static async history(user: User, months: number, month?: string) {
+    const settings = settingsOf(user)
+    const last = this.period(user, month)
+    const rows = []
+    for (let i = months - 1; i >= 0; i--) {
+      const period = shiftPeriod(last, -i, settings)
+      const { totals, budgets } = await this.overview(user, period.month)
+      rows.push({
+        month: period.month,
+        periodStart: period.periodStart,
+        periodEnd: period.periodEnd,
+        budgetsCount: budgets.length,
+        ...totals,
+      })
+    }
+    return rows
   }
 
   /**

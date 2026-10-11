@@ -127,10 +127,10 @@ class BudgetInfoView extends ConsumerWidget {
             style: TextStyle(color: colors.textSecondary),
           ),
           const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+          // Wraps instead of overflowing when the amounts are long on a phone.
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.end,
             children: [
               AnimatedAmount(
                 budget.spent,

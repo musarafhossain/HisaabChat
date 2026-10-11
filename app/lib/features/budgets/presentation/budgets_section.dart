@@ -8,7 +8,6 @@ import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/money/money.dart';
 import 'package:hisaabchat/core/motion/animated_amount.dart';
 import 'package:hisaabchat/core/motion/entrance.dart';
-import 'package:hisaabchat/core/motion/ring_progress.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/chat_tile.dart';
 import 'package:hisaabchat/core/widgets/empty_state.dart';
@@ -20,6 +19,7 @@ import 'package:hisaabchat/features/budgets/budgets_controller.dart';
 import 'package:hisaabchat/features/budgets/data/budget.dart';
 import 'package:hisaabchat/features/budgets/presentation/budget_form.dart';
 import 'package:hisaabchat/features/budgets/presentation/budget_info.dart';
+import 'package:hisaabchat/features/budgets/presentation/budget_summary.dart';
 import 'package:hisaabchat/features/budgets/presentation/budget_widgets.dart';
 import 'package:hisaabchat/features/categories/categories_controller.dart';
 import 'package:hisaabchat/features/categories/data/category.dart';
@@ -47,12 +47,14 @@ class BudgetsSection extends ConsumerWidget {
     final month = ref.watch(budgetMonthProvider);
     return ListDetailLayout(
       list: const _BudgetList(),
-      detail: selected == null
-          ? const EmptyDetailPane(icon: AppIcons.budgets, message: 'Select a budget to see how it’s going')
-          : Material(
-              key: ValueKey('$selected-$month'),
-              child: BudgetInfoView(budgetId: selected, month: month),
-            ),
+      detail: switch (selected) {
+        null => const EmptyDetailPane(icon: AppIcons.budgets, message: 'Select a budget to see how it’s going'),
+        budgetSummaryKey => const Material(key: ValueKey(budgetSummaryKey), child: BudgetSummaryView()),
+        _ => Material(
+          key: ValueKey('$selected-$month'),
+          child: BudgetInfoView(budgetId: selected, month: month),
+        ),
+      },
     );
   }
 }
@@ -76,19 +78,19 @@ class _BudgetListState extends ConsumerState<_BudgetList> {
   }
 
   void _open(BuildContext context, WidgetRef ref, BudgetStatus budget) {
+    // From the tab it's always this month.
+    ref.read(budgetMonthProvider.notifier).show(null);
     if (context.windowClass == WindowClass.expanded) {
       ref.read(selectedBudgetProvider.notifier).select(budget.id);
     } else {
-      final month = ref.read(budgetMonthProvider);
-      unawaited(context.push('/budgets/${budget.id}${month == null ? '' : '?month=$month'}'));
+      unawaited(context.push('/budgets/${budget.id}'));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final month = ref.watch(budgetMonthProvider);
-    final overview = ref.watch(budgetsOverviewProvider(month));
+    final overview = ref.watch(budgetsOverviewProvider(null));
     final selected = ref.watch(selectedBudgetProvider);
     final value = overview.value;
 
@@ -99,7 +101,7 @@ class _BudgetListState extends ConsumerState<_BudgetList> {
               title: 'Couldn’t load budgets',
               message: overview.error is ApiException ? (overview.error! as ApiException).message : '${overview.error}',
               action: FilledButton.icon(
-                onPressed: () => ref.invalidate(budgetsOverviewProvider(month)),
+                onPressed: () => ref.invalidate(budgetsOverviewProvider(null)),
                 icon: const Icon(AppIcons.refresh),
                 label: const Text('Try again'),
               ),
@@ -107,18 +109,16 @@ class _BudgetListState extends ConsumerState<_BudgetList> {
           : Center(child: CircularProgressIndicator(color: colors.primary));
     }
 
-    final current = month == null;
     return RefreshIndicator(
       color: colors.primary,
-      onRefresh: () => ref.refresh(budgetsOverviewProvider(month).future),
+      onRefresh: () => ref.refresh(budgetsOverviewProvider(null).future),
       child: ListView(
         padding: const EdgeInsets.only(bottom: 96),
         children: [
-          _MonthSwitcher(overview: value),
           if (value.budgets.isEmpty)
             const _Templates()
           else ...[
-            _Summary(overview: value, current: current),
+            _ThisMonth(overview: value, selected: selected == budgetSummaryKey),
             SearchPill(hint: 'Search budgets', onChanged: (v) => setState(() => _query = v.trim())),
             if (!value.budgets.any(_matches))
               Padding(
@@ -162,114 +162,102 @@ class _BudgetListState extends ConsumerState<_BudgetList> {
   }
 }
 
-class _MonthSwitcher extends ConsumerWidget {
-  const _MonthSwitcher({required this.overview});
+/// "October · 21 days left / ₹2,700 left of ₹11,500 ›": opens the Budget
+/// summary (monthly amounts, carried money, month by month).
+class _ThisMonth extends ConsumerWidget {
+  const _ThisMonth({required this.overview, required this.selected});
 
   final BudgetsOverview overview;
+
+  /// Desktop: the summary is open in the detail pane.
+  final bool selected;
+
+  void _openSummary(BuildContext context, WidgetRef ref) {
+    ref.read(budgetMonthProvider.notifier).show(null);
+    if (context.windowClass == WindowClass.expanded) {
+      ref.read(selectedBudgetProvider.notifier).select(budgetSummaryKey);
+    } else {
+      unawaited(context.push('/budgets/summary'));
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(budgetMonthProvider.notifier);
-    final current = ref.watch(budgetMonthProvider) == null;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
-      child: Row(
-        children: [
-          IconButton(
-            tooltip: 'Previous month',
-            icon: const Icon(AppIcons.back),
-            onPressed: () => notifier.show(shiftMonth(overview.month, -1)),
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                Text(
-                  periodLabel(overview.periodStart, overview.periodEnd),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w600),
-                ),
-                if (!current)
-                  TextButton(
-                    onPressed: () => notifier.show(null),
-                    style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
-                    child: const Text('Back to this month'),
-                  ),
-              ],
-            ),
-          ),
-          IconButton(
-            tooltip: 'Next month',
-            icon: const Icon(AppIcons.forward),
-            onPressed: () => notifier.show(shiftMonth(overview.month, 1)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Summary extends StatelessWidget {
-  const _Summary({required this.overview, required this.current});
-
-  final BudgetsOverview overview;
-  final bool current;
-
-  @override
-  Widget build(BuildContext context) {
     final colors = context.colors;
     final theme = Theme.of(context);
     final over = overview.remaining < 0;
+    final days = overview.daysLeft;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Row(
-            children: [
-              RingProgress(
-                progress: overview.progress,
-                size: 84,
-                strokeWidth: 7,
-                semanticsLabel: 'All budgets',
-                child: Text(
-                  '${(overview.progress * 100).round()}%',
-                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-                ),
-              ),
-              const SizedBox(width: 18),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Spent of budgeted', style: TextStyle(color: colors.textSecondary)),
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.end,
-                      children: [
-                        AnimatedAmount(
-                          overview.spent,
-                          style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
+        color: selected ? colors.chipSelected : null,
+        clipBehavior: Clip.antiAlias,
+        child: Semantics(
+          button: true,
+          label:
+              '${over ? 'Over by ${Money.format(-overview.remaining)}' : '${Money.format(overview.remaining)} left'} '
+              'of ${Money.format(overview.budgeted)} this month. Open budget summary',
+          excludeSemantics: true,
+          child: InkWell(
+            onTap: () => _openSummary(context, ref),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 14, 12, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${DateFormat('MMMM').format(overview.periodStart)} · $days ${days == 1 ? 'day' : 'days'} left',
+                          style: TextStyle(color: colors.textSecondary),
                         ),
-                        Text(
-                          ' / ${Money.format(overview.budgeted)}',
-                          style: TextStyle(color: colors.textSecondary, fontSize: 15),
+                      ),
+                      Icon(AppIcons.chevron, color: colors.textSecondary),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.end,
+                    children: [
+                      AnimatedAmount(
+                        overview.remaining.abs(),
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: over ? colors.danger : colors.textPrimary,
                         ),
-                      ],
+                      ),
+                      Text(
+                        over
+                            ? ' over · of ${Money.format(overview.budgeted)}'
+                            : ' left of ${Money.format(overview.budgeted)}',
+                        style: TextStyle(color: colors.textSecondary, fontSize: 15),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: overview.progress.clamp(0, 1),
+                      minHeight: 6,
+                      color: over ? colors.danger : colors.primary,
+                      backgroundColor: colors.divider,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      [
-                        if (over)
-                          'Over by ${Money.format(-overview.remaining)}'
-                        else
-                          '${Money.format(overview.remaining)} left',
-                        if (current) '${overview.daysLeft} ${overview.daysLeft == 1 ? 'day' : 'days'} to go',
-                      ].join(' · '),
-                      style: TextStyle(fontSize: 13, color: over ? colors.danger : colors.textSecondary),
+                  ),
+                  if (overview.carried != 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        overview.carried > 0
+                            ? 'Includes ${Money.format(overview.carried)} carried over'
+                            : '${Money.format(-overview.carried)} overspent earlier is taken from this month',
+                        style: TextStyle(fontSize: 12.5, color: colors.textSecondary),
+                      ),
                     ),
-                  ],
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

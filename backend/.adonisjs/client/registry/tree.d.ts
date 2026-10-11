@@ -57,6 +57,7 @@ export interface ApiDefinition {
   }
   budgets: {
     index: typeof routes['budgets.index']
+    history: typeof routes['budgets.history']
     store: typeof routes['budgets.store']
     show: typeof routes['budgets.show']
     update: typeof routes['budgets.update']

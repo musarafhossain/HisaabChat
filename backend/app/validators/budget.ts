@@ -39,6 +39,11 @@ export const updateBudgetValidator = vine.create({
   sortOrder: vine.number().withoutDecimals().range([0, 10_000]).optional(),
 })
 
+export const budgetHistoryValidator = vine.create({
+  month: month().optional(),
+  months: vine.number().withoutDecimals().range([1, 24]).optional(),
+})
+
 export const monthQueryValidator = vine.create({
   month: month().optional(),
 })

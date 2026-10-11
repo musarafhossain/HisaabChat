@@ -44,6 +44,7 @@ export type ScannedRoutes = {
     'reports.byCategory': { paramsTuple?: []; params?: {} }
     'reports.trend': { paramsTuple?: []; params?: {} }
     'budgets.index': { paramsTuple?: []; params?: {} }
+    'budgets.history': { paramsTuple?: []; params?: {} }
     'budgets.store': { paramsTuple?: []; params?: {} }
     'budgets.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'budgets.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -70,6 +71,7 @@ export type ScannedRoutes = {
     'reports.byCategory': { paramsTuple?: []; params?: {} }
     'reports.trend': { paramsTuple?: []; params?: {} }
     'budgets.index': { paramsTuple?: []; params?: {} }
+    'budgets.history': { paramsTuple?: []; params?: {} }
     'budgets.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'transactions.index': { paramsTuple?: []; params?: {} }
     'transactions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -88,6 +90,7 @@ export type ScannedRoutes = {
     'reports.byCategory': { paramsTuple?: []; params?: {} }
     'reports.trend': { paramsTuple?: []; params?: {} }
     'budgets.index': { paramsTuple?: []; params?: {} }
+    'budgets.history': { paramsTuple?: []; params?: {} }
     'budgets.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'transactions.index': { paramsTuple?: []; params?: {} }
     'transactions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

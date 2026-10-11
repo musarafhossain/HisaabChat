@@ -487,6 +487,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['index']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'budgets.history': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/budgets/history'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/budget').budgetHistoryValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['history']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/budgets_controller').default['history']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'budgets.store': {
     methods: ["POST"]
     pattern: '/api/v1/budgets'
