@@ -1,6 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import BudgetService from '#services/budget_service'
-import TransactionTransformer from '#transformers/transaction_transformer'
 import {
   createBudgetValidator,
   monthQueryValidator,
@@ -18,15 +17,9 @@ export default class BudgetsController {
     return { data: await BudgetService.overview(auth.getUserOrFail(), month) }
   }
 
-  async show({ auth, params, request, serialize }: HttpContext) {
+  async show({ auth, params, request }: HttpContext) {
     const { month } = await request.validateUsing(monthQueryValidator, { data: request.qs() })
-    const { transactions, ...detail } = await BudgetService.detail(
-      auth.getUserOrFail(),
-      params.id,
-      month
-    )
-    const items = await serialize.withoutWrapping(TransactionTransformer.transform(transactions))
-    return { data: { ...detail, transactions: items } }
+    return { data: await BudgetService.detail(auth.getUserOrFail(), params.id, month) }
   }
 
   async store({ auth, request, response }: HttpContext) {
@@ -34,14 +27,14 @@ export default class BudgetsController {
     const input = await request.validateUsing(createBudgetValidator)
     const budget = await BudgetService.create(user, input)
     response.status(201)
-    return { data: await BudgetService.detail(user, budget.id).then(({ transactions, ...d }) => d) }
+    return { data: await BudgetService.detail(user, budget.id) }
   }
 
   async update({ auth, params, request }: HttpContext) {
     const user = auth.getUserOrFail()
     const changes = await request.validateUsing(updateBudgetValidator)
     await BudgetService.update(user, params.id, changes)
-    return { data: await BudgetService.detail(user, params.id).then(({ transactions, ...d }) => d) }
+    return { data: await BudgetService.detail(user, params.id) }
   }
 
   async archive({ auth, params, response }: HttpContext) {

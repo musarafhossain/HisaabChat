@@ -7,6 +7,7 @@ import 'package:hisaabchat/app/theme/app_colors.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/empty_state.dart';
+import 'package:hisaabchat/core/widgets/load_more.dart';
 import 'package:hisaabchat/core/widgets/settings_tile.dart';
 import 'package:hisaabchat/features/accounts/accounts_controller.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart';
@@ -17,9 +18,10 @@ import 'package:hisaabchat/features/budgets/presentation/budget_widgets.dart';
 import 'package:hisaabchat/features/people/data/person.dart';
 import 'package:hisaabchat/features/people/people_controller.dart';
 import 'package:hisaabchat/features/people/presentation/people_widgets.dart';
-import 'package:hisaabchat/features/search/search_controller.dart';
+import 'package:hisaabchat/features/transactions/data/transactions_repository.dart';
 import 'package:hisaabchat/features/transactions/presentation/transactions_section.dart' show TransactionTile;
 import 'package:hisaabchat/features/transactions/presentation/txn_form.dart';
+import 'package:hisaabchat/features/transactions/transactions_controller.dart';
 
 /// Search everything (`/search`): opened from the search icon on phones,
 /// the rail on desktop, or Ctrl+F. Accounts, people and budgets are matched
@@ -124,8 +126,9 @@ class _Results extends ConsumerWidget {
       for (final b in ref.watch(budgetsOverviewProvider(null)).value?.budgets ?? const <BudgetStatus>[])
         if (has(b.name) || b.categories.any((c) => has(c.name))) b,
     ];
-    final txns = ref.watch(searchTxnsProvider(query));
-    final found = txns.value ?? const [];
+    final txnFilter = txnQuery(q: query);
+    final txns = ref.watch(filteredTxnsProvider(txnFilter));
+    final found = txns.value?.items ?? const [];
     final nothing = accounts.isEmpty && people.isEmpty && budgets.isEmpty && txns.hasValue && found.isEmpty;
 
     if (nothing) {
@@ -136,75 +139,74 @@ class _Results extends ConsumerWidget {
       );
     }
 
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
-      children: [
-        if (accounts.isNotEmpty) ...[
-          const SectionLabel('Accounts'),
-          for (final account in accounts)
-            AccountTile(account: account, onTap: () => unawaited(context.push('/accounts/${account.id}'))),
-        ],
-        if (people.isNotEmpty) ...[
-          const SectionLabel('People'),
-          for (final person in people)
-            PersonTile(person: person, onTap: () => unawaited(context.push('/people/${person.id}'))),
-        ],
-        if (budgets.isNotEmpty) ...[
-          const SectionLabel('Budgets'),
-          for (final budget in budgets)
-            BudgetTile(budget: budget, onTap: () => unawaited(context.push('/budgets/${budget.id}'))),
-        ],
-        const SectionLabel('Transactions'),
-        switch (txns) {
-          AsyncValue(:final value?) when value.isEmpty => Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: Text('No transactions match', style: TextStyle(color: colors.textSecondary)),
+    return LoadMoreListener(
+      onLoadMore: () => unawaited(ref.read(filteredTxnsProvider(txnFilter).notifier).loadMore()),
+      child: ListView(
+        padding: const EdgeInsets.only(bottom: 24),
+        children: [
+          if (accounts.isNotEmpty) ...[
+            const SectionLabel('Accounts'),
+            for (final account in accounts)
+              AccountTile(account: account, onTap: () => unawaited(context.push('/accounts/${account.id}'))),
+          ],
+          if (people.isNotEmpty) ...[
+            const SectionLabel('People'),
+            for (final person in people)
+              PersonTile(person: person, onTap: () => unawaited(context.push('/people/${person.id}'))),
+          ],
+          if (budgets.isNotEmpty) ...[
+            const SectionLabel('Budgets'),
+            for (final budget in budgets)
+              BudgetTile(budget: budget, onTap: () => unawaited(context.push('/budgets/${budget.id}'))),
+          ],
+          SectionLabel(
+            txns.value == null ? 'Transactions' : 'Transactions · ${txns.value!.totals.count}',
           ),
-          AsyncValue(:final value?) => Column(
-            children: [
-              for (final txn in value)
-                TransactionTile(
-                  txn: txn,
-                  onTap: () => unawaited(showTxnForm(context, existing: txn)),
-                ),
-              if (value.length >= searchTxnLimit)
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    'Showing the latest $searchTxnLimit. Add more words to narrow it down.',
-                    style: TextStyle(fontSize: 13, color: colors.textSecondary),
-                  ),
-                ),
-            ],
-          ),
-          AsyncError(:final error) => Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
+          switch (txns) {
+            AsyncValue(:final value?) when value.items.isEmpty => Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              child: Text('No transactions match', style: TextStyle(color: colors.textSecondary)),
+            ),
+            AsyncValue(:final value?) => Column(
               children: [
-                Expanded(
-                  child: Text(
-                    error is ApiException ? error.message : 'Couldn’t search transactions',
-                    style: TextStyle(color: colors.danger),
+                for (final txn in value.items)
+                  TransactionTile(
+                    txn: txn,
+                    onTap: () => unawaited(showTxnForm(context, existing: txn)),
                   ),
-                ),
-                TextButton(
-                  onPressed: () => ref.invalidate(searchTxnsProvider(query)),
-                  child: const Text('Retry'),
-                ),
+                // More pages load as you scroll.
+                if (value.hasMore) const LoadMoreFooter(),
               ],
             ),
-          ),
-          _ => Padding(
-            padding: const EdgeInsets.all(16),
-            child: Center(
-              child: SizedBox.square(
-                dimension: 22,
-                child: CircularProgressIndicator(strokeWidth: 2, color: colors.primary),
+            AsyncError(:final error) => Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      error is ApiException ? error.message : 'Couldn’t search transactions',
+                      style: TextStyle(color: colors.danger),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => ref.invalidate(filteredTxnsProvider(txnFilter)),
+                    child: const Text('Retry'),
+                  ),
+                ],
               ),
             ),
-          ),
-        },
-      ],
+            _ => Padding(
+              padding: const EdgeInsets.all(16),
+              child: Center(
+                child: SizedBox.square(
+                  dimension: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: colors.primary),
+                ),
+              ),
+            ),
+          },
+        ],
+      ),
     );
   }
 }

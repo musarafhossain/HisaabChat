@@ -39,6 +39,7 @@ export type TransactionFilters = {
   accountId?: string
   categoryId?: string
   personId?: string
+  budgetId?: string
   q?: string
   cursor?: string
   limit?: number
@@ -303,6 +304,19 @@ export default class TransactionService {
     if (filters.type) query.where('type', filters.type)
     if (filters.categoryId) query.where('categoryId', filters.categoryId)
     if (filters.personId) query.where('personId', filters.personId)
+    if (filters.budgetId) {
+      const budgetId = filters.budgetId
+      // A sub-category counts toward its own budget, else its parent's.
+      query.where('type', 'EXPENSE').whereIn(
+        'categoryId',
+        db
+          .from('categories as c')
+          .leftJoin('categories as p', 'p.id', 'c.parent_id')
+          .where('c.user_id', user.id)
+          .where((q) => q.where('c.budget_id', budgetId).orWhere('p.budget_id', budgetId))
+          .select('c.id')
+      )
+    }
     if (filters.accountId) {
       const accountId = filters.accountId
       query.where((q) => q.where('accountId', accountId).orWhere('toAccountId', accountId))

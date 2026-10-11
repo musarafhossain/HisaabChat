@@ -362,6 +362,9 @@ class FakeTransactionsRepository implements TransactionsRepository {
   final FakeCategoriesRepository categories;
   final List<Txn> txns = [];
 
+  /// How many pages have been requested (pagination tests).
+  int listCalls = 0;
+
   /// Number of upcoming create calls that fail with a network error.
   int failNextCreates = 0;
 
@@ -458,6 +461,9 @@ class FakeTransactionsRepository implements TransactionsRepository {
                   (query.type == null || t.type == query.type) &&
                   (query.categoryId == null || t.category?.id == query.categoryId) &&
                   (query.personId == null || t.person?.id == query.personId) &&
+                  (query.budgetId == null ||
+                      (t.type == TxnType.expense &&
+                          categories.categories.any((c) => c.id == t.category?.id && c.budgetId == query.budgetId))) &&
                   (query.from == null || !t.date.isBefore(query.from!)) &&
                   (query.to == null || t.date.isBefore(query.to!)) &&
                   (q.isEmpty || _searchMatches(t, q)),
@@ -466,9 +472,13 @@ class FakeTransactionsRepository implements TransactionsRepository {
           ..sort((a, b) => b.date.compareTo(a.date));
     final income = items.where((t) => t.type == TxnType.income).fold<int>(0, (s, t) => s + t.amount);
     final expense = items.where((t) => t.type == TxnType.expense).fold<int>(0, (s, t) => s + t.amount);
+    // Cursor = offset into the sorted matches, like the server's keyset pages.
+    final start = cursor == null ? 0 : int.parse(cursor);
+    final end = (start + limit).clamp(0, items.length);
+    listCalls++;
     return (
-      items: items,
-      nextCursor: null,
+      items: items.sublist(start, end),
+      nextCursor: end < items.length ? '$end' : null,
       totals: TxnTotals(income: income, expense: expense, count: items.length),
     );
   }
@@ -666,18 +676,17 @@ class FakeBudgetsRepository implements BudgetsRepository {
       (b) => b.id == id,
       orElse: () => throw const ApiException(message: 'Budget not found', statusCode: 404),
     );
-    final ids = _categoryIds(id);
     final parts = m.split('-').map(int.parse).toList();
     return BudgetDetail(
       status: _status(budget, m),
-      transactions: txns.txns.where((t) => t.type == TxnType.expense && ids.contains(t.category?.id)).toList()
-        ..sort((a, b) => b.date.compareTo(a.date)),
       history: [
         for (var i = 5; i > 0; i--) BudgetHistoryPoint(month: _shift(m, -i), spent: 0),
         BudgetHistoryPoint(month: m, spent: _spent(id, m), budgeted: budget.overrides[m] ?? budget.amount),
       ],
       periodStart: DateTime(parts[0], parts[1]),
       periodEnd: DateTime(parts[0], parts[1] + 1, 0),
+      from: DateTime(parts[0], parts[1]).toUtc(),
+      to: DateTime(parts[0], parts[1] + 1).toUtc(),
     );
   }
 

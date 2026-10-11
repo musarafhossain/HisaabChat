@@ -5,7 +5,7 @@ import { DateTime } from 'luxon'
 import Budget, { type BudgetKind } from '#models/budget'
 import BudgetPeriodOverride from '#models/budget_period_override'
 import Category from '#models/category'
-import Transaction from '#models/transaction'
+import type Transaction from '#models/transaction'
 import type User from '#models/user'
 import {
   daysLeft,
@@ -87,8 +87,8 @@ export default class BudgetService {
   }
 
   /**
-   * One budget for a period: status, the expenses counted toward it and the
-   * last six periods of budget vs. spent.
+   * One budget for a period: status and the last six periods of budget vs.
+   * spent. Its expenses are paged through GET /transactions?budgetId=….
    */
   static async detail(user: User, id: string, month?: string) {
     const settings = settingsOf(user)
@@ -108,20 +108,6 @@ export default class BudgetService {
       settings
     )
 
-    const transactions = categoryIds.length
-      ? await Transaction.query()
-          .where('userId', user.id)
-          .where('type', 'EXPENSE')
-          .whereIn('categoryId', categoryIds)
-          .where('date', '>=', period.start.toJSDate())
-          .where('date', '<', period.end.toJSDate())
-          .preload('account')
-          .preload('toAccount')
-          .preload('category')
-          .orderBy('date', 'desc')
-          .orderBy('id', 'desc')
-      : []
-
     const history = []
     for (let i = 5; i >= 0; i--) {
       const past = shiftPeriod(period, -i, settings)
@@ -136,10 +122,12 @@ export default class BudgetService {
 
     return {
       ...status,
-      transactions,
       history,
       periodStart: period.periodStart,
       periodEnd: period.periodEnd,
+      /** UTC bounds of the period: list its expenses with GET /transactions?budgetId=…&from=…&to=… */
+      from: period.start.toUTC().toISO(),
+      to: period.end.toUTC().toISO(),
     }
   }
 

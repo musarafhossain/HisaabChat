@@ -223,7 +223,10 @@ class _TransactionsSectionState extends ConsumerState<TransactionsSection> {
                 _ => 0,
               },
         );
-        rows.add((Dates.dayChip(txn.localDate), net));
+        // Only once the whole day is loaded (an older day follows, or there
+        // are no more pages); until then the label alone, never a partial sum.
+        final complete = !value.hasMore || !Dates.sameDay(value.items.last.localDate, txn.localDate);
+        rows.add((Dates.dayChip(txn.localDate), complete ? net : null));
       }
       rows.add(txn);
     }
@@ -246,11 +249,11 @@ class _TransactionsSectionState extends ConsumerState<TransactionsSection> {
             );
           }
           final row = rows[i];
-          if (row is (String, int)) {
+          if (row is (String, int?)) {
             return Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
               child: Text(
-                '${row.$1} · ${Money.format(row.$2, signed: true)}',
+                row.$2 == null ? row.$1 : '${row.$1} · ${Money.format(row.$2!, signed: true)}',
                 style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: colors.textSecondary),
               ),
             );

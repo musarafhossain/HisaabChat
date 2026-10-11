@@ -104,10 +104,15 @@ class _AccountThreadState extends ConsumerState<AccountThread> {
       final day = rows[i].txn.localDate;
       final next = i + 1 < rows.length ? rows[i + 1].txn.localDate : null;
       if (next == null || !Dates.sameDay(day, next)) {
+        // The day's net only once all of it is loaded (older pages may still
+        // hold more of it); until then just the day.
+        final complete = next != null || state == null || !state.hasMore;
         final net = rows
             .where((r) => Dates.sameDay(r.txn.localDate, day))
             .fold<int>(0, (sum, r) => sum + r.txn.signedFor(account.id));
-        entries.add(_DayEntry('${Dates.dayChip(day)} · ${Money.format(net, signed: true)}'));
+        entries.add(
+          _DayEntry(complete ? '${Dates.dayChip(day)} · ${Money.format(net, signed: true)}' : Dates.dayChip(day)),
+        );
       }
     }
     if (state != null && !state.hasMore) {

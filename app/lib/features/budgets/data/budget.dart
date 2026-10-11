@@ -174,30 +174,33 @@ class BudgetHistoryPoint {
 class BudgetDetail {
   const BudgetDetail({
     required this.status,
-    required this.transactions,
     required this.history,
     required this.periodStart,
     required this.periodEnd,
+    required this.from,
+    required this.to,
   });
 
   factory BudgetDetail.fromJson(Map<String, dynamic> json) => BudgetDetail(
     status: BudgetStatus.fromJson(json),
-    transactions: [
-      for (final t in (json['transactions'] as List? ?? const []).cast<Map<String, dynamic>>()) Txn.fromJson(t),
-    ],
     history: [
       for (final h in (json['history'] as List? ?? const []).cast<Map<String, dynamic>>())
         BudgetHistoryPoint.fromJson(h),
     ],
     periodStart: DateTime.parse(json['periodStart'] as String),
     periodEnd: DateTime.parse(json['periodEnd'] as String),
+    from: DateTime.parse(json['from'] as String),
+    to: DateTime.parse(json['to'] as String),
   );
 
   final BudgetStatus status;
-  final List<Txn> transactions;
   final List<BudgetHistoryPoint> history;
   final DateTime periodStart;
   final DateTime periodEnd;
+
+  /// Exact period bounds (UTC): its expenses are paged with these.
+  final DateTime from;
+  final DateTime to;
 }
 
 /// A budget that a new expense pushed past its alert level or limit.

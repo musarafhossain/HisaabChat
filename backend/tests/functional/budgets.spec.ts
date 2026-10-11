@@ -228,9 +228,22 @@ test.group('budgets', (group) => {
 
     const detail = json(await client.get(`/api/v1/budgets/${id}`).bearerToken(s.token)).data
     assert.equal(detail.spent, 60_000)
-    assert.lengthOf(detail.transactions, 2)
-    assert.equal(detail.transactions[0].category.name, 'Eating Out') // newest first
+    assert.notProperty(detail, 'transactions') // paged separately, below
     assert.lengthOf(detail.history, 6)
+
+    // The budget's expenses for the period, paged, with totals for all of them.
+    const qs = `budgetId=${id}&from=${encodeURIComponent(detail.from)}&to=${encodeURIComponent(detail.to)}`
+    const first = json(await client.get(`/api/v1/transactions?${qs}&limit=1`).bearerToken(s.token))
+    assert.lengthOf(first.data, 1)
+    assert.equal(first.data[0].category.name, 'Eating Out') // newest first
+    assert.deepEqual(first.meta.totals, { income: 0, expense: 60_000, count: 2 })
+    const second = json(
+      await client
+        .get(`/api/v1/transactions?${qs}&limit=1&cursor=${first.meta.nextCursor}`)
+        .bearerToken(s.token)
+    )
+    assert.equal(second.data[0].category.name, 'Food & Groceries')
+    assert.isNull(second.meta.nextCursor)
     assert.deepEqual(detail.history.at(-1), { month, budgeted: 400_000, spent: 60_000 })
     assert.isNull(detail.history[0].budgeted) // before the budget existed
   })

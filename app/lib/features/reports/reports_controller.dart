@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/misc.dart' show FutureProviderFamily;
 import 'package:hisaabchat/features/auth/auth_controller.dart';
 import 'package:hisaabchat/features/reports/data/report.dart';
 import 'package:hisaabchat/features/reports/data/reports_repository.dart';
-import 'package:hisaabchat/features/transactions/data/transactions_repository.dart';
 import 'package:hisaabchat/features/transactions/data/txn.dart';
 
 /// Home dashboard for the current period.
@@ -39,28 +38,10 @@ class ReportMonth extends Notifier<String?> {
 
 final reportMonthProvider = NotifierProvider<ReportMonth, String?>(ReportMonth.new);
 
-typedef CategoryTxnsKey = ({String categoryId, DateTime from, DateTime to});
-
-/// Every transaction behind one report row (a category in a period).
-final FutureProviderFamily<List<Txn>, CategoryTxnsKey> categoryTxnsProvider =
-    FutureProvider.family<List<Txn>, CategoryTxnsKey>((ref, key) async {
-      final page = await ref.watch(transactionsRepositoryProvider).list((
-        accountId: null,
-        categoryId: key.categoryId,
-        personId: null,
-        type: null,
-        q: null,
-        from: key.from,
-        to: key.to,
-      ), limit: 100);
-      return page.items;
-    }, retry: (retryCount, error) => null);
-
 /// Forget cached report numbers (after any transaction or budget change).
 void invalidateReports(Ref ref) {
   ref
     ..invalidate(dashboardProvider)
     ..invalidate(categoryReportProvider)
-    ..invalidate(trendProvider)
-    ..invalidate(categoryTxnsProvider);
+    ..invalidate(trendProvider);
 }

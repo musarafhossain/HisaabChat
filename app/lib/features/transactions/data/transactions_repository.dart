@@ -10,11 +10,33 @@ typedef TxnQuery = ({
   String? accountId,
   String? categoryId,
   String? personId,
+  String? budgetId,
   TxnType? type,
   String? q,
   DateTime? from,
   DateTime? to,
 });
+
+/// A [TxnQuery] with only the filters you need (the rest are null).
+TxnQuery txnQuery({
+  String? accountId,
+  String? categoryId,
+  String? personId,
+  String? budgetId,
+  TxnType? type,
+  String? q,
+  DateTime? from,
+  DateTime? to,
+}) => (
+  accountId: accountId,
+  categoryId: categoryId,
+  personId: personId,
+  budgetId: budgetId,
+  type: type,
+  q: q,
+  from: from,
+  to: to,
+);
 
 /// `/transactions` endpoints plus account reconcile.
 class TransactionsRepository {
@@ -29,6 +51,7 @@ class TransactionsRepository {
         'accountId': ?query.accountId,
         'categoryId': ?query.categoryId,
         'personId': ?query.personId,
+        'budgetId': ?query.budgetId,
         'type': ?query.type?.api,
         'from': ?query.from?.toUtc().toIso8601String(),
         'to': ?query.to?.toUtc().toIso8601String(),

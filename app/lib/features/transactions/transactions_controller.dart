@@ -9,7 +9,6 @@ import 'package:hisaabchat/features/auth/auth_controller.dart';
 import 'package:hisaabchat/features/budgets/budgets_controller.dart';
 import 'package:hisaabchat/features/people/people_controller.dart';
 import 'package:hisaabchat/features/recurring/recurring_controller.dart';
-import 'package:hisaabchat/features/search/search_controller.dart';
 import 'package:hisaabchat/features/transactions/data/transactions_repository.dart';
 import 'package:hisaabchat/features/transactions/data/txn.dart';
 import 'package:uuid/uuid.dart';
@@ -126,7 +125,7 @@ class TxnMutations {
       ..invalidate(personThreadProvider)
       ..invalidate(transactionsListProvider)
       ..invalidate(upcomingProvider)
-      ..invalidate(searchTxnsProvider);
+      ..invalidate(filteredTxnsProvider);
     invalidateBudgets(_ref);
     await Future.wait([
       _ref.read(accountsProvider.notifier).refresh(),
@@ -201,8 +200,7 @@ class AccountThreadController extends _PagedTxns {
   final String accountId;
 
   @override
-  TxnQuery get query =>
-      (accountId: accountId, categoryId: null, personId: null, type: null, q: null, from: null, to: null);
+  TxnQuery get query => txnQuery(accountId: accountId);
 }
 
 final AsyncNotifierProviderFamily<AccountThreadController, TxnListState, String> accountThreadProvider =
@@ -217,12 +215,25 @@ class PersonThreadController extends _PagedTxns {
   final String personId;
 
   @override
-  TxnQuery get query =>
-      (accountId: null, categoryId: null, personId: personId, type: null, q: null, from: null, to: null);
+  TxnQuery get query => txnQuery(personId: personId);
 }
 
 final AsyncNotifierProviderFamily<PersonThreadController, TxnListState, String> personThreadProvider =
     AsyncNotifierProvider.family<PersonThreadController, TxnListState, String>(PersonThreadController.new);
+
+/// Any filtered list (a report category, a budget's month, search results),
+/// paged with totals for everything that matches, not just what's loaded.
+class FilteredTxnsController extends _PagedTxns {
+  FilteredTxnsController(this.filter);
+
+  final TxnQuery filter;
+
+  @override
+  TxnQuery get query => filter;
+}
+
+final AsyncNotifierProviderFamily<FilteredTxnsController, TxnListState, TxnQuery> filteredTxnsProvider =
+    AsyncNotifierProvider.family<FilteredTxnsController, TxnListState, TxnQuery>(FilteredTxnsController.new);
 
 /// Filters for the Transactions tab.
 typedef TxnFilter = ({TxnType? type, String q});
@@ -234,8 +245,7 @@ class TransactionsListController extends _PagedTxns {
   final TxnFilter filter;
 
   @override
-  TxnQuery get query =>
-      (accountId: null, categoryId: null, personId: null, type: filter.type, q: filter.q, from: null, to: null);
+  TxnQuery get query => txnQuery(type: filter.type, q: filter.q);
 }
 
 final AsyncNotifierProviderFamily<TransactionsListController, TxnListState, TxnFilter> transactionsListProvider =

@@ -10,6 +10,7 @@ import 'package:hisaabchat/core/motion/motion.dart';
 import 'package:hisaabchat/core/motion/shake.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/empty_state.dart';
+import 'package:hisaabchat/core/widgets/load_more.dart';
 import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/features/accounts/accounts_controller.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart';
@@ -76,21 +77,27 @@ class PersonThread extends ConsumerWidget {
           icon: AppIcons.info,
         ),
       ),
-      _ => ListView.builder(
-        reverse: true,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        itemCount: entries.length,
-        itemBuilder: (context, index) => switch (entries[index]) {
-          final Txn txn => TxnBubble(
-            key: ValueKey(txn.id),
-            txn: txn,
-            accountId: txn.account.id,
-            label: '${txn.personLabel} · ${txn.account.name}',
-            onTap: () => _showEntryActions(context, ref, txn),
-          ),
-          final String day => ThreadChip(text: day),
-          _ => const SizedBox.shrink(),
-        },
+      // Reversed like a chat: scrolling up toward older entries loads the next page.
+      _ => LoadMoreListener(
+        onLoadMore: () => unawaited(ref.read(personThreadProvider(personId).notifier).loadMore()),
+        child: ListView.builder(
+          reverse: true,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          itemCount: entries.length + ((thread.value?.hasMore ?? false) ? 1 : 0),
+          itemBuilder: (context, index) => index >= entries.length
+              ? const LoadMoreFooter()
+              : switch (entries[index]) {
+                  final Txn txn => TxnBubble(
+                    key: ValueKey(txn.id),
+                    txn: txn,
+                    accountId: txn.account.id,
+                    label: '${txn.personLabel} · ${txn.account.name}',
+                    onTap: () => _showEntryActions(context, ref, txn),
+                  ),
+                  final String day => ThreadChip(text: day),
+                  _ => const SizedBox.shrink(),
+                },
+        ),
       ),
     };
 

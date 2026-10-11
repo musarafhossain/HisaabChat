@@ -64,6 +64,8 @@ export const listTransactionsValidator = vine.create({
   accountId: vine.string().uuid().optional(),
   categoryId: vine.string().uuid().optional(),
   personId: vine.string().uuid().optional(),
+  /** Expenses counted by this budget (its categories and their sub-categories). */
+  budgetId: vine.string().uuid().optional(),
   q: vine.string().trim().maxLength(100).optional(),
   cursor: vine.string().maxLength(200).optional(),
   limit: vine.number().withoutDecimals().range([1, 100]).optional(),

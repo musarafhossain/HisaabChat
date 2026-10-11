@@ -12,6 +12,7 @@ import 'package:hisaabchat/core/motion/motion.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/amount_field.dart';
 import 'package:hisaabchat/core/widgets/empty_state.dart';
+import 'package:hisaabchat/core/widgets/load_more.dart';
 import 'package:hisaabchat/core/widgets/settings_tile.dart';
 import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/features/budgets/budgets_controller.dart';
@@ -19,8 +20,10 @@ import 'package:hisaabchat/features/budgets/data/budget.dart';
 import 'package:hisaabchat/features/budgets/presentation/budget_form.dart';
 import 'package:hisaabchat/features/budgets/presentation/budget_widgets.dart';
 import 'package:hisaabchat/features/budgets/presentation/budgets_section.dart' show periodLabel;
+import 'package:hisaabchat/features/transactions/data/transactions_repository.dart';
 import 'package:hisaabchat/features/transactions/presentation/transactions_section.dart' show TransactionTile;
 import 'package:hisaabchat/features/transactions/presentation/txn_form.dart';
+import 'package:hisaabchat/features/transactions/transactions_controller.dart';
 import 'package:intl/intl.dart';
 
 /// Full-screen budget page (phones): `/budgets/:id`.
@@ -108,130 +111,127 @@ class BudgetInfoView extends ConsumerWidget {
       ('Days left', '${budget.daysLeft}'),
     ];
 
-    return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      children: [
-        Center(child: BudgetRingAvatar(budget: budget, size: 132)),
-        const SizedBox(height: 14),
-        Text(budget.name, textAlign: TextAlign.center, style: theme.textTheme.headlineSmall),
-        const SizedBox(height: 4),
-        Text(
-          periodLabel(value.periodStart, value.periodEnd),
-          textAlign: TextAlign.center,
-          style: TextStyle(color: colors.textSecondary),
-        ),
-        const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            AnimatedAmount(
-              budget.spent,
-              style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600, color: stateColor),
-            ),
-            Text(' of ${Money.format(budget.available)}', style: TextStyle(fontSize: 16, color: colors.textSecondary)),
-          ],
-        ),
-        if (budget.hasOverride)
+    final expenses = txnQuery(budgetId: budget.id, from: value.from, to: value.to);
+    return LoadMoreListener(
+      onLoadMore: () => unawaited(ref.read(filteredTxnsProvider(expenses).notifier).loadMore()),
+      child: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        children: [
+          Center(child: BudgetRingAvatar(budget: budget, size: 132)),
+          const SizedBox(height: 14),
+          Text(budget.name, textAlign: TextAlign.center, style: theme.textTheme.headlineSmall),
+          const SizedBox(height: 4),
           Text(
-            'This month only · usually ${Money.format(budget.amount)}',
+            periodLabel(value.periodStart, value.periodEnd),
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12.5, color: colors.textSecondary),
+            style: TextStyle(color: colors.textSecondary),
           ),
-        if (budget.rolloverIn != 0)
-          Text(
-            budget.rolloverIn > 0
-                ? 'Includes ${Money.format(budget.rolloverIn)} carried over from earlier months'
-                : '${Money.format(-budget.rolloverIn)} overspent earlier is taken from this month',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12.5, color: colors.textSecondary),
-          ),
-        const SizedBox(height: 18),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
-              for (final (i, (label, text)) in stats.indexed) ...[
-                if (i > 0) const SizedBox(width: 10),
-                Expanded(
-                  child: FadeSlideIn(
-                    index: i,
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-                        child: Column(
-                          children: [
-                            Text(
-                              text,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontFeatures: const [FontFeature.tabularFigures()],
-                                color: label == 'Over by' ? colors.danger : null,
+              AnimatedAmount(
+                budget.spent,
+                style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600, color: stateColor),
+              ),
+              Text(
+                ' of ${Money.format(budget.available)}',
+                style: TextStyle(fontSize: 16, color: colors.textSecondary),
+              ),
+            ],
+          ),
+          if (budget.hasOverride)
+            Text(
+              'This month only · usually ${Money.format(budget.amount)}',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12.5, color: colors.textSecondary),
+            ),
+          if (budget.rolloverIn != 0)
+            Text(
+              budget.rolloverIn > 0
+                  ? 'Includes ${Money.format(budget.rolloverIn)} carried over from earlier months'
+                  : '${Money.format(-budget.rolloverIn)} overspent earlier is taken from this month',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12.5, color: colors.textSecondary),
+            ),
+          const SizedBox(height: 18),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                for (final (i, (label, text)) in stats.indexed) ...[
+                  if (i > 0) const SizedBox(width: 10),
+                  Expanded(
+                    child: FadeSlideIn(
+                      index: i,
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+                          child: Column(
+                            children: [
+                              Text(
+                                text,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontFeatures: const [FontFeature.tabularFigures()],
+                                  color: label == 'Over by' ? colors.danger : null,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(label, style: TextStyle(fontSize: 12.5, color: colors.textSecondary)),
-                          ],
+                              const SizedBox(height: 4),
+                              Text(label, style: TextStyle(fontSize: 12.5, color: colors.textSecondary)),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ],
-            ],
-          ),
-        ),
-        const SectionLabel('Categories'),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final category in budget.categories)
-                Chip(
-                  avatar: Icon(AppIcons.byKey(category.icon), size: 18, color: category.color, fill: 1),
-                  label: Text(category.name),
-                ),
-            ],
-          ),
-        ),
-        const SectionLabel('Last 6 months'),
-        _HistoryChart(history: value.history, color: budget.color),
-        SectionLabel('Expenses this period (${value.transactions.length})'),
-        if (value.transactions.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text('Nothing spent yet.', style: TextStyle(color: colors.textSecondary)),
-          )
-        else
-          for (final txn in value.transactions)
-            TransactionTile(
-              txn: txn,
-              onTap: () => showTxnForm(context, existing: txn),
             ),
-        const Divider(),
-        SettingsTile(
-          icon: AppIcons.edit,
-          title: 'Edit budget',
-          subtitle: 'Name, amount, categories, alert',
-          onTap: () => showBudgetForm(context, existing: budget),
-        ),
-        SettingsTile(
-          icon: AppIcons.month,
-          title: 'Change amount for this month only',
-          subtitle: budget.hasOverride ? 'Currently ${Money.format(budget.budgeted)}' : 'e.g. a higher fees month',
-          onTap: () => _showOverrideDialog(context, budget, monthKey),
-        ),
-        SettingsTile(
-          icon: AppIcons.archive,
-          title: 'Archive budget',
-          destructive: true,
-          onTap: () => _archive(context, ref, budget),
-        ),
-      ],
+          ),
+          const SectionLabel('Categories'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final category in budget.categories)
+                  Chip(
+                    avatar: Icon(AppIcons.byKey(category.icon), size: 18, color: category.color, fill: 1),
+                    label: Text(category.name),
+                  ),
+              ],
+            ),
+          ),
+          const SectionLabel('Last 6 months'),
+          _HistoryChart(history: value.history, color: budget.color),
+          const Divider(),
+          SettingsTile(
+            icon: AppIcons.edit,
+            title: 'Edit budget',
+            subtitle: 'Name, amount, categories, alert',
+            onTap: () => showBudgetForm(context, existing: budget),
+          ),
+          SettingsTile(
+            icon: AppIcons.month,
+            title: 'Change amount for this month only',
+            subtitle: budget.hasOverride ? 'Currently ${Money.format(budget.budgeted)}' : 'e.g. a higher fees month',
+            onTap: () => _showOverrideDialog(context, budget, monthKey),
+          ),
+          SettingsTile(
+            icon: AppIcons.archive,
+            title: 'Archive budget',
+            destructive: true,
+            onTap: () => _archive(context, ref, budget),
+          ),
+          // Last, so it can keep loading as you scroll.
+          _BudgetExpenses(query: expenses),
+        ],
+      ),
     );
   }
 }
@@ -426,6 +426,54 @@ class _OverrideDialogState extends ConsumerState<_OverrideDialog> {
                 },
           child: const Text('Save'),
         ),
+      ],
+    );
+  }
+}
+
+/// The expenses counted by a budget this period, paged; the count comes from
+/// the server so it covers all of them.
+class _BudgetExpenses extends ConsumerWidget {
+  const _BudgetExpenses({required this.query});
+
+  final TxnQuery query;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final state = ref.watch(filteredTxnsProvider(query));
+    final value = state.value;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionLabel(value == null ? 'Expenses this period' : 'Expenses this period (${value.totals.count})'),
+        if (value == null && state.hasError)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text('Couldn’t load expenses', style: TextStyle(color: colors.danger)),
+                ),
+                TextButton(onPressed: () => ref.invalidate(filteredTxnsProvider(query)), child: const Text('Retry')),
+              ],
+            ),
+          )
+        else if (value == null)
+          const LoadMoreFooter()
+        else if (value.items.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text('Nothing spent yet.', style: TextStyle(color: colors.textSecondary)),
+          )
+        else ...[
+          for (final txn in value.items)
+            TransactionTile(
+              txn: txn,
+              onTap: () => unawaited(showTxnForm(context, existing: txn)),
+            ),
+          if (value.hasMore) const LoadMoreFooter(),
+        ],
       ],
     );
   }
