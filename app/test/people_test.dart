@@ -48,6 +48,21 @@ void main() {
     expect(find.text('Settled up'), findsOneWidget);
   });
 
+  testWidgets('phone: the + keeps adding people once the list isn’t empty', (tester) async {
+    final app = await pumpApp(tester, savedToken: 'oat', accounts: _cash(), seed: (a) async => a.people.add('Amit'));
+    await _openPeople(tester);
+    expect(find.text('No one yet'), findsNothing);
+
+    await tester.tap(find.byTooltip('New person'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextFormField, 'Name'), 'Riya');
+    await tester.tap(find.descendant(of: find.byType(PersonForm), matching: find.text('Add person')));
+    await tester.pumpAndSettle();
+
+    expect(app.people.rows.map((r) => r.name), ['Amit', 'Riya']);
+    expect(find.widgetWithText(PersonTile, 'Riya'), findsOneWidget);
+  });
+
   testWidgets('lend in a person’s chat, see who owes what, then settle up', (tester) async {
     final app = await pumpApp(tester, savedToken: 'oat', accounts: _cash(), seed: (a) async => a.people.add('Amit'));
     await _openPeople(tester);

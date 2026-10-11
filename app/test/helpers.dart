@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hisaabchat/app/app.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
@@ -1054,6 +1055,9 @@ Future<TestApp> pumpApp(
 
   /// Adds data (transactions, budgets…) before the app first loads.
   Future<void> Function(TestApp app)? seed,
+
+  /// Extra provider overrides (e.g. turning on web-only behaviour).
+  List<Override> overrides = const [],
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -1097,6 +1101,7 @@ Future<TestApp> pumpApp(
         budgetsRepositoryProvider.overrideWithValue(fakeBudgets),
         peopleRepositoryProvider.overrideWithValue(fakePeople),
         recurringRepositoryProvider.overrideWithValue(fakeRecurring),
+        ...overrides,
         reportsRepositoryProvider.overrideWithValue(fakeReports),
       ],
       child: const HisaabChatApp(),

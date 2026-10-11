@@ -44,9 +44,18 @@ class AppShell extends ConsumerWidget {
       WindowClass.compact => _CompactShell(current: _current, onSelect: _go, body: body),
       _ => _RailShell(current: _current, onSelect: _go, body: body),
     };
-    return CallbackShortcuts(
-      bindings: shortcuts,
-      child: Focus(autofocus: true, child: content),
+    // Back (Android button or gesture) on any section but Home returns to Home
+    // first, like WhatsApp; only Back on Home leaves the app. Screens opened on
+    // top (forms, sheets, chats, Settings pages) are closed before this runs.
+    return PopScope(
+      canPop: _current == Destination.home,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _go(Destination.home);
+      },
+      child: CallbackShortcuts(
+        bindings: shortcuts,
+        child: Focus(autofocus: true, child: content),
+      ),
     );
   }
 }
@@ -60,8 +69,9 @@ class _CompactShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Reports & Settings open full screen with a back arrow, like WhatsApp's
-    // ⋮ → Settings; the four tabs keep the bottom bar.
+    // People, Reports & Settings open full screen with a back arrow, like
+    // WhatsApp's ⋮ → Settings; the four tabs keep the bottom bar. The + stays
+    // where the section has something to add (People); it hides itself otherwise.
     if (!current.isTab) {
       return Scaffold(
         appBar: AppBar(
@@ -73,6 +83,7 @@ class _CompactShell extends ConsumerWidget {
           title: Text(current.label, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w500)),
         ),
         body: body,
+        floatingActionButton: ToastAvoid(child: _Fab(current: current)),
       );
     }
 

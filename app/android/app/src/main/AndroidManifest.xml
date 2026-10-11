@@ -1,9 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- enableOnBackInvokedCallback="false": every Back press goes to Flutter's
+         router, which closes the top screen (form, sheet, dialog, thread) first and
+         only leaves the app from the first screen. With predictive back (on by
+         default when targeting Android 16) the system could close the whole app
+         while a form was still open. -->
     <application
         android:label="HisaabChat"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="false">
         <activity
             android:name=".MainActivity"
             android:exported="true"

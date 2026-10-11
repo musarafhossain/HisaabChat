@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hisaabchat/core/motion/page_transitions.dart';
+import 'package:hisaabchat/core/navigation/back_navigation.dart';
 import 'package:hisaabchat/features/accounts/presentation/account_info.dart';
 import 'package:hisaabchat/features/accounts/presentation/accounts_section.dart';
 import 'package:hisaabchat/features/auth/auth_controller.dart';
@@ -34,7 +36,17 @@ const _publicPaths = {'/welcome', '/login', '/register'};
 
 /// Routes from docs/03-AppFlow.md. Signed-out users only see the public
 /// screens; signed-in users never see them.
+/// Browser history entries for forms, sheets and dialogs (web only).
+final webModalHistoryProvider = Provider<WebModalHistory>((ref) {
+  final history = WebModalHistory(enabled: kIsWeb);
+  // Registered before the router so it sees the browser's Back first.
+  WidgetsBinding.instance.addObserver(history);
+  ref.onDispose(() => WidgetsBinding.instance.removeObserver(history));
+  return history;
+});
+
 final routerProvider = Provider<GoRouter>((ref) {
+  final modalHistory = ref.watch(webModalHistoryProvider);
   final refresh = ValueNotifier<int>(0);
   ref
     ..listen(authControllerProvider, (_, _) => refresh.value++)
@@ -52,8 +64,9 @@ final routerProvider = Provider<GoRouter>((ref) {
     pageBuilder: (context, state) => sharedAxisPage(key: state.pageKey, child: child),
   );
 
-  return GoRouter(
+  final router = GoRouter(
     navigatorKey: rootNavigatorKey,
+    observers: [modalHistory],
     initialLocation: Destination.home.path,
     refreshListenable: refresh,
     redirect: (context, state) {
@@ -206,4 +219,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+  modalHistory.currentLocation = () => router.routeInformationProvider.value.uri;
+  ref.onDispose(router.dispose);
+  return router;
 });

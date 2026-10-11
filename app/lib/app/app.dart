@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hisaabchat/app/router.dart';
 import 'package:hisaabchat/app/settings/appearance_controller.dart';
 import 'package:hisaabchat/app/theme/app_theme.dart';
+import 'package:hisaabchat/core/navigation/back_navigation.dart';
 import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/features/budgets/presentation/budget_alert_listener.dart';
 
@@ -31,7 +32,11 @@ class HisaabChatApp extends ConsumerWidget {
           data: media.copyWith(
             disableAnimations: media.disableAnimations || appearance.reduceMotion,
           ),
-          child: ToastHost(child: BudgetAlertListener(child: child!)),
+          // Esc and the mouse's back button work like Android's Back.
+          child: BackShortcuts(
+            onBack: router.routerDelegate.popRoute,
+            child: ToastHost(child: BudgetAlertListener(child: child!)),
+          ),
         );
       },
     );
