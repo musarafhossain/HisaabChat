@@ -56,6 +56,19 @@ flutter run -d emulator-5554               # Android emulator (uses http://10.0.
 For a physical phone on the same Wi-Fi, pass your PC's LAN address:
 `flutter run --dart-define=API_BASE_URL=http://192.168.x.x:3333/api/v1`
 
+Release builds talk to production, `https://hisaabchat.musaraf.org.in/api/v1`,
+unless `--dart-define=API_BASE_URL=…` is given.
+
+Windows installer (signed MSIX, from `app/`):
+
+```powershell
+powershell -File tool\windows\build_msix.ps1
+# → build\windows\installer\  HisaabChat.msix, HisaabChat.cer, Install-HisaabChat.ps1
+```
+
+To install on a PC, copy that folder and run `Install-HisaabChat.ps1` (it asks
+for admin once to trust the certificate).
+
 ## Tests
 
 ```bash

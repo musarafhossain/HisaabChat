@@ -177,7 +177,7 @@
 - [x] **Write off** a person's remaining balance (PPL-7): `POST /people/:id/write-off` saves COLLECT+EXPENSE or REPAY+INCOME together (no money moves; the loss or gift shows in reports and budgets). Person ⋮ → Write off dialog (amount, category, account).
 - [x] **App identity:** teal bubble + ₹ icons from `tool/branding/generate_branding.py` (Android legacy/adaptive/themed, Windows .ico, web favicon + maskable); Android launch screens (pre-12 and 12+, light and dark); Windows window shown on the first frame (no white flash).
 - [ ] **Android:** release signing config, `flutter build apk --split-per-abi` / `appbundle`, minSdk 24, edge-to-edge (predictive back stays off; see above). *Blocked locally: the dev network can't reach `storage.googleapis.com`.*
-- [ ] **Windows:** `msix` config (name, publisher, logo, self-signed cert) → `dart run msix:create`.
+- [x] **Windows:** `msix_config` in `pubspec.yaml` + `tool/windows/build_msix.ps1` (self-signed certificate kept in `%USERPROFILE%\.hisaabchat`, signed `HisaabChat.msix`, `Install-HisaabChat.ps1` for other PCs). Release builds point to production by default.
 - [x] **Web:** loading screen in `index.html` (logo, name, progress bar in the saved accent and light/dark mode, fades out on the first frame; also sets the browser bar color before the app loads).
 - [ ] **Web:** try `--wasm`; check the base href when hosting under a sub-path.
 - [ ] Accessibility pass: `Semantics` labels, text scale 200%, contrast, TalkBack/Narrator spot checks.

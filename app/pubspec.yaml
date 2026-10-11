@@ -65,9 +65,26 @@ dev_dependencies:
   json_serializable: ^6.14.1
   very_good_analysis: ^10.2.0
   mocktail: ^1.0.5
+  msix: ^3.18.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+# Windows installer. Build it with tool/windows/build_msix.ps1, which signs it
+# with the self-signed certificate kept outside the repo (see that script).
+msix_config:
+  display_name: HisaabChat
+  description: WhatsApp-style personal expense tracker
+  publisher_display_name: Musaraf Hossain
+  identity_name: Musaraf.HisaabChat
+  # Must match the signing certificate's subject.
+  publisher: CN=Musaraf Hossain
+  msix_version: 1.0.0.0
+  logo_path: assets/branding/logo.png
+  capabilities: internetClient
+  languages: en-in, en-us
+  output_name: HisaabChat
+  install_certificate: false
 
 
 flutter:
