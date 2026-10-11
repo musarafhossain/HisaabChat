@@ -160,7 +160,7 @@
 - [x] Smaller fixes: People's + button on phones, a quieter Home greeting, a one-line chat placeholder, a scrolling rail in short windows, the design preview removed from Settings → Connection.
 - [x] `trustProxy` for running behind nginx (Phase 8 prep).
 - [x] **Budgets tab shows this month only**; a new **Budget summary** (tap the month line) explains monthly amounts + carried money, each budget's maths and month-by-month totals (`GET /budgets/history`). No database change.
-- [ ] *In progress:* the browser's own top bar (`<meta name="theme-color">`) follows the accent on web.
+- [x] The browser's own top bar (`<meta name="theme-color">`, manifest teal) follows the chosen accent on web, in light and dark mode.
 - [x] Tests: 110 backend, 96 app (back button, search, accent, pagination).
 
 ### Phase 7 — Platform Polish & Packaging
@@ -177,7 +177,8 @@
 - [ ] **App identity:** `flutter_launcher_icons` (Android adaptive, Windows .ico, web favicons/manifest) and `flutter_native_splash`.
 - [ ] **Android:** release signing config, `flutter build apk --split-per-abi` / `appbundle`, minSdk 24, edge-to-edge (predictive back stays off; see above). *Blocked locally: the dev network can't reach `storage.googleapis.com`.*
 - [ ] **Windows:** `msix` config (name, publisher, logo, self-signed cert) → `dart run msix:create`.
-- [ ] **Web:** `flutter build web --release` (try `--wasm`), loading splash in `index.html`, correct base href.
+- [x] **Web:** loading screen in `index.html` (logo, name, progress bar in the saved accent and light/dark mode, fades out on the first frame; also sets the browser bar color before the app loads).
+- [ ] **Web:** try `--wasm`; check the base href when hosting under a sub-path.
 - [ ] Accessibility pass: `Semantics` labels, text scale 200%, contrast, TalkBack/Narrator spot checks.
 - [ ] Performance: seed 10k transactions; verify API p95 and smooth list scrolling.
 

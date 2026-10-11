@@ -19,6 +19,8 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="HisaabChat - WhatsApp-style personal expense tracker">
+  <!-- Browser / installed-app top bar; the app updates it to the chosen color. -->
+  <meta name="theme-color" content="#00897B">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -31,8 +33,86 @@
 
   <title>HisaabChat</title>
   <link rel="manifest" href="manifest.json">
+
+  <!--
+    Loading screen shown instantly while the app's code downloads, in the
+    user's saved color and light/dark mode (read from the app's own saved
+    settings). It fades out when the app draws its first frame.
+  -->
+  <style>
+    :root { --accent: #00897B; --bg: #FFFFFF; --text: #111B21; --track: #E9EDEF; }
+    html.dark { --bg: #0B141A; --text: #E9EDEF; --track: #222D34; }
+    html, body { margin: 0; height: 100%; background: var(--bg); }
+    #hc-splash {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: var(--bg); color: var(--text);
+      font-family: Roboto, "Segoe UI", system-ui, -apple-system, sans-serif;
+      transition: opacity 250ms ease-out;
+    }
+    #hc-splash.hide { opacity: 0; pointer-events: none; }
+    #hc-splash .logo {
+      width: 88px; height: 88px; border-radius: 25px; background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+    }
+    #hc-splash .name { margin-top: 24px; font-size: 24px; font-weight: 700; letter-spacing: 0.2px; }
+    #hc-splash .bar {
+      margin-top: 28px; width: 120px; height: 3px; border-radius: 2px;
+      background: var(--track); overflow: hidden; position: relative;
+    }
+    #hc-splash .bar::after {
+      content: ""; position: absolute; top: 0; bottom: 0; width: 40%;
+      background: var(--accent); border-radius: 2px;
+      animation: hc-slide 1.1s ease-in-out infinite;
+    }
+    @keyframes hc-slide { from { left: -40%; } to { left: 100%; } }
+    @media (prefers-reduced-motion: reduce) { #hc-splash .bar::after { animation: none; left: 30%; } }
+  </style>
+  <script>
+    (function () {
+      // Same colors as lib/app/theme/accent.dart: [light mode, dark mode].
+      var accents = {
+        GREEN: ['#1DAA61', '#21C063'], TEAL: ['#00897B', '#26A69A'], BLUE: ['#1E6FD9', '#4C9AFF'],
+        INDIGO: ['#4F46E5', '#818CF8'], PURPLE: ['#7C3AED', '#A78BFA'], PINK: ['#D6336C', '#F06595'],
+        ORANGE: ['#E8590C', '#FF922B'], AMBER: ['#B7791F', '#F6C350'], CYAN: ['#0891B2', '#22D3EE'],
+        SLATE: ['#475569', '#94A3B8']
+      };
+      function saved(key) {
+        try { return JSON.parse(localStorage.getItem('flutter.' + key)); } catch (e) { return null; }
+      }
+      var accent = accents[saved('appearance.accent')] || accents.TEAL;
+      var theme = saved('appearance.theme');
+      var dark = theme === 'DARK' ||
+        (theme !== 'LIGHT' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+      var root = document.documentElement;
+      if (dark) root.classList.add('dark');
+      root.style.setProperty('--accent', dark ? accent[1] : accent[0]);
+      // The browser's top bar gets the chosen color right away, too.
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', accent[0]);
+
+      window.addEventListener('flutter-first-frame', function () {
+        var splash = document.getElementById('hc-splash');
+        if (!splash) return;
+        splash.classList.add('hide');
+        setTimeout(function () { splash.remove(); }, 300);
+      });
+    })();
+  </script>
 </head>
 <body>
+  <div id="hc-splash" role="progressbar" aria-label="Loading HisaabChat">
+    <div class="logo">
+      <!-- The HisaabChat mark: a white chat bubble with a ₹ sign. -->
+      <svg width="55" height="55" viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="0" y="0" width="100" height="84" rx="30" fill="#FFFFFF"/>
+        <path d="M20 70 L12 100 L46 80 Z" fill="#FFFFFF"/>
+        <text x="50" y="58" text-anchor="middle" font-size="52" font-weight="800"
+              font-family="Roboto, 'Segoe UI', system-ui, sans-serif" fill="var(--accent)" style="fill: var(--accent)">&#8377;</text>
+      </svg>
+    </div>
+    <div class="name">HisaabChat</div>
+    <div class="bar"></div>
+  </div>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader

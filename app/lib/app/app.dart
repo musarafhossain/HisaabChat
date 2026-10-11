@@ -4,6 +4,7 @@ import 'package:hisaabchat/app/router.dart';
 import 'package:hisaabchat/app/settings/appearance_controller.dart';
 import 'package:hisaabchat/app/theme/app_theme.dart';
 import 'package:hisaabchat/core/navigation/back_navigation.dart';
+import 'package:hisaabchat/core/platform/browser_bar_color.dart';
 import 'package:hisaabchat/core/widgets/toast.dart';
 import 'package:hisaabchat/features/budgets/presentation/budget_alert_listener.dart';
 
@@ -28,6 +29,10 @@ class HisaabChatApp extends ConsumerWidget {
         // The in-app "Reduce motion" switch behaves exactly like the OS
         // setting: every motion widget reads MediaQuery.disableAnimations.
         final media = MediaQuery.of(context);
+        // Web: the browser's own top bar shows the chosen accent color, in
+        // light and dark mode alike (otherwise it would fall back to the
+        // manifest's color).
+        setBrowserThemeColor(appearance.accent.light);
         return MediaQuery(
           data: media.copyWith(
             disableAnimations: media.disableAnimations || appearance.reduceMotion,

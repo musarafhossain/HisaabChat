@@ -4,7 +4,7 @@
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FFFFFF",
-    "theme_color": "#1DAA61",
+    "theme_color": "#00897B",
     "description": "WhatsApp-style personal expense tracker",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
