@@ -66,7 +66,7 @@ void main() {
   });
 
   test('profile accent parses with a teal fallback', () {
-    final user = AppUser.fromJson({'id': 'u', 'email': 'a@b.c', 'accentColor': 'PINK'});
+    final user = AppUser.fromJson(const {'id': 'u', 'email': 'a@b.c', 'accentColor': 'PINK'});
     expect(user.accent, AccentColor.pink);
     expect(AccentColor.fromApi('NOPE'), AccentColor.teal);
     expect(AccentColor.fromApi(null), AccentColor.teal);

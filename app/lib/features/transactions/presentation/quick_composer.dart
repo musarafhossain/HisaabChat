@@ -255,7 +255,13 @@ class _QuickComposerState extends ConsumerState<QuickComposer> {
                           onSubmitted: (_) => _send(),
                           decoration: InputDecoration(
                             fillColor: colors.panel,
-                            hintText: _income ? 'Income, e.g. 35000 salary' : 'Amount and note, e.g. 120 tea',
+                            // Narrow phones get the short form so the example stays visible.
+                            hintText: MediaQuery.sizeOf(context).width < 380
+                                ? (_income ? 'e.g. 35000 salary' : 'e.g. 120 tea')
+                                : (_income ? 'Income, e.g. 35000 salary' : 'Amount and note, e.g. 120 tea'),
+                            // Typed text may grow to 4 lines; the placeholder stays on one.
+                            hintMaxLines: 1,
+                            hintStyle: const TextStyle(overflow: TextOverflow.ellipsis),
                             suffixIcon: typing
                                 ? IconButton(
                                     tooltip: 'More details',

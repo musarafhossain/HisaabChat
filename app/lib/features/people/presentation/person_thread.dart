@@ -461,7 +461,10 @@ class _PersonComposerState extends ConsumerState<PersonComposer> {
                         textInputAction: TextInputAction.send,
                         onSubmitted: (_) => _send(accounts),
                         decoration: InputDecoration(
-                          hintText: 'Amount and note, e.g. 500 movie',
+                          hintText: MediaQuery.sizeOf(context).width < 380
+                              ? 'e.g. 500 movie'
+                              : 'Amount and note, e.g. 500 movie',
+                          hintMaxLines: 1,
                           filled: true,
                           fillColor: colors.inputFill,
                           border: OutlineInputBorder(
