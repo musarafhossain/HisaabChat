@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hisaabchat/app/theme/app_colors.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
+import 'package:hisaabchat/core/motion/motion.dart';
 
 /// Full screen on phones; a centered column (max 420 dp) on wide screens.
 class AuthScaffold extends StatelessWidget {
@@ -78,7 +79,7 @@ class SubmitButton extends StatelessWidget {
     return FilledButton(
       onPressed: loading ? null : onPressed,
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 150),
+        duration: context.motion(const Duration(milliseconds: 150)),
         child: loading
             ? SizedBox.square(
                 key: const ValueKey('spinner'),

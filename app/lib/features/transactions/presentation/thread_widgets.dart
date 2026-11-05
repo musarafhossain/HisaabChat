@@ -172,7 +172,10 @@ class TxnBubble extends StatelessWidget {
                   const SizedBox(width: 4),
                   AnimatedSwitcher(
                     duration: context.motion(Motion.short),
-                    transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+                    transitionBuilder: (child, animation) => ScaleTransition(
+                      scale: CurvedAnimation(parent: animation, curve: Motion.pop),
+                      child: child,
+                    ),
                     child: KeyedSubtree(key: ValueKey(status), child: statusIcon),
                   ),
                 ],
@@ -196,6 +199,7 @@ class TxnBubble extends StatelessWidget {
           Flexible(
             child: Semantics(
               button: true,
+              selected: selected,
               label:
                   '${outgoing ? 'Money out' : 'Money in'}, ${Money.format(txn.amount)} rupees, '
                   '$title, ${Dates.time(txn.localDate)}'
@@ -215,7 +219,22 @@ class TxnBubble extends StatelessWidget {
     final highlighted = AnimatedContainer(
       duration: context.motion(Motion.instant),
       color: selected ? colors.chipSelected.withValues(alpha: 0.5) : Colors.transparent,
-      child: Shake(trigger: shakeTrigger, child: row),
+      child: Stack(
+        children: [
+          Shake(trigger: shakeTrigger, child: row),
+          // On the free side of the bubble, so selecting doesn't move it.
+          if (selected)
+            Positioned(
+              top: 0,
+              bottom: 0,
+              left: outgoing ? 16 : null,
+              right: outgoing ? null : 16,
+              child: Center(
+                child: PopIn(child: Icon(AppIcons.ok, color: colors.primary, fill: 1)),
+              ),
+            ),
+        ],
+      ),
     );
 
     // New messages rise from the composer.

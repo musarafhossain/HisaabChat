@@ -105,7 +105,7 @@ class AccountInfoView extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 16),
       children: [
         Center(
-          child: Hero(
+          child: AppHero(
             tag: 'account-avatar-${account.id}',
             child: IconAvatar(icon: AppIcons.byKey(account.icon), color: account.color, radius: 48, solid: true),
           ),

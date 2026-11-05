@@ -7,7 +7,8 @@ import 'package:hisaabchat/features/accounts/presentation/account_form.dart';
 import 'package:hisaabchat/features/transactions/presentation/txn_form.dart';
 
 /// The green + button: a new transaction, or an account first if there are none.
-void openNewTransaction(BuildContext context) {
+/// With [morph], [context] is the button and the form grows out of it.
+void openNewTransaction(BuildContext context, {bool morph = false}) {
   final container = ProviderScope.containerOf(context, listen: false);
   final accounts = container.read(accountsProvider).value?.active ?? const [];
   if (accounts.isEmpty) {
@@ -16,5 +17,11 @@ void openNewTransaction(BuildContext context) {
     );
     return;
   }
-  unawaited(showTxnForm(context, draft: TxnDraft(accountId: accounts.first.id)));
+  unawaited(
+    showTxnForm(
+      context,
+      draft: TxnDraft(accountId: accounts.first.id),
+      morphFrom: morph ? context : null,
+    ),
+  );
 }

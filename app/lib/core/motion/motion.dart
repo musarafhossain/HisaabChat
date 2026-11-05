@@ -37,4 +37,7 @@ extension MotionContext on BuildContext {
 
   /// [duration], or zero when motion is reduced.
   Duration motion(Duration duration) => reduceMotion ? Duration.zero : duration;
+
+  /// For `showModalBottomSheet`: no slide when motion is reduced.
+  AnimationStyle? get sheetMotion => reduceMotion ? AnimationStyle.noAnimation : null;
 }

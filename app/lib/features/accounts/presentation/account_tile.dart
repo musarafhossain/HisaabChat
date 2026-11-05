@@ -4,6 +4,7 @@ import 'package:hisaabchat/core/format/dates.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/money/money.dart';
 import 'package:hisaabchat/core/motion/animated_amount.dart';
+import 'package:hisaabchat/core/motion/entrance.dart';
 import 'package:hisaabchat/core/widgets/chat_tile.dart';
 import 'package:hisaabchat/features/accounts/data/account.dart';
 
@@ -43,7 +44,7 @@ class AccountTile extends StatelessWidget {
       child: ChatTile(
         selected: selected,
         onTap: onTap,
-        leading: Hero(
+        leading: AppHero(
           tag: 'account-avatar-${account.id}',
           child: IconAvatar(icon: AppIcons.byKey(account.icon), color: account.color, solid: true),
         ),

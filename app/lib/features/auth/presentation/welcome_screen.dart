@@ -25,7 +25,7 @@ class WelcomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Center(
-                    child: Hero(tag: 'app-logo', child: AppLogo(size: 96)),
+                    child: AppHero(tag: 'app-logo', child: AppLogo(size: 96)),
                   ),
                   const SizedBox(height: 28),
                   FadeSlideIn(

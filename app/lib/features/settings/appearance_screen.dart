@@ -4,6 +4,7 @@ import 'package:hisaabchat/app/settings/appearance_controller.dart';
 import 'package:hisaabchat/app/theme/accent.dart';
 import 'package:hisaabchat/app/theme/app_colors.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
+import 'package:hisaabchat/core/motion/motion.dart';
 import 'package:hisaabchat/core/widgets/settings_tile.dart';
 
 class AppearanceScreen extends ConsumerWidget {
@@ -104,7 +105,7 @@ class _AccentSwatch extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(4),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
+              duration: context.motion(const Duration(milliseconds: 200)),
               width: 44,
               height: 44,
               padding: const EdgeInsets.all(3),
@@ -116,7 +117,7 @@ class _AccentSwatch extends StatelessWidget {
                 decoration: BoxDecoration(color: color, shape: BoxShape.circle),
                 child: AnimatedOpacity(
                   opacity: selected ? 1 : 0,
-                  duration: const Duration(milliseconds: 150),
+                  duration: context.motion(const Duration(milliseconds: 150)),
                   child: Icon(AppIcons.check, size: 20, color: dark ? colors.panel : Colors.white),
                 ),
               ),

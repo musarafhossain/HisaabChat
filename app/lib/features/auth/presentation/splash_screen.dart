@@ -25,7 +25,7 @@ class SplashScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Hero(tag: 'app-logo', child: AppLogo(size: 88)),
+              const AppHero(tag: 'app-logo', child: AppLogo(size: 88)),
               const SizedBox(height: 24),
               Text(
                 'HisaabChat',

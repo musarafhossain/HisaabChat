@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hisaabchat/app/theme/app_colors.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/motion/animated_icons.dart';
+import 'package:hisaabchat/core/motion/entrance.dart';
 import 'package:hisaabchat/core/motion/motion.dart';
 import 'package:hisaabchat/core/motion/shake.dart';
 import 'package:hisaabchat/core/widgets/toast.dart';
@@ -275,19 +276,21 @@ class _QuickComposerState extends ConsumerState<QuickComposer> {
                       const SizedBox(width: 6),
                       Tooltip(
                         message: typing ? 'Send' : 'Full form',
-                        child: Material(
-                          color: colors.primary,
-                          shape: const CircleBorder(),
-                          child: InkWell(
-                            customBorder: const CircleBorder(),
-                            onTap: typing ? _send : _openFullForm,
-                            child: SizedBox.square(
-                              dimension: 48,
-                              child: MorphIcon(
-                                first: AppIcons.attach,
-                                second: AppIcons.send,
-                                showSecond: typing,
-                                color: theme.colorScheme.onPrimary,
+                        child: PressBounce(
+                          child: Material(
+                            color: colors.primary,
+                            shape: const CircleBorder(),
+                            child: InkWell(
+                              customBorder: const CircleBorder(),
+                              onTap: typing ? _send : _openFullForm,
+                              child: SizedBox.square(
+                                dimension: 48,
+                                child: MorphIcon(
+                                  first: AppIcons.attach,
+                                  second: AppIcons.send,
+                                  showSecond: typing,
+                                  color: theme.colorScheme.onPrimary,
+                                ),
                               ),
                             ),
                           ),

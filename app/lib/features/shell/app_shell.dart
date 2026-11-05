@@ -41,7 +41,7 @@ class AppShell extends ConsumerWidget {
       for (final (i, d) in Destination.railTop.indexed)
         SingleActivator(LogicalKeyboardKey(0x31 + i), control: true): () => _go(d),
       const SingleActivator(LogicalKeyboardKey.keyF, control: true): () => openSearch(context),
-      const SingleActivator(LogicalKeyboardKey.keyN, control: true): () => openNewTransaction(context),
+      const SingleActivator(LogicalKeyboardKey.keyN, control: true): () => openNewTransaction(context, morph: true),
     };
 
     final content = switch (context.windowClass) {
@@ -280,7 +280,7 @@ class _Fab extends StatelessWidget {
             ? () => showBudgetForm(context)
             : current == Destination.people
             ? () => showPersonForm(context)
-            : () => openNewTransaction(context),
+            : () => openNewTransaction(context, morph: true),
         child: AnimatedSwitcher(
           duration: context.motion(Motion.short),
           transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),

@@ -137,7 +137,7 @@
 - [x] `/reports`: spending/income donut + ranked list with share bars; tap → that category's transactions for the period; month switcher.
 - [x] Empty and error states; offline banner with Retry on Home and Reports (cached numbers stay visible).
 - [x] Widget tests (63 app total): dashboard, refresh after save, offline banner, reports drill-down, onboarding (create, back, skip).
-- [ ] `integration_test`: register → onboarding → add expense → budget and dashboard update (run on Android emulator, Windows, Chrome).
+- [x] `integration_test`: register → onboarding → add expense → budget and dashboard update → reopen the app, against a real API and database, in phone and desktop layouts (`app/integration_test/first_expense_test.dart`). Passes on Android emulator, Windows and Chrome; `e2e.yml` runs the Chrome version in CI. Chrome uses a debug build: in a profile build the test's simulated typing doesn't reach the form.
 - [ ] Deploy to a staging VPS (see Phase 8 steps) and **use it daily for a week** on phone + laptop.
 
 **🚀 Milestone: MVP v0.1 — all P0 requirements on Android, Windows and Web.**
@@ -165,7 +165,7 @@
 
 ### Phase 7 — Platform Polish & Packaging
 - [x] **Dark mode** check of every screen (reviewed renders at phone and desktop sizes: bubbles, wallpaper, chips, rings, dialogs). Fixed: theme text styles now carry the platform font, Account info and the Categories tabs keep a readable width on wide windows, Settings → Account's month dropdown no longer overflows on phones. `test/screens_layout_test.dart` opens every main screen in light and dark at 3 sizes (360×740, 412×915, 1280×800) and fails on any overflow (instead of pixel goldens, which differ between machines).
-- [ ] **Motion polish pass** against the brief's §2.5 table (tab fill animation, Hero avatars, FAB container transform, bubble send/tick/shake, ring sweep + alert pulse, count-ups, search morph, selection mode). Verify Reduce motion turns them off.
+- [x] **Motion polish pass** against the brief's §2.5 table (tab fill animation, Hero avatars, FAB container transform, bubble send/tick/shake, ring sweep + alert pulse, count-ups, selection mode; search stays a shared-axis page, as the brief allows). Added: the + button grows into the transaction form on phones, a pop on the saved tick, a press bounce on Send, a check mark and app-bar cross-fade in selection mode. Reduce motion now also covers page routes, avatars, bottom sheets and the fixed durations that ignored it. `test/motion_test.dart` keeps these rules enforced. *Other §2.5 rows, such as the FAB hiding on scroll and animated list insert/delete, weren't part of this pass. Smoothness on real devices is the jank check below.*
 - [ ] **Jank check:** profile mode on a mid-range Android phone + Windows + Chrome; ≥ 99% of frames < 16 ms; fix with `RepaintBoundary`, shader warm-up, fewer stagger items.
 - [ ] **Icon audit:** no `Icons.*` or emoji left in the UI; every icon button has a tooltip and semantics label.
 - [ ] Our own **doodle wallpaper** SVG (light/dark tints) + Appearance setting (Doodle / Plain / None).

@@ -7,6 +7,7 @@ import 'package:hisaabchat/app/theme/app_colors.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/motion/animated_amount.dart';
 import 'package:hisaabchat/core/motion/entrance.dart';
+import 'package:hisaabchat/core/motion/motion.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/context_menu.dart';
 import 'package:hisaabchat/core/widgets/empty_state.dart';
@@ -246,13 +247,13 @@ class _AccountsListState extends ConsumerState<_AccountsList> {
               title: Text('Archived (${state.archived.length})'),
               trailing: AnimatedRotation(
                 turns: _showArchived ? 0.25 : 0,
-                duration: const Duration(milliseconds: 200),
+                duration: context.motion(const Duration(milliseconds: 200)),
                 child: Icon(AppIcons.chevron, color: colors.textSecondary),
               ),
               onTap: () => setState(() => _showArchived = !_showArchived),
             ),
             AnimatedSize(
-              duration: const Duration(milliseconds: 250),
+              duration: context.motion(const Duration(milliseconds: 250)),
               curve: Curves.easeOutCubic,
               alignment: Alignment.topCenter,
               child: _showArchived

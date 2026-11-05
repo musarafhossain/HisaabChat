@@ -6,6 +6,7 @@ import 'package:hisaabchat/app/theme/app_colors.dart';
 import 'package:hisaabchat/core/format/dates.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/money/money.dart';
+import 'package:hisaabchat/core/motion/entrance.dart';
 import 'package:hisaabchat/core/motion/motion.dart';
 import 'package:hisaabchat/core/motion/shake.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
@@ -144,6 +145,7 @@ class PersonThread extends ConsumerWidget {
     unawaited(
       showModalBottomSheet<void>(
         context: context,
+        sheetAnimationStyle: context.sheetMotion,
         useRootNavigator: true,
         showDragHandle: true,
         builder: (sheetContext) => SafeArea(
@@ -196,7 +198,7 @@ class _TitleRow extends StatelessWidget {
     final colors = context.colors;
     return Row(
       children: [
-        Hero(tag: 'person-avatar-${person.id}', child: PersonAvatar.of(person, radius: 20)),
+        AppHero(tag: 'person-avatar-${person.id}', child: PersonAvatar.of(person, radius: 20)),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -503,10 +505,12 @@ class _PersonComposerState extends ConsumerState<PersonComposer> {
                       ),
                     ),
                     const SizedBox(width: 6),
-                    IconButton.filled(
-                      tooltip: 'Send',
-                      onPressed: _sending ? null : () => _send(accounts),
-                      icon: const Icon(AppIcons.send),
+                    PressBounce(
+                      child: IconButton.filled(
+                        tooltip: 'Send',
+                        onPressed: _sending ? null : () => _send(accounts),
+                        icon: const Icon(AppIcons.send),
+                      ),
                     ),
                   ],
                 ),

@@ -7,6 +7,7 @@ import 'package:hisaabchat/app/theme/app_colors.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/motion/animated_amount.dart';
 import 'package:hisaabchat/core/motion/entrance.dart';
+import 'package:hisaabchat/core/motion/motion.dart';
 import 'package:hisaabchat/core/widgets/chat_tile.dart';
 import 'package:hisaabchat/core/widgets/offline_banner.dart';
 import 'package:hisaabchat/core/widgets/skeleton.dart';
@@ -403,7 +404,7 @@ class _BudgetsRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _SectionHeader('Budgets this month', onSeeAll: seeAll),
-        AnimatedSwitcher(duration: const Duration(milliseconds: 200), child: body),
+        AnimatedSwitcher(duration: context.motion(const Duration(milliseconds: 200)), child: body),
       ],
     );
   }

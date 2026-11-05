@@ -44,3 +44,46 @@ class PopIn extends StatelessWidget {
         );
   }
 }
+
+/// A [Hero] that stays put when motion is reduced.
+class AppHero extends StatelessWidget {
+  const AppHero({required this.tag, required this.child, super.key});
+
+  final Object tag;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => HeroMode(
+    enabled: !context.reduceMotion,
+    child: Hero(tag: tag, child: child),
+  );
+}
+
+/// Presses in slightly and bounces back (the send button).
+class PressBounce extends StatefulWidget {
+  const PressBounce({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  State<PressBounce> createState() => _PressBounceState();
+}
+
+class _PressBounceState extends State<PressBounce> {
+  bool _down = false;
+
+  void _set({required bool down}) => setState(() => _down = down);
+
+  @override
+  Widget build(BuildContext context) => Listener(
+    onPointerDown: (_) => _set(down: true),
+    onPointerUp: (_) => _set(down: false),
+    onPointerCancel: (_) => _set(down: false),
+    child: AnimatedScale(
+      scale: _down ? 0.9 : 1,
+      duration: context.motion(Motion.instant),
+      curve: _down ? Motion.standard : Motion.pop,
+      child: widget.child,
+    ),
+  );
+}

@@ -5,6 +5,7 @@ import 'package:hisaabchat/app/theme/app_colors.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/motion/animated_icons.dart';
 import 'package:hisaabchat/core/motion/entrance.dart';
+import 'package:hisaabchat/core/motion/motion.dart';
 import 'package:hisaabchat/core/network/api_client.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/features/health/health_repository.dart';
@@ -93,7 +94,7 @@ class _ApiStatusCard extends ConsumerWidget {
             Row(
               children: [
                 AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
+                  duration: context.motion(const Duration(milliseconds: 200)),
                   child: PopIn(
                     key: ValueKey(icon),
                     child: Icon(icon, color: color, size: 32, fill: 1),

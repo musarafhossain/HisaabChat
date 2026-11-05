@@ -65,7 +65,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   GoRoute fullScreen(String path, Widget child) => GoRoute(
     path: path,
     parentNavigatorKey: rootNavigatorKey,
-    pageBuilder: (context, state) => sharedAxisPage(key: state.pageKey, child: child),
+    pageBuilder: (context, state) => sharedAxisPage(context, key: state.pageKey, child: child),
   );
 
   final router = GoRouter(
@@ -92,17 +92,18 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/splash',
-        pageBuilder: (context, state) => fadeThroughPage(key: state.pageKey, child: const SplashScreen()),
+        pageBuilder: (context, state) => fadeThroughPage(context, key: state.pageKey, child: const SplashScreen()),
       ),
       GoRoute(
         path: '/welcome',
-        pageBuilder: (context, state) => fadeThroughPage(key: state.pageKey, child: const WelcomeScreen()),
+        pageBuilder: (context, state) => fadeThroughPage(context, key: state.pageKey, child: const WelcomeScreen()),
       ),
       fullScreen('/login', const LoginScreen()),
       fullScreen('/register', const RegisterScreen()),
       GoRoute(
         path: '/forgot-password',
         pageBuilder: (context, state) => fadeThroughPage(
+          context,
           key: state.pageKey,
           child: ForgotPasswordScreen(initialEmail: state.uri.queryParameters['email'] ?? ''),
         ),
@@ -110,7 +111,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       fullScreen('/search', const SearchScreen()),
       GoRoute(
         path: '/onboarding',
-        pageBuilder: (context, state) => fadeThroughPage(key: state.pageKey, child: const OnboardingScreen()),
+        pageBuilder: (context, state) => fadeThroughPage(context, key: state.pageKey, child: const OnboardingScreen()),
       ),
       StatefulShellRoute(
         builder: (context, state, shell) => shell,
@@ -128,12 +129,13 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'summary',
                     parentNavigatorKey: rootNavigatorKey,
                     pageBuilder: (context, state) =>
-                        sharedAxisPage(key: state.pageKey, child: const BudgetSummaryScreen()),
+                        sharedAxisPage(context, key: state.pageKey, child: const BudgetSummaryScreen()),
                   ),
                   GoRoute(
                     path: ':id',
                     parentNavigatorKey: rootNavigatorKey,
                     pageBuilder: (context, state) => sharedAxisPage(
+                      context,
                       key: state.pageKey,
                       child: BudgetInfoScreen(
                         budgetId: state.pathParameters['id']!,
@@ -155,6 +157,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: ':id',
                     parentNavigatorKey: rootNavigatorKey,
                     pageBuilder: (context, state) => sharedAxisPage(
+                      context,
                       key: state.pageKey,
                       child: AccountThreadScreen(accountId: state.pathParameters['id']!),
                     ),
@@ -163,6 +166,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                         path: 'info',
                         parentNavigatorKey: rootNavigatorKey,
                         pageBuilder: (context, state) => sharedAxisPage(
+                          context,
                           key: state.pageKey,
                           child: AccountInfoScreen(accountId: state.pathParameters['id']!),
                         ),
@@ -183,6 +187,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: ':id',
                     parentNavigatorKey: rootNavigatorKey,
                     pageBuilder: (context, state) => sharedAxisPage(
+                      context,
                       key: state.pageKey,
                       child: PersonThreadScreen(personId: state.pathParameters['id']!),
                     ),
@@ -203,6 +208,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                     pageBuilder: (context, state) {
                       final query = state.uri.queryParameters;
                       return sharedAxisPage(
+                        context,
                         key: state.pageKey,
                         child: CategoryTransactionsScreen(
                           categoryId: state.pathParameters['id']!,

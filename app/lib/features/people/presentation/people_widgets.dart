@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hisaabchat/app/theme/app_colors.dart';
 import 'package:hisaabchat/core/format/dates.dart';
 import 'package:hisaabchat/core/money/money.dart';
+import 'package:hisaabchat/core/motion/entrance.dart';
 import 'package:hisaabchat/core/widgets/chat_tile.dart';
 import 'package:hisaabchat/features/people/data/person.dart';
 
@@ -58,7 +59,7 @@ class PersonTile extends StatelessWidget {
     return ChatTile(
       selected: selected,
       onTap: onTap,
-      leading: Hero(tag: 'person-avatar-${person.id}', child: PersonAvatar.of(person)),
+      leading: AppHero(tag: 'person-avatar-${person.id}', child: PersonAvatar.of(person)),
       title: person.name,
       subtitle: personStatus(person),
       trailing: person.settled

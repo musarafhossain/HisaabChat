@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hisaabchat/core/motion/motion.dart';
 import 'package:hisaabchat/core/widgets/window_class.dart';
 
 /// Opens [child] as a bottom sheet on phones and a dialog on wider windows.
@@ -11,6 +12,7 @@ Future<T?> showAdaptiveSheet<T>(BuildContext context, {required Widget child, do
   if (context.windowClass == WindowClass.compact) {
     return showModalBottomSheet<T>(
       context: context,
+      sheetAnimationStyle: context.sheetMotion,
       // Over the whole app, not just the current tab (covers the tab bar and +).
       useRootNavigator: true,
       isScrollControlled: true,

@@ -295,7 +295,7 @@ class _AccountThreadState extends ConsumerState<AccountThread> {
 
     if (!widget.fullScreen) return body;
     return Scaffold(
-      appBar: _selected.isNotEmpty ? _selectionBar(selectedTxns) : _appBar(context, account),
+      appBar: _switchingBar(_selected.isNotEmpty ? _selectionBar(selectedTxns) : _appBar(context, account)),
       body: body,
     );
   }
@@ -311,6 +311,18 @@ class _AccountThreadState extends ConsumerState<AccountThread> {
         ),
       ),
       actions: [_menu(context, account)],
+    );
+  }
+
+  /// Cross-fades between the normal app bar and the selection bar.
+  PreferredSizeWidget _switchingBar(PreferredSizeWidget bar) {
+    return PreferredSize(
+      preferredSize: bar.preferredSize,
+      child: AnimatedSwitcher(
+        duration: context.motion(Motion.medium),
+        layoutBuilder: (current, previous) => Stack(fit: StackFit.expand, children: [...previous, ?current]),
+        child: KeyedSubtree(key: ValueKey(_selected.isNotEmpty), child: bar),
+      ),
     );
   }
 
@@ -343,7 +355,7 @@ class _AccountThreadState extends ConsumerState<AccountThread> {
     final colors = context.colors;
     return Row(
       children: [
-        Hero(
+        AppHero(
           tag: 'account-avatar-${account.id}',
           child: IconAvatar(icon: AppIcons.byKey(account.icon), color: account.color, radius: 20, solid: true),
         ),

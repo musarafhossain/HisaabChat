@@ -7,6 +7,7 @@ import 'package:hisaabchat/app/theme/app_colors.dart';
 import 'package:hisaabchat/core/format/dates.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/money/money.dart';
+import 'package:hisaabchat/core/motion/page_transitions.dart';
 import 'package:hisaabchat/core/motion/shake.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/amount_field.dart';
@@ -36,19 +37,21 @@ class TxnDraft {
 
 /// Opens the full form: full-screen page on phones, dialog on wider windows.
 /// Completes with true when something was saved or deleted.
-Future<bool?> showTxnForm(BuildContext context, {Txn? existing, TxnDraft? draft}) {
+Future<bool?> showTxnForm(BuildContext context, {Txn? existing, TxnDraft? draft, BuildContext? morphFrom}) {
   final title = existing == null ? 'New transaction' : 'Edit transaction';
   if (context.windowClass == WindowClass.compact) {
-    return Navigator.of(context, rootNavigator: true).push<bool>(
-      MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: Text(title, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w500)),
-          ),
-          body: TxnForm(existing: existing, draft: draft, onDone: (saved) => Navigator.of(context).pop(saved)),
-        ),
+    Widget page(BuildContext context) => Scaffold(
+      appBar: AppBar(
+        title: Text(title, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w500)),
       ),
+      body: TxnForm(existing: existing, draft: draft, onDone: (saved) => Navigator.of(context).pop(saved)),
+    );
+    final navigator = Navigator.of(context, rootNavigator: true);
+    final origin = morphFrom == null ? null : globalRectOf(morphFrom, navigator.context);
+    return navigator.push<bool>(
+      origin == null
+          ? MaterialPageRoute(fullscreenDialog: true, builder: page)
+          : containerTransformRoute(context, from: origin, builder: page),
     );
   }
   return showDialog<bool>(

@@ -7,6 +7,7 @@ import 'package:hisaabchat/core/format/dates.dart';
 import 'package:hisaabchat/core/icons/app_icons.dart';
 import 'package:hisaabchat/core/money/money.dart';
 import 'package:hisaabchat/core/motion/entrance.dart';
+import 'package:hisaabchat/core/motion/motion.dart';
 import 'package:hisaabchat/core/network/api_exception.dart';
 import 'package:hisaabchat/core/widgets/chat_tile.dart';
 import 'package:hisaabchat/core/widgets/empty_state.dart';
@@ -131,6 +132,7 @@ class _RuleTile extends ConsumerWidget {
     unawaited(
       showModalBottomSheet<void>(
         context: context,
+        sheetAnimationStyle: context.sheetMotion,
         useRootNavigator: true,
         showDragHandle: true,
         builder: (sheet) {
