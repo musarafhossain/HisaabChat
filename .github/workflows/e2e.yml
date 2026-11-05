@@ -1,0 +1,73 @@
+name: End-to-end
+
+on:
+  push:
+    paths: ['app/**', 'backend/**', '.github/workflows/e2e.yml']
+  pull_request:
+    paths: ['app/**', 'backend/**', '.github/workflows/e2e.yml']
+
+env:
+  FLUTTER_VERSION: '3.41.6'
+
+jobs:
+  chrome:
+    name: Register to budget (Chrome)
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: mariadb:11.4
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: hisaabchat
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: '3306'
+      DB_USER: root
+      DB_PASSWORD: root
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Start the API
+        working-directory: backend
+        run: |
+          npm ci
+          cp .env.example .env
+          node ace generate:key
+          node ace migration:run --force
+          nohup node --import=@poppinss/ts-exec bin/server.ts > "$RUNNER_TEMP/api.log" 2>&1 &
+          for _ in $(seq 1 30); do
+            curl -sf http://localhost:3333/api/v1/health && exit 0
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/api.log"
+          exit 1
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      # The runner's Chrome and chromedriver are installed as a matching pair.
+      - run: chromedriver --port=4444 &
+      - name: Run the test
+        working-directory: app
+        run: >-
+          flutter drive
+          --driver=test_driver/integration_test.dart
+          --target=integration_test/first_expense_test.dart
+          -d web-server --browser-name=chrome --headless
+          --dart-define=API_BASE_URL=http://localhost:3333/api/v1
+      - name: API log
+        if: failure()
+        run: cat "$RUNNER_TEMP/api.log"

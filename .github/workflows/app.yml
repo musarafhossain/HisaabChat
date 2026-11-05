@@ -23,7 +23,7 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
       - run: flutter pub get
-      - run: dart format --line-length 120 --set-exit-if-changed lib test
+      - run: dart format --line-length 120 --set-exit-if-changed lib test integration_test test_driver
       - run: flutter analyze
       - run: flutter test
 

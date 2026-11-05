@@ -76,6 +76,25 @@ cd backend && npm test        # Japa unit + functional tests (uses the hisaabcha
 cd app && flutter analyze && flutter test
 ```
 
+### End-to-end test
+
+[`app/integration_test/first_expense_test.dart`](app/integration_test/first_expense_test.dart) runs the first-run journey through the real screens and API, in a phone and a desktop layout: register → onboarding → add an expense → budget and dashboard update → reopen the app.
+
+Start the API first (`npm run dev`). Each run adds two `e2e-…@example.com` users to the database the API uses, so point it at a development database, never production. Then, from `app/`:
+
+```bash
+# Windows
+flutter test integration_test/first_expense_test.dart -d windows
+
+# Android emulator
+flutter test integration_test/first_expense_test.dart -d emulator-5554
+
+# Chrome (needs a chromedriver matching your Chrome: chromedriver --port=4444)
+flutter drive --driver=test_driver/integration_test.dart --target=integration_test/first_expense_test.dart -d web-server --browser-name=chrome --dart-define=API_BASE_URL=http://localhost:3333/api/v1
+```
+
+CI runs the Chrome version against MariaDB 11.4 ([`e2e.yml`](.github/workflows/e2e.yml)).
+
 ## Notes
 
 - **`@swc/core` is pinned to 1.16.2** in `backend/package.json` (`overrides`). From 1.16.12 on, SWC refuses to load its native binary from a cache folder that another Windows account can modify, and on this machine `C:\Users\<you>` grants full control to an extra sandbox account. Remove the override once that permission is cleaned up or SWC relaxes the check.
